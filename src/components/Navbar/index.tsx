@@ -28,7 +28,7 @@ export default function NavBar() {
     if (key === "Enter") {
       // @ts-ignore
       let term = document?.getElementById(id).value;
-      location.href = `/search?term=${term}`;
+      location.href = `/home_cinema/search?term=${term}`;
     }
   };
   return (
@@ -36,12 +36,12 @@ export default function NavBar() {
       <div className="w-full mt-10">
         <div
           className={
-            "flex justify-between ps-16 pr-16 sm:ps-32 sm:pr-32 " +
+            "flex justify-between ps-8 pr-8 sm:ps-32 sm:pr-32 " +
             (openS ? "!justify-center" : "")
           }
         >
           {!openS && (
-            <a href="/">
+            <a href="/home_cinema/">
               <div>
                 <div className="flex items-center gap-4">
                   <FontAwesomeIcon icon={faFilm} className="lg:h-10 h-7 mt-1" />
@@ -54,7 +54,7 @@ export default function NavBar() {
           )}
           <div className="flex justify-center xl:gap-32 gap-16 items-center">
             <a
-              href="/watch"
+              href="/home_cinema/watch"
               className="font-bold text-lg lg:block hidden xl:text-xl"
             >
               Watch

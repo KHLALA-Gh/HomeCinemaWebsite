@@ -10,11 +10,11 @@ export default function Router() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/watch" element={<Watch />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/watch/:id" element={<MoviePage />} />
-          <Route path="/watch/:id/play/:hash" element={<Play />} />
+          <Route path="/home_cinema" element={<Home />} />
+          <Route path="/home_cinema/watch" element={<Watch />} />
+          <Route path="/home_cinema/search" element={<Search />} />
+          <Route path="/home_cinema/watch/:id" element={<MoviePage />} />
+          <Route path="/home_cinema/watch/:id/play/:hash" element={<Play />} />
         </Routes>
       </BrowserRouter>
     </>

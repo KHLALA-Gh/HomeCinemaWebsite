@@ -1,10 +1,15 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-
-export const api: string = "http://localhost:8080/";
+import data from "../../public/home_cinema_config.json";
+export const api: string = data["torrent-streamer-api"].origin;
 
 export const streamEndPoint = "/api/stream";
 const magnetURIEndpoint = "/api/get_magnet_uri";
+
+export async function fetchConfigs() {
+  const configs = (await axios.get("/home_cinema_config.json")).data as Configs;
+  return configs;
+}
 
 export function useGetMagnetURI(hash: string) {
   const [resp, setResp] = useState<string>("");
@@ -25,13 +30,21 @@ export function useGetMagnetURI(hash: string) {
   };
   const fetch = () => {
     setIsLoading(true);
-    const url = new URL(magnetURIEndpoint, api);
-    url.searchParams.set("hash", hash);
-    get(url.href)
-      .catch((e) => {
-        setErr(e);
+    fetchConfigs()
+      .then((c) => {
+        const url = new URL(
+          magnetURIEndpoint,
+          c["torrent-streamer-api"].origin
+        );
+        url.searchParams.set("hash", hash);
+        get(url.href).catch((e) => {
+          setErr(e);
+        });
       })
-      .finally(() => setIsLoading(false));
+      .catch(() => {
+        setErr("error when fetching configs");
+      });
+    setIsLoading(false);
   };
   useEffect(() => {
     fetch();

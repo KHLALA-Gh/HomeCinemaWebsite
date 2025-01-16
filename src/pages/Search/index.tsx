@@ -14,12 +14,11 @@ export default function Search() {
   });
   useEffect(() => {
     let t = searchP.get("term");
-    if (t) {
-      fetch([
-        ["query_term", t],
-        ["sort_by", "rating"],
-      ]);
-    }
+    if (!t) t = "";
+    fetch([
+      ["query_term", t],
+      ["sort_by", "like_count"],
+    ]);
   }, [searchP]);
   return (
     <>
@@ -29,7 +28,14 @@ export default function Search() {
           Search results
         </h1>
         {err && <h1 className="text-red-500">Error when searching : {err}</h1>}
-        {isLoading && !err && <>{returnLoadingMovies()}</>}
+        {isLoading && !err && (
+          <>
+            <div className="flex gap-5 justify-center">
+              {" "}
+              {returnLoadingMovies()}{" "}
+            </div>
+          </>
+        )}
         {!isLoading && !err && (
           <>
             <div className="flex gap-4 md:gap-16 flex-wrap justify-center">

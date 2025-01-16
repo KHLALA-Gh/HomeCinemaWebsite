@@ -6,7 +6,11 @@ import {
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
 import { useParams, useSearchParams } from "react-router";
-import { api, streamEndPoint, useGetMagnetURI } from "../../hooks/getMagnetURI";
+import {
+  fetchConfigs,
+  streamEndPoint,
+  useGetMagnetURI,
+} from "../../hooks/getMagnetURI";
 import { useEffect, useState } from "react";
 export default function Play() {
   const p = useParams();
@@ -19,9 +23,15 @@ export default function Play() {
   const [sp, _] = useSearchParams();
   const [streamUrl, setStreamUrl] = useState<string>();
   useEffect(() => {
-    const url = new URL(streamEndPoint, api);
-    url.searchParams.set("magnet", magnet);
-    setStreamUrl(url.href);
+    fetchConfigs()
+      .then((c) => {
+        const url = new URL(streamEndPoint, c["torrent-streamer-api"].origin);
+        url.searchParams.set("magnet", magnet);
+        setStreamUrl(url.href);
+      })
+      .catch(() => {
+        setErr("error when fetching configs");
+      });
   }, [magnet]);
   return (
     <>

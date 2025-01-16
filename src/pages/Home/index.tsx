@@ -14,12 +14,17 @@ export default function Home() {
           <div className="flex gap-5 mt-16">
             <Button
               onClick={() => {
-                location.href = "/watch";
+                location.href = "/home_cinema/watch";
               }}
             >
               Watch
             </Button>
-            <Button className="!bg-transparent border-4 text-white border-white">
+            <Button
+              onClick={() => {
+                location.href = "/home_cinema/search";
+              }}
+              className="!bg-transparent border-4 text-white border-white"
+            >
               Search
             </Button>
           </div>

@@ -17,13 +17,9 @@ RUN npm install
 # Copy the rest of the app code
 COPY . .
 
-# Build the Vite app for production
-RUN npm run build
-
-
 
 # Expose the port that the app will run on
-EXPOSE 4173
+EXPOSE 5173
 
 # Command to run Nginx
-CMD ["npm", "run", "preview"]
+CMD ["npm", "run", "dev"]

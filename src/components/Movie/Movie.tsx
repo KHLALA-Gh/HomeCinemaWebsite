@@ -13,7 +13,7 @@ export default function Movie({
       {!loading && m && (
         <div
           onClick={() => {
-            location.href = "/watch/" + m.id;
+            location.href = "/home_cinema/watch/" + m.id;
           }}
           className="lg:w-[230px] w-[115px] h-[172px] relative lg:h-[345px] shrink-0 cursor-pointer"
           style={{
