@@ -74,3 +74,4 @@ To run the application execute this command :
 ```shell
 docker compose up
 ```
+The website should be accessible from : http://localhost:8000/home_cinema
