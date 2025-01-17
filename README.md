@@ -28,7 +28,7 @@ services:
     ports:
       - "8000:4173"
     volumes:
-      - ./config/home_cinema_config.json:/app/home_cinema_config.json
+      - ./config/home_cinema_config.json:/app/dist/home_cinema_config.json
     restart: always
 ```
 
