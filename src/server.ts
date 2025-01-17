@@ -1,8 +1,13 @@
+import env from "dotenv";
+
 import fs from "node:fs/promises";
 import express from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import routes from "./api/index.js";
+
+env.config();
+
 // Constants
 const isProduction = process.env.NODE_ENV === "production";
 const port = process.env.PORT || (isProduction ? 4173 : 5173);
