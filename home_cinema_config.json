@@ -1,5 +1,9 @@
 {
   "torrent-streamer-api": {
     "origin": "http://localhost:8080/"
+  },
+  "server": {
+    "ApiRateLimit": 10,
+    "PagesRateLimit": 500
   }
 }

@@ -5,7 +5,8 @@ import express from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import routes from "./api/index.js";
-
+import Ratelimit from "express-rate-limit";
+import config from "../home_cinema_config.json" with{type : "json"}
 env.config();
 
 // Constants
@@ -20,7 +21,24 @@ const templateHtml = isProduction
 
 // Create http server
 const app = express();
+const limitApi = Ratelimit({
+  windowMs: 60 * 1000,
+  limit: config.server.ApiRateLimit || 10,
+});
+app.use("/api", limitApi);
+// Set all routers
+Object.keys(routes).map((k) => {
+  //@ts-ignore
+  app.use(routes[k]);
+});
 
+
+const limit = Ratelimit({
+  windowMs: 60 * 1000,
+  limit: config.server.PagesRateLimit || 500,
+});
+
+app.use(limit);
 // Add Vite or respective production middlewares
 /** @type {import('vite').ViteDevServer | undefined} */
 let vite: any;
@@ -39,12 +57,6 @@ if (!isProduction) {
   app.use(compression());
   app.use(base, sirv(path.join(__dirname, "./client"), { extensions: [] }));
 }
-
-// Set all routers
-Object.keys(routes).map((k) => {
-  //@ts-ignore
-  app.use(routes[k]);
-});
 
 // Serve HTML
 app.use("*", async (req, res) => {
