@@ -26,3 +26,24 @@ router.get("/api/tv_shows", async (req, res) => {
     console.log("error when getting TV SHOWS");
   }
 });
+
+router.get("/api/tv_shows/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const api = new TMDBApi(process.env.TMDB_KEY as string);
+    const data = await api.getTVShowDetails(id);
+    res.status(200).json(data);
+  } catch (err) {
+    if (err instanceof TMDBError) {
+      console.log(TMDBError.format(err));
+      res.status(err.statusCode).json({
+        error: err.message,
+      });
+      return;
+    }
+    console.log("Internal Server Error !! : ", err);
+    res.status(500).json({
+      error: "internal server error",
+    });
+  }
+});
