@@ -1,13 +1,11 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import data from "../../public/home_cinema_config.json";
-export const api: string = data["torrent-streamer-api"].origin;
 
 export const streamEndPoint = "/api/stream";
 const magnetURIEndpoint = "/api/get_magnet_uri";
 
 export async function fetchConfigs() {
-  const configs = (await axios.get("/home_cinema_config.json")).data as Configs;
+  const configs = (await axios.get("/api/config")).data as Configs;
   return configs;
 }
 
