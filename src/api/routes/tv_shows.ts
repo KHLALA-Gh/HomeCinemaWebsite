@@ -1,5 +1,5 @@
 import { Response, Router } from "express";
-import { TMDBApi, TMDBError } from "../../lib/tmdb_api";
+import { TMDBApi, TMDBError } from "../../lib/tmdb_api.js";
 
 export const router = Router();
 

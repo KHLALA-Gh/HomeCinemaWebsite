@@ -13,9 +13,9 @@ interface InputProps
 export default function Input(props: InputProps) {
   return (
     <>
-      <div className="rounded-full border-3 border-white flex items-center gap-3 p-2">
+      <div className="rounded-full border-2 border-white flex items-center gap-3 p-2">
         <div onClick={props.onClickIcon}>
-          {props.Icon && <FontAwesomeIcon icon={props.Icon} className="ml-3" />}
+          {props.Icon && <FontAwesomeIcon icon={props.Icon} className="ml-2" />}
         </div>
         <input
           {...props}

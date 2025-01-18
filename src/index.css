@@ -30,3 +30,11 @@
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
+
+.tv_show {
+  background-size: 100%;
+  background-position: center;
+}
+.tv_show:hover {
+  background-size: 110%;
+}

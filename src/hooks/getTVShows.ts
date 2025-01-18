@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 
 interface GetTVShowsProps {
@@ -22,6 +22,10 @@ export function useGetTVShows(props: GetTVShowsProps) {
         setResp(data);
       })
       .catch((e: Error) => {
+        if (e instanceof AxiosError) {
+          setErr(e.response?.data.error);
+          return;
+        }
         setErr(e.message);
       })
       .finally(() => {

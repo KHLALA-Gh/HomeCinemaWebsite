@@ -14,7 +14,7 @@ interface MoviesListResponseData {
 export function returnLoadingMovies() {
   let arr = [];
   for (let i = 0; i < 5; i++) {
-    arr.push(<Movie loading={true} />);
+    arr.push(<Movie key={i} loading={true} />);
   }
   return arr;
 }
