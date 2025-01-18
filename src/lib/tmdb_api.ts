@@ -30,6 +30,8 @@ export class TMDBError extends Error {
 export class TMDBApi {
   static tvShowsendPoint = "https://api.themoviedb.org/3/discover/tv";
   static tvShowDetailsEndPoint = "https://api.themoviedb.org/3/tv/:id";
+  static tvShowSeasonDetails =
+    "https://api.themoviedb.org/3/tv/:series_id/season/:season_number";
   private api_key: string;
   constructor(api_key: string) {
     this.api_key = api_key;
@@ -89,6 +91,27 @@ export class TMDBApi {
         },
       });
       return resp.data as TMDBTVShowDetails;
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        this.handleAxiosErr(err);
+      }
+      throw err;
+    }
+  }
+
+  async getSeasonDetails(
+    series_id: string,
+    season_number: string
+  ): Promise<SeasonDetails> {
+    let url = TMDBApi.tvShowSeasonDetails.replace(":series_id", series_id);
+    url = url.replace(":season_number", season_number);
+    try {
+      const resp = await axios.get(url, {
+        headers: {
+          Authorization: this.authHeader(),
+        },
+      });
+      return resp.data as SeasonDetails;
     } catch (err) {
       if (err instanceof AxiosError) {
         this.handleAxiosErr(err);

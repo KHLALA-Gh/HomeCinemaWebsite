@@ -9,6 +9,17 @@ interface TMDBTVShow {
   first_air_date: string;
 }
 
+interface SeasonDetails {
+  episodes: Episode;
+  name: string;
+  overview: string;
+  id: number;
+  poster_path: string;
+  season_number: number;
+  vote_average: number;
+  air_date: string;
+}
+
 interface Season {
   air_date: string;
   episode_count: number;

@@ -1,7 +1,15 @@
-import { Router } from "express";
+import { Response, Router } from "express";
 import { TMDBApi, TMDBError } from "../../lib/tmdb_api";
 
 export const router = Router();
+
+function HandlerTMDBApiErr(res: Response, err: TMDBError) {
+  console.log(TMDBError.format(err));
+  res.status(err.statusCode).json({
+    error: err.message,
+  });
+  return;
+}
 
 router.get("/api/tv_shows", async (req, res) => {
   try {
@@ -44,6 +52,23 @@ router.get("/api/tv_shows/:id", async (req, res) => {
     console.log("Internal Server Error !! : ", err);
     res.status(500).json({
       error: "internal server error",
+    });
+  }
+});
+
+router.get("/api/tv_shows/:id/season/:season_number", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const seasonNumber = req.params.season_number;
+    const api = new TMDBApi(process.env.TMDB_KEY as string);
+    const data = await api.getSeasonDetails(id, seasonNumber);
+    res.status(200).json(data);
+  } catch (err) {
+    if (err instanceof TMDBError) {
+      return HandlerTMDBApiErr(res, err);
+    }
+    res.status(500).json({
+      error: "Internal Server Error",
     });
   }
 });
