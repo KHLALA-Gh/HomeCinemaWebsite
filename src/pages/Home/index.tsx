@@ -21,11 +21,11 @@ export default function Home() {
             </Button>
             <Button
               onClick={() => {
-                location.href = "/home_cinema/search";
+                location.href = "/home_cinema/watch_tv_shows";
               }}
               className="!bg-transparent border-4 text-white border-white"
             >
-              Search
+              TV Shows
             </Button>
           </div>
         </div>
