@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Route, Routes, useNavigate } from "react-router";
 import Home from "../../pages/Home";
 import Watch from "../../pages/Watch";
 import Search from "../../pages/Search";
@@ -7,12 +7,22 @@ import Play from "../../pages/Play";
 import TVShows from "../../pages/TV_Shows";
 import Show from "../../pages/Show";
 import TorrentFiles from "../../pages/TorrentFiles";
+import { useEffect } from "react";
+
+function Root() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate("/home_cinema");
+  }, []);
+  return <></>;
+}
 
 export default function Router() {
   return (
     <>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<Root />} />
           <Route path="/home_cinema" element={<Home />} />
           <Route path="/home_cinema/watch" element={<Watch />} />
           <Route path="/home_cinema/search" element={<Search />} />
