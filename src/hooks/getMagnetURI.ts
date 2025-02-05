@@ -32,7 +32,9 @@ export function useGetMagnetURI(hash: string) {
       .then((c) => {
         const url = new URL(
           magnetURIEndpoint,
-          c["torrent-streamer-api"].origin
+          c["torrent-streamer-api"].external
+            ? c["torrent-streamer-api"].origin
+            : location.origin
         );
         url.searchParams.set("hash", hash);
         get(url.href).catch((e) => {

@@ -35,6 +35,32 @@ router.get("/api/tv_shows", async (req, res) => {
   }
 });
 
+router.get("/api/tv_shows/search", async (req, res) => {
+  try {
+    const query = req.query.query;
+    let page = +req.query.page!;
+    if (typeof query !== "string") {
+      res.status(400).json({
+        error: "search query is required",
+      });
+      return;
+    }
+    if (!page) {
+      page = 1;
+    }
+    const api = new TMDBApi(process.env.TMDB_KEY as string);
+    const data = await api.searchTvShows(query, page.toString());
+    res.status(200).json(data);
+  } catch (err) {
+    if (err instanceof TMDBError) {
+      return HandlerTMDBApiErr(res, err);
+    }
+    res.status(500).json({
+      error: "Internal Server Error",
+    });
+  }
+});
+
 router.get("/api/tv_shows/:id", async (req, res) => {
   try {
     const id = req.params.id;

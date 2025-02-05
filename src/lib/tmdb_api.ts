@@ -32,6 +32,7 @@ export class TMDBApi {
   static tvShowDetailsEndPoint = "https://api.themoviedb.org/3/tv/:id";
   static tvShowSeasonDetails =
     "https://api.themoviedb.org/3/tv/:series_id/season/:season_number";
+  static tvShowsSearchEndPoint = "https://api.themoviedb.org/3/search/tv";
   private api_key: string;
   constructor(api_key: string) {
     this.api_key = api_key;
@@ -112,6 +113,25 @@ export class TMDBApi {
         },
       });
       return resp.data as SeasonDetails;
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        this.handleAxiosErr(err);
+      }
+      throw err;
+    }
+  }
+
+  async searchTvShows(query: string, page: string): Promise<TVShowsResp> {
+    let url = new URL(TMDBApi.tvShowsSearchEndPoint);
+    url.searchParams.set("query", query);
+    url.searchParams.set("page", page);
+    try {
+      const resp = await axios.get(url.href, {
+        headers: {
+          Authorization: this.authHeader(),
+        },
+      });
+      return resp.data as TVShowsResp;
     } catch (err) {
       if (err instanceof AxiosError) {
         this.handleAxiosErr(err);

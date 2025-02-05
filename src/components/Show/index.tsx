@@ -1,6 +1,14 @@
+import { useNavigate } from "react-router";
+
 export default function Show(props: TMDBTVShow) {
+  const navigate = useNavigate();
+
   return (
     <div
+      onClick={() => {
+        console.log("wa");
+        navigate("/home_cinema/tv_shows/" + props.id);
+      }}
       style={{
         backgroundImage: `url("https://media.themoviedb.org/t/p/w300_and_h450_bestv2${props.poster_path})`,
       }}

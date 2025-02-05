@@ -41,6 +41,7 @@ interface TMDBTVShowDetails {
   poster_path: string;
   first_air_date: string;
   seasons: Season[];
+  overview: string;
 }
 
 interface Genre {
