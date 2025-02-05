@@ -5,6 +5,8 @@ import express from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import routes from "./api/index.js";
+import configs from "../home_cinema_config.json" with{type : "json"}
+
 
 env.config();
 
@@ -38,6 +40,11 @@ if (!isProduction) {
   //@ts-ignore
   app.use(compression());
   app.use(base, sirv(path.join(__dirname, "./client"), { extensions: [] }));
+}
+
+if (configs["torrent-streamer-api"].external === false){
+  let streamerRouter = (await import("torrent-streamer-api")).default
+  app.use(streamerRouter({}))
 }
 
 // Set all routers

@@ -10,6 +10,6 @@
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "include": ["src/server.ts"],
+  "include": ["src/server.ts", "src/types", "src/lib"],
   "exclude": ["node_modules"]
 }

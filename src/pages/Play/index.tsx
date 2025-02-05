@@ -25,7 +25,12 @@ export default function Play() {
   useEffect(() => {
     fetchConfigs()
       .then((c) => {
-        const url = new URL(streamEndPoint, c["torrent-streamer-api"].origin);
+        const url = new URL(
+          streamEndPoint,
+          c["torrent-streamer-api"].external
+            ? c["torrent-streamer-api"].origin
+            : location.origin
+        );
         url.searchParams.set("magnet", magnet);
         setStreamUrl(url.href);
       })

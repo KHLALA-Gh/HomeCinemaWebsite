@@ -1,23 +1,18 @@
 import axios, { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 
-interface GetTVShowsProps {
-  page: string;
-}
-
-export function useGetTVShows(props: GetTVShowsProps) {
-  const [resp, setResp] = useState<TVShowsResp>();
+export function useGetTVShowDetails(showID: string) {
+  const [resp, setResp] = useState<TMDBTVShowDetails>();
   const [err, setErr] = useState<string>();
-  const [isLoading, setIsloading] = useState(false);
-  const get = async (page: string) => {
-    const url = new URL("/api/tv_shows", location.origin);
-    url.searchParams.set("page", page);
+  const [isLoading, setIsloading] = useState(true);
+  const get = async (showID: string) => {
+    const url = new URL("/api/tv_shows/" + showID, location.origin);
     const resp = await axios.get(url.href);
-    return resp.data as TVShowsResp;
+    return resp.data as TMDBTVShowDetails;
   };
-  const fetch = () => {
+  useEffect(() => {
     setIsloading(true);
-    get(props.page)
+    get(showID)
       .then((data) => {
         setResp(data);
       })
@@ -31,12 +26,10 @@ export function useGetTVShows(props: GetTVShowsProps) {
       .finally(() => {
         setIsloading(false);
       });
-  };
-
+  }, []);
   return {
     resp,
     err,
     isLoading,
-    fetch,
   };
 }
