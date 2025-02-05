@@ -26,10 +26,8 @@ export function useSearchTVShows() {
     get(query, page)
       .then((data) => {
         setResp(data);
-        console.log(data);
       })
       .catch((err) => {
-        console.log(err);
         setErr(err);
       })
       .finally(() => {
