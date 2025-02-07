@@ -44,7 +44,9 @@ if (!isProduction) {
 
 if (configs["torrent-streamer-api"].external === false){
   let streamerRouter = (await import("torrent-streamer-api")).default
-  app.use(streamerRouter({}))
+  app.use(streamerRouter({
+    torrentFilesTimeout : 1000 * 20
+  }))
 }
 
 // Set all routers
