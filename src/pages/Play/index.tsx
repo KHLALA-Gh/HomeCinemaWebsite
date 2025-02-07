@@ -32,6 +32,10 @@ export default function Play() {
             : location.origin
         );
         url.searchParams.set("magnet", magnet);
+        let path64 = sp.get("path64");
+        if (path64) {
+          url.searchParams.set("path64", path64);
+        }
         setStreamUrl(url.href);
       })
       .catch(() => {
