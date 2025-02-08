@@ -31,7 +31,7 @@ export default function Router() {
           <Route path="/home_cinema/watch_tv_shows/" element={<TVShows />} />
           <Route path="/home_cinema/tv_shows/:id" element={<Show />} />
           <Route
-            path="/home_cinema/tv_shows/:id/:hash/files"
+            path="/home_cinema/torrents/:hash/files"
             element={<TorrentFiles />}
           />
         </Routes>

@@ -22,7 +22,8 @@ const templateHtml = isProduction
 
 // Create http server
 const app = express();
-
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }));
 // Add Vite or respective production middlewares
 /** @type {import('vite').ViteDevServer | undefined} */
 let vite: any;
@@ -44,7 +45,9 @@ if (!isProduction) {
 
 if (configs["torrent-streamer-api"].external === false){
   let streamerRouter = (await import("torrent-streamer-api")).default
-  app.use(streamerRouter({}))
+  app.use(streamerRouter({
+    torrentFilesTimeout : 1000 * 30
+  }))
 }
 
 // Set all routers

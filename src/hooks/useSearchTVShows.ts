@@ -10,12 +10,7 @@ export function useSearchTVShows() {
   const [err, setErr] = useState<string>();
   const get = async (query: string, page: string): Promise<TVShowsResp> => {
     const config = await fetchConfigs();
-    const url = new URL(
-      tvSearchEndPoint,
-      config["torrent-streamer-api"].external
-        ? config["torrent-streamer-api"].origin
-        : location.origin
-    );
+    const url = new URL(tvSearchEndPoint, location.origin);
     url.searchParams.set("query", query);
     url.searchParams.set("page", page);
     const resp = await axios.get(url.href);

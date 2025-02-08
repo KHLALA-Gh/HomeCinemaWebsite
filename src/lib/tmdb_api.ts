@@ -28,7 +28,7 @@ export class TMDBError extends Error {
   }
 }
 export class TMDBApi {
-  static tvShowsendPoint = "https://api.themoviedb.org/3/discover/tv";
+  static tvShowsendPoint = "https://api.themoviedb.org/3/trending/tv/week";
   static tvShowDetailsEndPoint = "https://api.themoviedb.org/3/tv/:id";
   static tvShowSeasonDetails =
     "https://api.themoviedb.org/3/tv/:series_id/season/:season_number";
