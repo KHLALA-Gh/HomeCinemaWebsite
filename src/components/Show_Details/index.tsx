@@ -1,6 +1,6 @@
 import Button from "../Button/button";
 import { useTorrentSearch } from "../../hooks/getTorrentSearch";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate } from "react-router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 
@@ -16,7 +16,6 @@ function getMagnetHash(magnetLink: string) {
 
 export function ShowDetails(props: TMDBTVShowDetails) {
   const { resp, err, isLoading, fetch } = useTorrentSearch();
-  const p = useParams();
   const navigate = useNavigate();
   const search = () => {
     //@ts-ignore
@@ -25,7 +24,6 @@ export function ShowDetails(props: TMDBTVShowDetails) {
     let limit = document.getElementById("limit")?.value;
 
     if (season) {
-      console.log(`${props.name} ${season}`);
       fetch(`${props.name} S0${season}`, limit);
     }
   };
@@ -108,9 +106,13 @@ export function ShowDetails(props: TMDBTVShowDetails) {
                 <div
                   className="p-5 hover:bg-slate-400 duration-200 cursor-pointer"
                   onClick={() => {
-                    location.href = `/home_cinema/tv_shows/${
-                      p.id
-                    }/${getMagnetHash(t.magnetURI)}/files`;
+                    navigate(
+                      `/home_cinema/torrents/${getMagnetHash(
+                        t.magnetURI
+                      )}/files?about=${t.desc}&seeds=${t.seeds}&peers=${
+                        t.peers
+                      }`
+                    );
                   }}
                   key={i}
                 >

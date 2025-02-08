@@ -8,6 +8,9 @@ interface Configs {
 interface TorrentSearch {
   title: string;
   magnetURI: string;
+  desc?: string;
+  seeds?: number;
+  peers?: number;
 }
 
 interface TorrentFile {
