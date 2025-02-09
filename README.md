@@ -18,8 +18,12 @@ services:
     # image: khlala/home-cinema-web:alpha3-arm64  ## use this image if you are running on arm64 arch
     ports:
       - "8000:4173"
+    environment:
+      - TMDB_KEY=<your_TMDB_api_key> ## Set your TMDB api key here
     restart: always
 ```
+
+To get TV Shows information you need to get TMDB api key from [TMDB](https://www.themoviedb.org/).
 
 > **Note** : Home cinema is still in alpha versions, you may encounter difficulties when installing it.
 
