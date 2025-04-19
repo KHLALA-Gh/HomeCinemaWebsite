@@ -6,7 +6,7 @@ interface Configs {
 }
 
 interface TorrentSearch {
-  title: string;
+  name: string;
   magnetURI: string;
   desc?: string;
   seeds?: number;

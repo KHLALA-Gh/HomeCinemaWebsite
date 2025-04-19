@@ -51,7 +51,7 @@ export default function TorrentFiles() {
           <p className="mb-3">{pr(size as number)}</p>
           {sp.get("peers") && sp.get("seeds") && (
             <p>
-              Seeds : {sp.get("seeds")} peers : {sp.get("peers")}
+              Seeds : {sp.get("seeds")} leechers : {sp.get("leechers")}
             </p>
           )}
           {sp.get("about") && (

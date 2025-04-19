@@ -3,6 +3,7 @@ import { useTorrentSearch } from "../../hooks/getTorrentSearch";
 import { useNavigate } from "react-router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
+import { useEffect, useState } from "react";
 
 function getMagnetHash(magnetLink: string) {
   const url = new URL(magnetLink);
@@ -16,17 +17,31 @@ function getMagnetHash(magnetLink: string) {
 
 export function ShowDetails(props: TMDBTVShowDetails) {
   const { resp, err, isLoading, fetch } = useTorrentSearch();
+  const [selectedSeason, setSelectedSeason] = useState<string>();
   const navigate = useNavigate();
   const search = () => {
     //@ts-ignore
     let season = document.getElementById("season")?.value;
     //@ts-ignore
+    let ep = document.getElementById("ep")?.value;
+    //@ts-ignore
     let limit = document.getElementById("limit")?.value;
 
     if (season) {
-      fetch(`${props.name} S0${season}`, limit);
+      fetch(`${props.name} S0${season}${+ep ? `E0${ep}` : ""}`, limit);
     }
   };
+  useEffect(() => {
+    setSelectedSeason("1");
+    let season = document.getElementById("season");
+
+    if (season) {
+      season.onchange = (e) => {
+        //@ts-ignore
+        setSelectedSeason(season.value);
+      };
+    }
+  }, [resp]);
   return (
     <>
       <div
@@ -70,10 +85,28 @@ export function ShowDetails(props: TMDBTVShowDetails) {
             {props.seasons.map((s, i) => {
               if (s.name === "Specials") return;
               return (
-                <option value={s.season_number} key={i}>
+                <option id="season" value={s.season_number} key={i}>
                   {s.name}
                 </option>
               );
+            })}
+          </select>
+          <select name="" id="ep">
+            <option value="0" selected key={0}>
+              any episode
+            </option>
+            {props.seasons.map((s, i) => {
+              if (`${s.season_number}` === selectedSeason) {
+                let opts = [];
+                for (let i = 1; i < s.episode_count + 1; i++) {
+                  opts.push(
+                    <option value={i} key={i}>
+                      episode {i}
+                    </option>
+                  );
+                }
+                return opts;
+              }
             })}
           </select>
           Search Limit{" "}
@@ -109,14 +142,14 @@ export function ShowDetails(props: TMDBTVShowDetails) {
                     navigate(
                       `/home_cinema/torrents/${getMagnetHash(
                         t.magnetURI
-                      )}/files?about=${t.desc}&seeds=${t.seeds}&peers=${
-                        t.peers
+                      )}/files?about=${t.url}&seeds=${t.seeders}&leechers=${
+                        t.leechers
                       }`
                     );
                   }}
                   key={i}
                 >
-                  {t.title}
+                  {t.name}
                 </div>
               );
             })}
