@@ -12,9 +12,12 @@
     "build:server": "vite build --outDir dist/server --ssr src/entry-server.jsx"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
+    "@mui/material": "^7.0.2",
     "@vidstack/react": "^1.12.12",
     "@vitejs/plugin-react": "^4.3.4",
     "axios": "^1.7.9",

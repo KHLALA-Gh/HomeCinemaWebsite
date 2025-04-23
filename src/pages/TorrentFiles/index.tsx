@@ -5,16 +5,31 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronLeft,
   faCopy,
+  faFile,
   faPlay,
+  faVideo,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import Button from "../../components/Button/button";
+import { FormControlLabel, Switch } from "@mui/material";
+
+function getVideos(files: TorrentFile[]): number {
+  let num = 0;
+  files.map((f) => {
+    if (!(f.name.endsWith(".mp4") || f.name.endsWith(".mkv"))) {
+      num++;
+    }
+  });
+  return num;
+}
+
 export default function TorrentFiles() {
   const p = useParams();
   const [sp, _] = useSearchParams();
   const { resp, isLoading, err } = useTorrentFiles(p.hash as string);
   const [streams, setStreams] = useState<string[]>();
   const [size, setSize] = useState<number>();
+  const [showOnlyVideo, setShowOnlyVideo] = useState<number>(+localStorage.sov);
   const navigate = useNavigate();
   useEffect(() => {
     if (!resp) return;
@@ -36,13 +51,15 @@ export default function TorrentFiles() {
   return (
     <>
       <div
-        className="cursor-pointer mt-7 ms-3"
+        className="cursor-pointer mt-7 ms-3 flex items-center gap-3"
         onClick={() => {
           navigate(-1);
         }}
       >
-        <FontAwesomeIcon icon={faChevronLeft} className="h-7 mb-5" />
+        <FontAwesomeIcon icon={faChevronLeft} className="h-7" />
+        <h1 className="font-bold text-3xl">Inspect Torrent</h1>
       </div>
+
       {streams && streams?.length > 0 && (
         <div className="p-5">
           <h1 className="md:text-3xl font-bold mb-3">
@@ -66,6 +83,7 @@ export default function TorrentFiles() {
               </a>
             </p>
           )}
+          <p className="text-sm mb-5">Info Hash : {p.hash}</p>
           <Button
             onClick={() => {
               const url = new URL("/api/playlist", location.origin);
@@ -82,24 +100,78 @@ export default function TorrentFiles() {
           </Button>
         </div>
       )}
-      {!err && !isLoading && (
+      {!err && !isLoading && resp && (
         <>
           <h1 className="text-xl font-bold p-5">Files</h1>
+
+          <FormControlLabel
+            control={
+              <Switch
+                color="info"
+                checked={showOnlyVideo ? true : false}
+                onChange={(_, ch) => {
+                  setShowOnlyVideo(ch ? 1 : 0);
+                  localStorage.sov = ch ? 1 : 0;
+                }}
+                sx={{
+                  "& .MuiSwitch-track": {
+                    backgroundColor: "lightgray",
+                  },
+                  "&.Mui-checked .MuiSwitch-track": {
+                    backgroundColor: "green", // color when checked
+                  },
+                }}
+              />
+            }
+            label="Only show video files"
+            labelPlacement="start"
+          />
+          <div className="ps-5">
+            <ul className="flex gap-5" style={{ listStyleType: "circle" }}>
+              <li className="list-none">{resp?.length} files </li>
+              {showOnlyVideo ? <li>{getVideos(resp)} Hidden files</li> : ""}
+            </ul>
+          </div>
           <div className="p-5">
             {resp?.map((file, i) => {
+              if (
+                showOnlyVideo &&
+                !(file.name.endsWith(".mp4") || file.name.endsWith(".mkv"))
+              )
+                return;
               return (
                 <div
                   key={i}
-                  className="p-5 hover:bg-slate-400 duration-200 flex gap-10 cursor-pointer flex-wrap"
+                  className="p-5 grid-cols-12 rounded-md hover:bg-[#50505059] duration-200 grid gap-10 cursor-pointer flex-wrap"
                 >
-                  <h1
-                    onClick={() => {
-                      open(file.downloadLink, "_blank");
-                    }}
+                  <div className="col-span-1">
+                    {file.name.endsWith(".mp4") ||
+                    file.name.endsWith(".mkv") ? (
+                      <FontAwesomeIcon icon={faVideo} />
+                    ) : (
+                      <FontAwesomeIcon icon={faFile} />
+                    )}
+                  </div>
+                  <a
+                    target="_blank"
+                    href={file.downloadLink}
+                    className="col-span-6 hover:underline"
                   >
                     {file.name}
-                  </h1>
-                  <p>{pr(file.size)}</p>
+                  </a>
+                  <p className="col-span-1">{pr(file.size)}</p>
+
+                  <button
+                    className="col-span-2"
+                    onClick={() => {
+                      navigator.clipboard.writeText(file.downloadLink);
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faCopy} />{" "}
+                    <span className="lg:inline-block hidden">
+                      Copy Stream URL
+                    </span>
+                  </button>
                   {(file.name.endsWith(".mp4") ||
                     file.name.endsWith(".mkv")) && (
                     <button
@@ -109,17 +181,12 @@ export default function TorrentFiles() {
                         url.searchParams.set("fileName", file.name);
                         open(url.href);
                       }}
+                      className="flex items-center"
                     >
-                      <FontAwesomeIcon icon={faPlay} />
+                      <FontAwesomeIcon icon={faPlay} className="mr-2" />
+                      play
                     </button>
                   )}
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(file.downloadLink);
-                    }}
-                  >
-                    <FontAwesomeIcon icon={faCopy} /> Copy Stream URL
-                  </button>
                 </div>
               );
             })}

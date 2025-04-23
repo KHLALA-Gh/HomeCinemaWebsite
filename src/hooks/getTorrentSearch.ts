@@ -16,9 +16,9 @@ export function useTorrentSearch() {
         : location.origin
     );
     url.searchParams.set("query", query);
-    url.searchParams.set("limit", `${limit || 20}`);
+    url.searchParams.set("limit", `${limit}`);
     const source = new EventSource(url.href);
-
+    console.log("send");
     source.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
@@ -32,6 +32,7 @@ export function useTorrentSearch() {
 
     source.onerror = (error) => {
       console.error("EventSource failed:", error);
+      source.close();
     };
   };
   const fetch = (query: string, limit?: number) => {
