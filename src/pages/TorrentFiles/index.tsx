@@ -65,25 +65,6 @@ export default function TorrentFiles() {
           <h1 className="md:text-3xl font-bold mb-3">
             {resp && <h1>{resp[0].path.split("/")[0]}</h1>}
           </h1>
-          <p className="mb-3">{pr(size as number)}</p>
-          {sp.get("peers") && sp.get("seeds") && (
-            <p>
-              Seeds : {sp.get("seeds")} leechers : {sp.get("leechers")}
-            </p>
-          )}
-          {sp.get("about") && (
-            <p className=" mb-3">
-              About :{" "}
-              <a
-                target="_blank"
-                className="text-blue-500"
-                href={sp.get("about") as string}
-              >
-                {sp.get("about")}
-              </a>
-            </p>
-          )}
-          <p className="text-sm mb-5">Info Hash : {p.hash}</p>
           <Button
             onClick={() => {
               const url = new URL("/api/playlist", location.origin);
@@ -100,100 +81,130 @@ export default function TorrentFiles() {
           </Button>
         </div>
       )}
-      {!err && !isLoading && resp && (
-        <>
-          <h1 className="text-xl font-bold p-5">Files</h1>
+      <div className="border-[2px] ms-3 mr-3 bg-[#ffffff0d] border-[#ffffff4f] drop-shadow-md rounded-sm">
+        <h1 className="text-xl font-bold p-5">Files</h1>
 
-          <FormControlLabel
-            control={
-              <Switch
-                color="info"
-                checked={showOnlyVideo ? true : false}
-                onChange={(_, ch) => {
-                  setShowOnlyVideo(ch ? 1 : 0);
-                  localStorage.sov = ch ? 1 : 0;
-                }}
-                sx={{
-                  "& .MuiSwitch-track": {
-                    backgroundColor: "lightgray",
-                  },
-                  "&.Mui-checked .MuiSwitch-track": {
-                    backgroundColor: "green", // color when checked
-                  },
-                }}
-              />
-            }
-            label="Only show video files"
-            labelPlacement="start"
-          />
-          <div className="ps-5">
-            <ul className="flex gap-5" style={{ listStyleType: "circle" }}>
-              <li className="list-none">{resp?.length} files </li>
-              {showOnlyVideo ? <li>{getVideos(resp)} Hidden files</li> : ""}
-            </ul>
-          </div>
-          <div className="p-5">
-            {resp?.map((file, i) => {
-              if (
-                showOnlyVideo &&
-                !(file.name.endsWith(".mp4") || file.name.endsWith(".mkv"))
-              )
-                return;
-              return (
-                <div
-                  key={i}
-                  className="p-5 grid-cols-12 rounded-md hover:bg-[#50505059] duration-200 grid gap-10 cursor-pointer flex-wrap"
-                >
-                  <div className="col-span-1">
-                    {file.name.endsWith(".mp4") ||
-                    file.name.endsWith(".mkv") ? (
-                      <FontAwesomeIcon icon={faVideo} />
-                    ) : (
-                      <FontAwesomeIcon icon={faFile} />
+        <FormControlLabel
+          control={
+            <Switch
+              color="info"
+              checked={showOnlyVideo ? true : false}
+              onChange={(_, ch) => {
+                setShowOnlyVideo(ch ? 1 : 0);
+                localStorage.sov = ch ? 1 : 0;
+              }}
+              sx={{
+                "& .MuiSwitch-track": {
+                  backgroundColor: "lightgray",
+                },
+                "&.Mui-checked .MuiSwitch-track": {
+                  backgroundColor: "green", // color when checked
+                },
+              }}
+            />
+          }
+          label="Only show video files"
+          labelPlacement="start"
+        />
+        {!err && !isLoading && resp && (
+          <>
+            <div className="ps-5">
+              <ul className="flex gap-5" style={{ listStyleType: "circle" }}>
+                <li className="list-none">{resp?.length} files </li>
+                {showOnlyVideo ? <li>{getVideos(resp)} Hidden files</li> : ""}
+              </ul>
+            </div>
+            <div className="p-5">
+              {resp?.map((file, i) => {
+                if (
+                  showOnlyVideo &&
+                  !(file.name.endsWith(".mp4") || file.name.endsWith(".mkv"))
+                )
+                  return;
+                return (
+                  <div
+                    key={i}
+                    className="p-5 grid-cols-12 rounded-md hover:bg-[#50505059] duration-200 grid gap-10 cursor-pointer flex-wrap"
+                  >
+                    <div className="col-span-1">
+                      {file.name.endsWith(".mp4") ||
+                      file.name.endsWith(".mkv") ? (
+                        <FontAwesomeIcon icon={faVideo} />
+                      ) : (
+                        <FontAwesomeIcon icon={faFile} />
+                      )}
+                    </div>
+                    <a
+                      target="_blank"
+                      href={file.downloadLink}
+                      className="col-span-6 hover:underline"
+                    >
+                      {file.name}
+                    </a>
+                    <p className="col-span-1">{pr(file.size)}</p>
+
+                    <button
+                      className="col-span-2"
+                      onClick={() => {
+                        navigator.clipboard.writeText(file.downloadLink);
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faCopy} />{" "}
+                      <span className="lg:inline-block hidden">
+                        Copy Stream URL
+                      </span>
+                    </button>
+                    {(file.name.endsWith(".mp4") ||
+                      file.name.endsWith(".mkv")) && (
+                      <button
+                        onClick={() => {
+                          const url = new URL("/api/playlist", location.origin);
+                          url.searchParams.set("streams", file.downloadLink);
+                          url.searchParams.set("fileName", file.name);
+                          open(url.href);
+                        }}
+                        className="flex items-center"
+                      >
+                        <FontAwesomeIcon icon={faPlay} className="mr-2" />
+                        play
+                      </button>
                     )}
                   </div>
-                  <a
-                    target="_blank"
-                    href={file.downloadLink}
-                    className="col-span-6 hover:underline"
-                  >
-                    {file.name}
-                  </a>
-                  <p className="col-span-1">{pr(file.size)}</p>
+                );
+              })}
+            </div>
+          </>
+        )}
+        {isLoading && !err && (
+          <>
+            <div className="flex justify-center items-center h-[200px]">
+              <h1>Loading files...</h1>
+            </div>
+          </>
+        )}
+      </div>
 
-                  <button
-                    className="col-span-2"
-                    onClick={() => {
-                      navigator.clipboard.writeText(file.downloadLink);
-                    }}
-                  >
-                    <FontAwesomeIcon icon={faCopy} />{" "}
-                    <span className="lg:inline-block hidden">
-                      Copy Stream URL
-                    </span>
-                  </button>
-                  {(file.name.endsWith(".mp4") ||
-                    file.name.endsWith(".mkv")) && (
-                    <button
-                      onClick={() => {
-                        const url = new URL("/api/playlist", location.origin);
-                        url.searchParams.set("streams", file.downloadLink);
-                        url.searchParams.set("fileName", file.name);
-                        open(url.href);
-                      }}
-                      className="flex items-center"
-                    >
-                      <FontAwesomeIcon icon={faPlay} className="mr-2" />
-                      play
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
-      {isLoading && <h1>Loading files ...</h1>}
+      <div className="ps-5 mt-7">
+        <p className="mb-3">{pr((size as number) || 0)}</p>
+        {sp.get("peers") && sp.get("seeds") && (
+          <p>
+            Seeds : {sp.get("seeds")} leechers : {sp.get("leechers")}
+          </p>
+        )}
+        {sp.get("about") && (
+          <p className=" mb-3">
+            About :{" "}
+            <a
+              target="_blank"
+              className="text-blue-500"
+              href={sp.get("about") as string}
+            >
+              {sp.get("about")}
+            </a>
+          </p>
+        )}
+        <p className="text-sm mb-5">Info Hash : {p.hash}</p>
+      </div>
       {err && (
         <h1 className="text-red-500">An error occurred while getting files</h1>
       )}
