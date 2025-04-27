@@ -17,23 +17,26 @@ export function useTorrentSearch() {
     );
     url.searchParams.set("query", query);
     url.searchParams.set("limit", `${limit}`);
-    const source = new EventSource(url.href);
-    console.log("send");
-    source.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        setResp((d) => {
-          return d ? [...d, data] : [data];
-        });
-      } catch (e) {
-        console.error("Failed to parse JSON:", e);
-      }
-    };
 
-    source.onerror = (error) => {
-      console.error("EventSource failed:", error);
-      source.close();
-    };
+    await new Promise<void>((res) => {
+      const source = new EventSource(url.href);
+      source.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          setResp((d) => {
+            return d ? [...d, data] : [data];
+          });
+        } catch (e) {
+          console.error("Failed to parse JSON:", e);
+        }
+      };
+
+      source.onerror = (error) => {
+        console.error("EventSource failed:", error);
+        source.close();
+        res();
+      };
+    });
   };
   const fetch = (query: string, limit?: number) => {
     setIsLoading(true);
