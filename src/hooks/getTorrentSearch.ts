@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useState } from "react";
 import { fetchConfigs } from "./getMagnetURI";
 
@@ -8,10 +7,7 @@ export function useTorrentSearch() {
   const [resp, setResp] = useState<TorrentSearch[]>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [err, setErr] = useState<string>();
-  const get = async (
-    query: string,
-    limit?: number
-  ): Promise<TorrentSearch[]> => {
+  const get = async (query: string, limit?: number) => {
     const config = await fetchConfigs();
     const url = new URL(
       endSearchPoint,
@@ -20,17 +16,32 @@ export function useTorrentSearch() {
         : location.origin
     );
     url.searchParams.set("query", query);
-    url.searchParams.set("limit", `${limit || 20}`);
-    url.searchParams.set("category", "TV");
-    const resp = await axios.get(url.href);
-    return resp.data as TorrentSearch[];
+    url.searchParams.set("limit", `${limit}`);
+
+    await new Promise<void>((res) => {
+      const source = new EventSource(url.href);
+      source.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          setResp((d) => {
+            return d ? [...d, data] : [data];
+          });
+        } catch (e) {
+          console.error("Failed to parse JSON:", e);
+        }
+      };
+
+      source.onerror = (error) => {
+        console.error("EventSource failed:", error);
+        source.close();
+        res();
+      };
+    });
   };
   const fetch = (query: string, limit?: number) => {
     setIsLoading(true);
+    setResp(undefined);
     get(query, limit)
-      .then((data) => {
-        setResp(data);
-      })
       .catch((err) => {
         setErr(err.message);
       })

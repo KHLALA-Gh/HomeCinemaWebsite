@@ -2,7 +2,11 @@ import Button from "../Button/button";
 import { useTorrentSearch } from "../../hooks/getTorrentSearch";
 import { useNavigate } from "react-router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowUpRightFromSquare,
+  faChevronLeft,
+} from "@fortawesome/free-solid-svg-icons";
+import { useEffect, useState } from "react";
 
 function getMagnetHash(magnetLink: string) {
   const url = new URL(magnetLink);
@@ -16,17 +20,31 @@ function getMagnetHash(magnetLink: string) {
 
 export function ShowDetails(props: TMDBTVShowDetails) {
   const { resp, err, isLoading, fetch } = useTorrentSearch();
+  const [selectedSeason, setSelectedSeason] = useState<string>();
   const navigate = useNavigate();
   const search = () => {
     //@ts-ignore
     let season = document.getElementById("season")?.value;
     //@ts-ignore
+    let ep = document.getElementById("ep")?.value;
+    //@ts-ignore
     let limit = document.getElementById("limit")?.value;
 
     if (season) {
-      fetch(`${props.name} S0${season}`, limit);
+      fetch(`${props.name} S0${season}${+ep ? `E0${ep}` : ""}`, limit);
     }
   };
+  useEffect(() => {
+    setSelectedSeason("1");
+    let season = document.getElementById("season");
+
+    if (season) {
+      season.onchange = () => {
+        //@ts-ignore
+        setSelectedSeason(season.value);
+      };
+    }
+  }, [resp]);
   return (
     <>
       <div
@@ -70,18 +88,36 @@ export function ShowDetails(props: TMDBTVShowDetails) {
             {props.seasons.map((s, i) => {
               if (s.name === "Specials") return;
               return (
-                <option value={s.season_number} key={i}>
+                <option id="season" value={s.season_number} key={i}>
                   {s.name}
                 </option>
               );
             })}
           </select>
+          <select name="" id="ep">
+            <option value="0" selected key={0}>
+              any episode
+            </option>
+            {props.seasons.map((s) => {
+              if (`${s.season_number}` === selectedSeason) {
+                let opts = [];
+                for (let i = 1; i < s.episode_count + 1; i++) {
+                  opts.push(
+                    <option value={i} key={i}>
+                      episode {i}
+                    </option>
+                  );
+                }
+                return opts;
+              }
+            })}
+          </select>
           Search Limit{" "}
           <select name="" id="limit" className="mr-2">
-            <option value="10">10</option>
-            <option value="20" selected>
-              20
+            <option value="10" selected>
+              10
             </option>
+            <option value="20">20</option>
             <option value="30">30</option>
             <option value="40">40</option>
             <option value="50">50</option>
@@ -104,19 +140,30 @@ export function ShowDetails(props: TMDBTVShowDetails) {
             {resp?.map((t, i) => {
               return (
                 <div
-                  className="p-5 hover:bg-slate-400 duration-200 cursor-pointer"
-                  onClick={() => {
-                    navigate(
-                      `/home_cinema/torrents/${getMagnetHash(
-                        t.magnetURI
-                      )}/files?about=${t.desc}&seeds=${t.seeds}&peers=${
-                        t.peers
-                      }`
-                    );
-                  }}
+                  className="p-5 gap-5 grid grid-cols-12 hover:bg-[#50505059] rounded-md duration-200"
                   key={i}
                 >
-                  {t.title}
+                  <h1
+                    className="col-span-7 hover:underline cursor-pointer"
+                    onClick={() => {
+                      navigate(
+                        `/home_cinema/torrents/${getMagnetHash(
+                          t.magnetURI
+                        )}/files?about=${t.url}&seeds=${t.seeders}&leechers=${
+                          t.leechers
+                        }`
+                      );
+                    }}
+                  >
+                    {t.name}
+                  </h1>
+                  <p className="col-span-1">seeders : {t.seeders}</p>
+                  <p className="col-span-1">leechers : {t.leechers}</p>
+                  <p className="col-span-1">{t.provider}</p>
+                  <a className="col-span-1" target="_blank" href={t.url}>
+                    torrent page{" "}
+                    <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+                  </a>
                 </div>
               );
             })}

@@ -6,11 +6,13 @@ interface Configs {
 }
 
 interface TorrentSearch {
-  title: string;
+  name: string;
   magnetURI: string;
-  desc?: string;
-  seeds?: number;
-  peers?: number;
+  url: string;
+  seeders?: number;
+  leechers?: number;
+  provider: string;
+  uploader?: string;
 }
 
 interface TorrentFile {
