@@ -1,27 +1,12 @@
-import { MediaPlayer, MediaProvider } from "@vidstack/react";
-import {
-  defaultLayoutIcons,
-  DefaultVideoLayout,
-} from "@vidstack/react/player/layouts/default";
-import "@vidstack/react/player/styles/default/theme.css";
-import "@vidstack/react/player/styles/default/layouts/video.css";
+import ReactPlayer from "react-player";
 import { useParams, useSearchParams } from "react-router";
-import {
-  fetchConfigs,
-  streamEndPoint,
-  useGetMagnetURI,
-} from "../../hooks/getMagnetURI";
+import { fetchConfigs, streamEndPoint } from "../../hooks/getMagnetURI";
 import { useEffect, useState } from "react";
 export default function Play() {
   const p = useParams();
-  const {
-    resp: magnet,
-    err,
-    isLoading,
-    setErr,
-  } = useGetMagnetURI(p.hash as string);
   const [sp, _] = useSearchParams();
   const [streamUrl, setStreamUrl] = useState<string>();
+  const [err, setErr] = useState<string>();
   useEffect(() => {
     fetchConfigs()
       .then((c) => {
@@ -31,7 +16,7 @@ export default function Play() {
             ? c["torrent-streamer-api"].origin
             : location.origin
         );
-        url.searchParams.set("magnet", magnet);
+        url.searchParams.set("hash", p.hash as string);
         let path64 = sp.get("path64");
         if (path64) {
           url.searchParams.set("path64", path64);
@@ -41,35 +26,28 @@ export default function Play() {
       .catch(() => {
         setErr("error when fetching configs");
       });
-  }, [magnet]);
+  }, [p]);
   return (
     <>
-      {!isLoading && !err && streamUrl && (
-        <MediaPlayer
-          src={{
-            src: streamUrl,
-            type:
-              sp.get("vd_type") == "mp4" || !sp.get("vd_type")
-                ? "video/mp4"
-                : "video/webm",
-          }}
-          onError={(e) => {
-            setErr(e.message);
-          }}
-          autoPlay={true}
-        >
-          <MediaProvider />
-          <DefaultVideoLayout icons={defaultLayoutIcons} />
-        </MediaPlayer>
+      {!err && streamUrl && (
+        <ReactPlayer
+          light={
+            <img
+              src={sp.get("thumbnail") || ""}
+              width={"100%"}
+              height={"100vh"}
+              alt="Thumbnail"
+            />
+          }
+          width={"100%"}
+          height={"100%"}
+          url={streamUrl}
+          controls
+        />
       )}
       {err && (
         <div className="bg-red-500">
           <h1 className="text-white text-xl">{err}</h1>
-        </div>
-      )}
-      {isLoading && (
-        <div className="flex justify-center items-center w-full h-screen">
-          <h1 className="text-2xl">Getting Magnet URI</h1>
         </div>
       )}
     </>

@@ -8,6 +8,8 @@ import TVShows from "../../pages/TV_Shows";
 import Show from "../../pages/Show";
 import TorrentFiles from "../../pages/TorrentFiles";
 import { useEffect } from "react";
+import PreStreams from "../../pages/PreStreams";
+import Torrents from "../../pages/Torrents";
 
 function Root() {
   const navigate = useNavigate();
@@ -34,6 +36,8 @@ export default function Router() {
             path="/home_cinema/torrents/:hash/files"
             element={<TorrentFiles />}
           />
+          <Route path="/home_cinema/torrents/" element={<Torrents />} />
+          <Route path="/home_cinema/pre-streams" element={<PreStreams />} />
         </Routes>
       </BrowserRouter>
     </>

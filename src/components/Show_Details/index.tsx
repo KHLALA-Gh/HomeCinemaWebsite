@@ -134,43 +134,67 @@ export function ShowDetails(props: TMDBTVShowDetails) {
       </div>
       <div>
         {isLoading && <div>Loading...(it takes time !)</div>}
-        {!isLoading && !err && resp && (
+        {!isLoading && resp && (
           <>
             <h1 className="text-2xl font-bold mb-5">Torrents Found</h1>
-            {resp?.map((t, i) => {
-              return (
-                <div
-                  className="p-5 gap-5 grid grid-cols-12 hover:bg-[#50505059] rounded-md duration-200"
-                  key={i}
-                >
-                  <h1
-                    className="col-span-7 hover:underline cursor-pointer"
-                    onClick={() => {
-                      navigate(
-                        `/home_cinema/torrents/${getMagnetHash(
-                          t.magnetURI
-                        )}/files?about=${t.url}&seeds=${t.seeders}&leechers=${
-                          t.leechers
-                        }`
-                      );
-                    }}
-                  >
-                    {t.name}
-                  </h1>
-                  <p className="col-span-1">seeders : {t.seeders}</p>
-                  <p className="col-span-1">leechers : {t.leechers}</p>
-                  <p className="col-span-1">{t.provider}</p>
-                  <a className="col-span-1" target="_blank" href={t.url}>
-                    torrent page{" "}
-                    <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
-                  </a>
-                </div>
-              );
-            })}
+
+            <FilterTorrents filter={"720p"} torrents={resp} />
+            <FilterTorrents filter={"1080p"} torrents={resp} />
+            <FilterTorrents filter={"2060p"} torrents={resp} />
+            <FilterTorrents filter={"4k"} torrents={resp} />
+            <FilterTorrents filter={"h264"} torrents={resp} />
+            <FilterTorrents filter={"h265"} torrents={resp} />
+
             {resp.length === 0 && <h1>No Torrents Found :(</h1>}
           </>
         )}
+        {err && !resp && (
+          <h1 className="text-red-600">Error when searching for torrents</h1>
+        )}
       </div>
+    </>
+  );
+}
+
+function Torrent({ t }: { t: TorrentSearch }) {
+  return (
+    <>
+      <div className="p-5 gap-5 grid grid-cols-12 hover:bg-[#50505059] rounded-md duration-200">
+        <a
+          href={`/home_cinema/torrents/${getMagnetHash(
+            t.magnetURI
+          )}/files?about=${t.url}&seeds=${t.seeders}&leechers=${t.leechers}`}
+          className="col-span-7 hover:underline cursor-pointer"
+        >
+          {t.name}
+        </a>
+        <p className="col-span-1">seeders : {t.seeders}</p>
+        <p className="col-span-1">leechers : {t.leechers}</p>
+        <p className="col-span-1">{t.provider}</p>
+        <a className="col-span-1" target="_blank" href={t.url}>
+          torrent page <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+        </a>
+      </div>
+    </>
+  );
+}
+
+function FilterTorrents({
+  torrents,
+  filter,
+}: {
+  torrents: TorrentSearch[];
+  filter: string;
+}) {
+  return (
+    <>
+      {torrents?.find((t) => {
+        if (t.name.includes(filter)) return true;
+      }) && <p className="font-bold underline">{filter} :</p>}
+      {torrents?.map((t, i) => {
+        if (t.name.toUpperCase().includes(filter.toUpperCase()))
+          return <Torrent t={t} key={i}></Torrent>;
+      })}
     </>
   );
 }

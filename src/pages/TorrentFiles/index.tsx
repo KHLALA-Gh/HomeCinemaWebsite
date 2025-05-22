@@ -2,34 +2,23 @@ import { useNavigate, useParams, useSearchParams } from "react-router";
 import { useTorrentFiles } from "../../hooks/useTorrentFiles";
 import pr from "pretty-bytes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faChevronLeft,
-  faCopy,
-  faFile,
-  faPlay,
-  faVideo,
-} from "@fortawesome/free-solid-svg-icons";
+import { faChevronLeft, faPlay, faX } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import Button from "../../components/Button/button";
-import { FormControlLabel, Switch } from "@mui/material";
-
-function getVideos(files: TorrentFile[]): number {
-  let num = 0;
-  files.map((f) => {
-    if (!(f.name.endsWith(".mp4") || f.name.endsWith(".mkv"))) {
-      num++;
-    }
-  });
-  return num;
-}
-
-export default function TorrentFiles() {
+import { useCreatePreStream } from "../../hooks/useCreatePreStream";
+import { TorrentFiles } from "../../components/TorrentFiles";
+export default function Files() {
   const p = useParams();
+  const [showStreamUrl, setShowStreamUrl] = useState(false);
   const [sp, _] = useSearchParams();
-  const { resp, isLoading, err } = useTorrentFiles(p.hash as string);
+  const { resp, isLoading, err, fetch: fetchFiles } = useTorrentFiles();
+  const {
+    resp: createStreamResp,
+    isLoading: isLoadingPreStream,
+    err: errPreStream,
+  } = useCreatePreStream();
   const [streams, setStreams] = useState<string[]>();
   const [size, setSize] = useState<number>();
-  const [showOnlyVideo, setShowOnlyVideo] = useState<number>(+localStorage.sov);
   const navigate = useNavigate();
   useEffect(() => {
     if (!resp) return;
@@ -48,6 +37,10 @@ export default function TorrentFiles() {
     });
     setSize(size);
   }, [resp]);
+  useEffect(() => {
+    fetchFiles(p.hash as string);
+  }, []);
+
   return (
     <>
       <div
@@ -81,108 +74,13 @@ export default function TorrentFiles() {
           </Button>
         </div>
       )}
-      <div className="border-[2px] ms-3 mr-3 bg-[#ffffff0d] border-[#ffffff4f] drop-shadow-md rounded-sm">
-        <h1 className="text-xl font-bold p-5">Files</h1>
 
-        <FormControlLabel
-          control={
-            <Switch
-              color="info"
-              checked={showOnlyVideo ? true : false}
-              onChange={(_, ch) => {
-                setShowOnlyVideo(ch ? 1 : 0);
-                localStorage.sov = ch ? 1 : 0;
-              }}
-              sx={{
-                "& .MuiSwitch-track": {
-                  backgroundColor: "lightgray",
-                },
-                "&.Mui-checked .MuiSwitch-track": {
-                  backgroundColor: "green", // color when checked
-                },
-              }}
-            />
-          }
-          label="Only show video files"
-          labelPlacement="start"
-        />
-        {!err && !isLoading && resp && (
-          <>
-            <div className="ps-5">
-              <ul className="flex gap-5" style={{ listStyleType: "circle" }}>
-                <li className="list-none">{resp?.length} files </li>
-                {showOnlyVideo ? <li>{getVideos(resp)} Hidden files</li> : ""}
-              </ul>
-            </div>
-            <div className="p-5">
-              {resp?.map((file, i) => {
-                if (
-                  showOnlyVideo &&
-                  !(file.name.endsWith(".mp4") || file.name.endsWith(".mkv"))
-                )
-                  return;
-                return (
-                  <div
-                    key={i}
-                    className="p-5 grid-cols-12 rounded-md hover:bg-[#50505059] duration-200 grid gap-10 cursor-pointer flex-wrap"
-                  >
-                    <div className="col-span-1">
-                      {file.name.endsWith(".mp4") ||
-                      file.name.endsWith(".mkv") ? (
-                        <FontAwesomeIcon icon={faVideo} />
-                      ) : (
-                        <FontAwesomeIcon icon={faFile} />
-                      )}
-                    </div>
-                    <a
-                      target="_blank"
-                      href={file.downloadLink}
-                      className="col-span-6 hover:underline"
-                    >
-                      {file.name}
-                    </a>
-                    <p className="col-span-1">{pr(file.size)}</p>
-
-                    <button
-                      className="col-span-2"
-                      onClick={() => {
-                        navigator.clipboard.writeText(file.downloadLink);
-                      }}
-                    >
-                      <FontAwesomeIcon icon={faCopy} />{" "}
-                      <span className="lg:inline-block hidden">
-                        Copy Stream URL
-                      </span>
-                    </button>
-                    {(file.name.endsWith(".mp4") ||
-                      file.name.endsWith(".mkv")) && (
-                      <button
-                        onClick={() => {
-                          const url = new URL("/api/playlist", location.origin);
-                          url.searchParams.set("streams", file.downloadLink);
-                          url.searchParams.set("fileName", file.name);
-                          open(url.href);
-                        }}
-                        className="flex items-center"
-                      >
-                        <FontAwesomeIcon icon={faPlay} className="mr-2" />
-                        play
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
-        {isLoading && !err && (
-          <>
-            <div className="flex justify-center items-center h-[200px]">
-              <h1>Loading files...</h1>
-            </div>
-          </>
-        )}
-      </div>
+      <TorrentFiles
+        resp={resp || []}
+        hash={p.hash as string}
+        err={err}
+        isLoading={isLoading}
+      />
 
       <div className="ps-5 mt-7">
         <p className="mb-3">{pr((size as number) || 0)}</p>
@@ -210,6 +108,50 @@ export default function TorrentFiles() {
       )}
       {resp?.length === 0 && !isLoading && (
         <h1>No files found. It could be 0 seeders</h1>
+      )}
+      {showStreamUrl && (
+        <>
+          <div className="absolute w-full h-screen bg-[#0000005c] top-0"></div>
+
+          <div className="w-[700px] flex justify-center items-center p-5 border-2 border-white h-[300px] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] bg-black">
+            {createStreamResp && (
+              <div
+                className="ms-[90%] translate-x-[-90%] absolute top-5 cursor-pointer"
+                onClick={() => setShowStreamUrl(false)}
+              >
+                <FontAwesomeIcon icon={faX} />
+              </div>
+            )}
+            {isLoadingPreStream && <h1>loading...</h1>}
+            {createStreamResp && (
+              <div>
+                <h1 className="text-center">
+                  <span className="font-bold text-xl mb-5 block">
+                    {" "}
+                    Stream URL{" "}
+                  </span>{" "}
+                  <a
+                    href={createStreamResp.streamUrl}
+                    className="text-blue-600 hover:underline"
+                  >
+                    {createStreamResp.streamUrl}
+                  </a>
+                </h1>
+                <div>
+                  <Button
+                    onClick={() => {
+                      navigate("/home_cinema/pre-streams");
+                    }}
+                    className="!text-base ms-[50%] translate-x-[-50%] mt-10"
+                  >
+                    All Streams
+                  </Button>
+                </div>
+              </div>
+            )}
+            {errPreStream && <h1 className="text-red-600">{errPreStream}</h1>}
+          </div>
+        </>
       )}
     </>
   );

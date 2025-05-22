@@ -6,7 +6,7 @@ export const endSearchPoint = "/api/search";
 export function useTorrentSearch() {
   const [resp, setResp] = useState<TorrentSearch[]>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [err, setErr] = useState<string>();
+  const [err, setErr] = useState<any>();
   const get = async (query: string, limit?: number) => {
     const config = await fetchConfigs();
     const url = new URL(
@@ -18,7 +18,7 @@ export function useTorrentSearch() {
     url.searchParams.set("query", query);
     url.searchParams.set("limit", `${limit}`);
 
-    await new Promise<void>((res) => {
+    await new Promise<void>((res, rej) => {
       const source = new EventSource(url.href);
       source.onmessage = (event) => {
         try {
@@ -34,16 +34,17 @@ export function useTorrentSearch() {
       source.onerror = (error) => {
         console.error("EventSource failed:", error);
         source.close();
-        res();
+        rej(error);
       };
     });
   };
   const fetch = (query: string, limit?: number) => {
     setIsLoading(true);
+    setErr(undefined);
     setResp(undefined);
     get(query, limit)
       .catch((err) => {
-        setErr(err.message);
+        setErr(err);
       })
       .finally(() => {
         setIsLoading(false);

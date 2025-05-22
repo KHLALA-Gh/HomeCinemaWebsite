@@ -20,6 +20,7 @@ interface MovieDetails {
   id: number;
   title: string;
   year: number;
+  url: string;
   rating: number;
   medium_cover_image: string;
   runtime: number;
@@ -27,5 +28,6 @@ interface MovieDetails {
   description: string;
   yt_trailer_code: string;
   language: "en";
+  background_image: string;
   torrents: torrent[];
 }

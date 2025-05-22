@@ -1,11 +1,11 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { fetchConfigs } from "./getMagnetURI";
 
 export const endPoint = "/api/torrents/:hash/files";
 export const endPointDownload = "/api/torrents/:hash/files/:path64";
 
-export function useTorrentFiles(hash: string) {
+export function useTorrentFiles() {
   const [resp, setResp] = useState<TorrentFile[]>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [err, setErr] = useState<string>();
@@ -29,22 +29,26 @@ export function useTorrentFiles(hash: string) {
     }
     return resp.data as TorrentFile[];
   };
-  useEffect(() => {
+  const fetch = (hash: string) => {
     setIsLoading(true);
+    setErr("");
     get(hash)
       .then((data) => {
         setResp(data);
       })
       .catch((err) => {
+        console.log(err);
         setErr(err.message);
       })
       .finally(() => {
         setIsLoading(false);
       });
-  }, []);
+  };
+
   return {
     resp,
     isLoading,
     err,
+    fetch,
   };
 }

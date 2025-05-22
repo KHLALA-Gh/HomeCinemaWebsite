@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowUpRightFromSquare,
   faChevronLeft,
+  faFile,
   faX,
 } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
@@ -13,6 +14,9 @@ export default function MoviePage() {
   const params = useParams();
   const { resp, isLoading } = useGetYTSMovieDetails(params.id as string);
   const [showQ, setShowQ] = useState(false);
+  const link = (hash: string) => {
+    return `/home_cinema/watch/${params.id}/play/${hash}?thumbnail=${resp?.background_image}`;
+  };
   return (
     <>
       <div className="lg:ps-28 lg:pr-28 ps-8 pr-8 md:mt-20 mt-10">
@@ -63,7 +67,7 @@ export default function MoviePage() {
                       if (t.quality === "2160p") {
                         location.href = `/home_cinema/watch/${params.id}/play/${t.hash}?vd_type=mkv`;
                       }
-                      location.href = `/home_cinema/watch/${params.id}/play/${t.hash}`;
+                      location.href = link(t.hash);
                     }}
                   >
                     <p
@@ -132,24 +136,45 @@ export default function MoviePage() {
               return (
                 <div
                   key={i}
-                  className="grid grid-cols-3 md:grid-cols-4 items-center mb-5 gap-3 hover:bg-[#b4b4b43e] p-3 duration-100 rounded-md cursor-pointer"
-                  onClick={() => {
-                    location.href = `/home_cinema/watch/${params.id}/play/${t.hash}`;
-                  }}
+                  className="grid grid-cols-12 items-center mb-5 gap-3 hover:bg-[#b4b4b43e] p-3 duration-100 rounded-md cursor-pointer"
                 >
-                  <h1 className="text-2xl">{t.quality}</h1>
-                  <h3>
-                    {t.type}
-                    {""}
-                    {t.video_codec === "x265" ? (
-                      <span className="text-green-600">.{t.video_codec}</span>
-                    ) : (
-                      ""
-                    )}
-                  </h3>
-                  <h5 className="md:block hidden">{t.size}</h5>
-                  <div className="w-fit">
-                    <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+                  <div
+                    className="col-span-9"
+                    onClick={() => {
+                      location.href = link(t.hash);
+                    }}
+                  >
+                    <h1 className="text-2xl col-span-6">{t.quality}</h1>
+                    <h3 className="col-span-3">
+                      {t.type}
+                      {""}
+                      {t.video_codec === "x265" ? (
+                        <span className="text-green-600">.{t.video_codec}</span>
+                      ) : (
+                        ""
+                      )}
+                    </h3>
+                  </div>
+                  <div className="flex gap-3 items-center justify-center col-span-3 bg-[#202020] p-2 rounded-md">
+                    <h6 className="md:block hidden col-span-1 text-sm">
+                      {t.size}
+                    </h6>
+                    <div
+                      className="w-fit"
+                      onClick={() => {
+                        open(link(t.hash), "_blank");
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+                    </div>
+                    <div
+                      className=" col-span-1"
+                      onClick={() => {
+                        location.href = `/home_cinema/torrents/${t.hash}/files?about=${resp.url}`;
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faFile} />
+                    </div>
                   </div>
                 </div>
               );

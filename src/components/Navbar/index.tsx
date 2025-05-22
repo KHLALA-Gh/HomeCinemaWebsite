@@ -87,6 +87,18 @@ export default function NavBar(props: NavbarProps) {
               {props.mode === "TV" && <>Movies</>}
               {(props.mode === "Movies" || !props.mode) && <>TV Shows</>}
             </a>
+            <a
+              href="/home_cinema/pre-streams"
+              className="font-bold text-lg lg:block hidden xl:text-xl"
+            >
+              Pre Streams
+            </a>
+            <a
+              href="/home_cinema/torrents"
+              className="font-bold text-lg lg:block hidden xl:text-xl"
+            >
+              Torrents
+            </a>
             <div className="md:block hidden">
               <Input
                 value={term}
