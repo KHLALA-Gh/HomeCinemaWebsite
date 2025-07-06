@@ -7,7 +7,7 @@ export default function Show() {
   const { resp, err, isLoading } = useGetTVShowDetails(p.id as string);
   return (
     <>
-      <div className="ps-8 pr-8 md:pr-16  md:ps-16 mt-20">
+      <div className="ps-2 pr-2 md:pr-16  md:ps-16 mt-20">
         {!err && !isLoading && resp && <ShowDetails {...resp} />}
       </div>
     </>

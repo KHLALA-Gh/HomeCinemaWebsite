@@ -36,6 +36,12 @@ export function useTorrentSearch() {
         source.close();
         rej(error);
       };
+
+      source.addEventListener("close", (e) => {
+        console.log("Server sent close event:", e.data);
+        res();
+        source.close();
+      });
     });
   };
   const fetch = (query: string, limit?: number) => {

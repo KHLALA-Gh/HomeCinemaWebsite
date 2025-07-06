@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Input from "../Input/Input";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+import DrawerMobileNavigation from "./drawer";
 
 interface NavbarProps {
   mode?: "Movies" | "TV";
@@ -60,7 +61,7 @@ export default function NavBar(props: NavbarProps) {
               <div>
                 <div className="flex items-center gap-4">
                   <FontAwesomeIcon icon={faFilm} className="lg:h-10 h-7 mt-1" />
-                  <h1 className="lg:text-4xl text-xl font-black">
+                  <h1 className="lg:text-4xl lg:text-xl font-black">
                     Home Cinema
                     {props.mode === "TV" && (
                       <p className="text-sm font-normal p-0">TV Shows</p>
@@ -75,27 +76,27 @@ export default function NavBar(props: NavbarProps) {
               </div>
             </a>
           )}
-          <div className="flex justify-center xl:gap-32 gap-16 items-center">
+          <div className="flex justify-center xl:gap-20 gap-6 items-center text-base">
             <a
               href={
                 props.mode === "Movies" || !props.mode
                   ? "/home_cinema/watch_tv_shows"
                   : "/home_cinema/watch"
               }
-              className="font-bold text-lg lg:block hidden xl:text-xl"
+              className="font-bold lg:block hidden"
             >
               {props.mode === "TV" && <>Movies</>}
               {(props.mode === "Movies" || !props.mode) && <>TV Shows</>}
             </a>
             <a
-              href="/home_cinema/pre-streams"
-              className="font-bold text-lg lg:block hidden xl:text-xl"
+              href="/home_cinema/streams"
+              className="font-bold lg:block hidden"
             >
-              Pre Streams
+              Streams
             </a>
             <a
               href="/home_cinema/torrents"
-              className="font-bold text-lg lg:block hidden xl:text-xl"
+              className="font-bold lg:block hidden"
             >
               Torrents
             </a>
@@ -103,6 +104,7 @@ export default function NavBar(props: NavbarProps) {
               <Input
                 value={term}
                 id="searchInp1"
+                className="!w-[150px]"
                 onKeyUp={(p) => onPressEnter("searchInp1", p.key)}
                 onChange={(e) => {
                   // @ts-ignore
@@ -112,14 +114,12 @@ export default function NavBar(props: NavbarProps) {
                 placeholder="Search"
               />
             </div>
-            {!openS && (
-              <div className="md:hidden block cursor-pointer">
-                <FontAwesomeIcon
-                  onClick={() => setOpenS(true)}
-                  icon={faSearch}
-                />
-              </div>
-            )}
+
+            <div className="lg:hidden">
+              <DrawerMobileNavigation
+                mode={props.mode}
+              ></DrawerMobileNavigation>
+            </div>
             {openS && (
               <div className="">
                 <Input

@@ -15,7 +15,7 @@ export default function MoviePage() {
   const { resp, isLoading } = useGetYTSMovieDetails(params.id as string);
   const [showQ, setShowQ] = useState(false);
   const link = (hash: string) => {
-    return `/home_cinema/watch/${params.id}/play/${hash}?thumbnail=${resp?.background_image}`;
+    return `/home_cinema/torrents/${hash}/files?about=${resp?.url}`;
   };
   return (
     <>
@@ -65,7 +65,7 @@ export default function MoviePage() {
                     className="lg:text-base text-sm h-fit border-[1px] border-white ps-2 pr-2 cursor-pointer"
                     onClick={() => {
                       if (t.quality === "2160p") {
-                        location.href = `/home_cinema/watch/${params.id}/play/${t.hash}?vd_type=mkv`;
+                        location.href = link(t.hash);
                       }
                       location.href = link(t.hash);
                     }}
@@ -159,22 +159,6 @@ export default function MoviePage() {
                     <h6 className="md:block hidden col-span-1 text-sm">
                       {t.size}
                     </h6>
-                    <div
-                      className="w-fit"
-                      onClick={() => {
-                        open(link(t.hash), "_blank");
-                      }}
-                    >
-                      <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
-                    </div>
-                    <div
-                      className=" col-span-1"
-                      onClick={() => {
-                        location.href = `/home_cinema/torrents/${t.hash}/files?about=${resp.url}`;
-                      }}
-                    >
-                      <FontAwesomeIcon icon={faFile} />
-                    </div>
                   </div>
                 </div>
               );

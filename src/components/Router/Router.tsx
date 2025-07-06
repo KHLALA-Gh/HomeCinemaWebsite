@@ -37,7 +37,7 @@ export default function Router() {
             element={<TorrentFiles />}
           />
           <Route path="/home_cinema/torrents/" element={<Torrents />} />
-          <Route path="/home_cinema/pre-streams" element={<PreStreams />} />
+          <Route path="/home_cinema/streams" element={<PreStreams />} />
         </Routes>
       </BrowserRouter>
     </>

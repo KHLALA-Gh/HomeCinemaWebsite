@@ -105,9 +105,9 @@ export function TorrentFiles({
                 return (
                   <div
                     key={i}
-                    className="p-5 items-center grid-cols-12 rounded-md hover:bg-[#50505059] duration-200 grid gap-10 cursor-pointer flex-wrap"
+                    className="md:p-5 p-2 md:text-base !text-sm items-center grid-cols-12 rounded-md hover:bg-[#50505059] duration-200 md:grid gap-10 cursor-pointer flex-wrap"
                   >
-                    <div className="col-span-1">
+                    <div className="col-span-1 inline-block md:mr-0 mr-5">
                       {file.name.endsWith(".mp4") ||
                       file.name.endsWith(".mkv") ? (
                         <FontAwesomeIcon icon={faVideo} />
@@ -122,10 +122,12 @@ export function TorrentFiles({
                     >
                       {file.name}
                     </a>
-                    <p className="col-span-1">{pr(file.size)}</p>
+                    <p className="xl:col-span-1 col-span-3 xl:block hidden">
+                      {pr(file.size)}
+                    </p>
 
                     <button
-                      className="col-span-2"
+                      className="lg:col-span-3 col-span-1 xl:block hidden"
                       onClick={() => {
                         navigator.clipboard.writeText(file.downloadLink);
                       }}
@@ -144,16 +146,37 @@ export function TorrentFiles({
                           url.searchParams.set("fileName", file.name);
                           open(url.href);
                         }}
-                        className="flex items-center"
+                        className="items-center col-span-1 xl:flex hidden"
                       >
                         <FontAwesomeIcon icon={faPlay} className="mr-2" />
                         play
                       </button>
                     )}
+                    <div className=" md:flex hidden xl:hidden gap-3 items-center justify-center col-span-3 bg-[#202020] p-2 rounded-md">
+                      <h6 className="md:block hidden col-span-1 text-[13px]">
+                        {pb(file.size)}
+                      </h6>
+                      <div
+                        className=" col-span-1 cursor-pointer"
+                        onClick={() => {
+                          navigator.clipboard.writeText(file.downloadLink);
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faFile} />
+                      </div>
+                      <div
+                        className="w-fit cursor-pointer"
+                        onClick={() => {
+                          open(file.downloadLink, "_blank");
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faDownload} />
+                      </div>
+                    </div>
                     {(file.name.endsWith(".mp4") ||
                       file.name.endsWith(".mkv")) && (
                       <Button
-                        className="col-span-2"
+                        className="xl:col-span-2 col-span-4 !text-base md:!block !hidden"
                         color="neutral"
                         loading={isLoadingPreStream}
                         disabled={showStreamUrl}
@@ -166,6 +189,46 @@ export function TorrentFiles({
                         Create PreStream
                       </Button>
                     )}
+
+                    <div className="md:hidden mt-3 flex items-center gap-5">
+                      <div className="flex xl:hidden gap-3 items-center justify-center col-span-3 bg-[#202020] p-2 rounded-md">
+                        <h6 className="md:block hidden col-span-1 text-[13px]">
+                          {pb(file.size)}
+                        </h6>
+                        <div
+                          className=" col-span-1 cursor-pointer"
+                          onClick={() => {
+                            navigator.clipboard.writeText(file.downloadLink);
+                          }}
+                        >
+                          <FontAwesomeIcon icon={faFile} />
+                        </div>
+                        <div
+                          className="w-fit cursor-pointer"
+                          onClick={() => {
+                            open(file.downloadLink, "_blank");
+                          }}
+                        >
+                          <FontAwesomeIcon icon={faDownload} />
+                        </div>
+                      </div>
+                      {(file.name.endsWith(".mp4") ||
+                        file.name.endsWith(".mkv")) && (
+                        <Button
+                          className="!text-[14px] !pt-0 !pb-0 !ps-2 !pr-2"
+                          color="neutral"
+                          loading={isLoadingPreStream}
+                          disabled={showStreamUrl}
+                          onClick={() => {
+                            createStream(file.path);
+                          }}
+                          variant="soft"
+                          size="sm"
+                        >
+                          Create PreStream
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -217,7 +280,7 @@ export function TorrentFiles({
                 <div>
                   <Button
                     onClick={() => {
-                      navigate("/home_cinema/pre-streams");
+                      navigate("/home_cinema/streams");
                     }}
                     className="!text-base !ms-[50%] translate-x-[-50%] !mt-10"
                   >
@@ -260,12 +323,14 @@ function EasyView({ resp }: { resp: TorrentFile[] }) {
     if (!f.name.endsWith(".mp4") && !f.name.endsWith(".mkv")) return;
     let match = f.name.toUpperCase().match(/S(\d+)E(\d+)/);
     if (!match) return;
-    console.log(match);
 
     return (
-      <div key={i} className="mb-2 p-2  grid grid-cols-12 hover:bg-[#b4b4b43e]">
+      <div
+        key={i}
+        className="mb-2 p-2  grid grid-cols-12 duration-200 hover:bg-[#b4b4b43e]"
+      >
         <div className="col-span-9">
-          <h1>
+          <h1 className="font-bold">
             Season {parseInt(match[1], 10)} Episode {parseInt(match[2], 10)}
           </h1>
           <h1>
@@ -302,7 +367,7 @@ function EasyView({ resp }: { resp: TorrentFile[] }) {
   elements = elements.filter((e) => e !== undefined);
   return (
     <>
-      <div className="bg-[#0f0f0f] w-[500px] relative h-[300px] overflow-y-auto">
+      <div className="bg-[#0f0f0f] min-w-[300px] max-w-[500px] relative min-h-[100px] max-h-[300px] overflow-y-auto">
         {resp && elements}
         {!elements.length && (
           <div className="flex justify-center items-center h-full">
