@@ -14,13 +14,24 @@ router.get("/api/playlist", (req, res) => {
     });
     return;
   }
+  let names: string[] = [];
+  if (typeof req.query.names === "string") {
+    names = [req.query.names];
+  } else if (req.query.names instanceof Array) {
+    names = req.query.names as string[];
+  } else {
+    res.status(400).json({
+      error: "stream names are required",
+    });
+    return;
+  }
   let fileName = req.query.fileName;
   if (!fileName) {
     fileName = "playlist";
   }
   let playlist = "#EXTM3U\n";
   streams.forEach((url, index) => {
-    playlist += `#EXTINF:-1,Video ${index + 1}\n${url}\n`;
+    playlist += `#EXTINF:-1,${names[index]}\n${url}\n`;
   });
 
   // Set response headers

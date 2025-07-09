@@ -32,7 +32,7 @@ export default function Watch() {
   } = useGetYTSList({ queries: [["sort_by", "download_count"]] });
   return (
     <>
-      <NavBar />
+      <NavBar mode="Movies" />
       {err && (
         <div className="bg-[#ff38384f] rounded-md border-2 border-red-600 p-4 flex items-center gap-3">
           <FontAwesomeIcon icon={faXmarkCircle} />

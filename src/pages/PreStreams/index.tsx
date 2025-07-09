@@ -28,7 +28,7 @@ export default function PreStreams() {
   return (
     <>
       <NavBar />
-      <div className="ms-5 mt-20">
+      <div className="ms-5 mr-5 mt-20">
         {err && (
           <Alert
             severity="error"
@@ -53,40 +53,47 @@ export default function PreStreams() {
           <div>
             {resp.map((s: any, i: number) => {
               return (
-                <div key={i} className="flex gap-5 items-center p-5">
-                  <a
-                    className="font-bold text-lg"
-                    href={s.streamUrl}
-                    target="_blank"
-                  >
-                    {s.name}
-                  </a>
-                  <div className="w-[200px] relative bg-white h-2 rounded-full">
-                    <div
-                      style={{
-                        width: `${(s.progress * 100).toFixed()}%`,
-                      }}
-                      className={`h-2 bg-green-600 rounded-full`}
-                    ></div>
-                  </div>
-
-                  <p>{(s.progress * 100).toFixed(2)}%</p>
-                  <Button
-                    className="!text-sm !ps-5 !pr-5 flex items-center"
-                    onClick={() => {
-                      navigator.clipboard.writeText(s.streamUrl);
-                    }}
-                  >
-                    <FontAwesomeIcon icon={faCopy} className="h-5 mr-2" />
-                    Copy Stream URL
-                  </Button>
+                <div
+                  key={i}
+                  className="hover:bg-[#50505059] md:p-5 p-2 rounded-md"
+                >
                   <div
-                    className="cursor-pointer"
                     onClick={() => {
                       fetchDel(s.id as string);
                     }}
+                    className="border-2 cursor-pointer ms-[100%] translate-x-[-100%] border-red-600 w-fit ps-[4px] pr-[4px] rounded-md"
                   >
-                    <FontAwesomeIcon icon={faXmark} className="h-5" />
+                    <FontAwesomeIcon icon={faXmark} className="text-red-600" />
+                  </div>
+                  <div className="lg:flex gap-5 items-center p-5  rounded-md cursor-pointer">
+                    <a
+                      className="font-bold md:text-lg"
+                      href={`/home_cinema/torrents/${s.torrentHash}/files`}
+                      target="_blank"
+                    >
+                      {s.name}
+                    </a>
+                    <div className="flex items-center gap-5">
+                      <div className="w-[200px] relative bg-white h-2 rounded-full">
+                        <div
+                          style={{
+                            width: `${(s.progress * 100).toFixed()}%`,
+                          }}
+                          className={`h-2 bg-green-600 rounded-full`}
+                        ></div>
+                      </div>
+
+                      <p>{(s.progress * 100).toFixed(2)}%</p>
+                    </div>
+                    <Button
+                      className="!text-sm !ps-5 !pr-5 flex items-center"
+                      onClick={() => {
+                        navigator.clipboard.writeText(s.streamUrl);
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faCopy} className="h-5 mr-2" />
+                      Copy Stream URL
+                    </Button>
                   </div>
                 </div>
               );

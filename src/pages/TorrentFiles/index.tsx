@@ -7,6 +7,12 @@ import { useEffect, useState } from "react";
 import Button from "../../components/Button/button";
 import { useCreatePreStream } from "../../hooks/useCreatePreStream";
 import { TorrentFiles } from "../../components/TorrentFiles";
+
+interface Streams {
+  streamUrl: string;
+  name: string;
+}
+
 export default function Files() {
   const p = useParams();
   const [showStreamUrl, setShowStreamUrl] = useState(false);
@@ -17,7 +23,7 @@ export default function Files() {
     isLoading: isLoadingPreStream,
     err: errPreStream,
   } = useCreatePreStream();
-  const [streams, setStreams] = useState<string[]>();
+  const [streams, setStreams] = useState<Streams[]>();
   const [size, setSize] = useState<number>();
   const navigate = useNavigate();
   useEffect(() => {
@@ -28,9 +34,9 @@ export default function Files() {
         size += file.size;
         setStreams((s) => {
           if (s) {
-            return [...s, file.downloadLink];
+            return [...s, { streamUrl: file.downloadLink, name: file.name }];
           } else {
-            return [file.downloadLink];
+            return [{ streamUrl: file.downloadLink, name: file.name }];
           }
         });
       }
@@ -62,7 +68,8 @@ export default function Files() {
             onClick={() => {
               const url = new URL("/api/playlist", location.origin);
               streams.map((s) => {
-                url.searchParams.append("streams", s);
+                url.searchParams.append("streams", s.streamUrl);
+                url.searchParams.append("names", s.name);
               });
               if (resp) {
                 url.searchParams.set("fileName", resp[0].path.split("/")[0]);

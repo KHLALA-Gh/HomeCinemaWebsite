@@ -14,8 +14,8 @@ First create `docker-compose.yml` file in the location you want and add the cont
 ```yml
 services:
   home-cinema-website:
-    image: khlala/home-cinema-web:alpha4
-    # image: khlala/home-cinema-web:alpha4-arm64  ## use this image if you are running on arm64 arch
+    image: khlala/home-cinema-web:alpha5
+    # image: khlala/home-cinema-web:alpha5-arm64  ## use this image if you are running on arm64 arch
     ports:
       - "8000:4173"
     environment:

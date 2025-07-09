@@ -53,18 +53,23 @@ export default function NavBar(props: NavbarProps) {
           {!openS && (
             <a
               href={
-                props.mode === "Movies" || !props.mode
+                !props.mode
                   ? "/home_cinema/"
+                  : props.mode === "Movies"
+                  ? "/home_cinema/watch"
                   : "/home_cinema/watch_tv_shows"
               }
             >
               <div>
                 <div className="flex items-center gap-4">
                   <FontAwesomeIcon icon={faFilm} className="lg:h-10 h-7 mt-1" />
-                  <h1 className="lg:text-4xl lg:text-xl font-black">
+                  <h1 className="lg:text-xl font-black">
                     Home Cinema
                     {props.mode === "TV" && (
                       <p className="text-sm font-normal p-0">TV Shows</p>
+                    )}
+                    {props.mode === "Movies" && (
+                      <p className="text-sm font-normal p-0">Movies</p>
                     )}
                   </h1>
                   {props.mode === "TV" && (

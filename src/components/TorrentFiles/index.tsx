@@ -143,6 +143,7 @@ export function TorrentFiles({
                         onClick={() => {
                           const url = new URL("/api/playlist", location.origin);
                           url.searchParams.set("streams", file.downloadLink);
+                          url.searchParams.set("names", file.name);
                           url.searchParams.set("fileName", file.name);
                           open(url.href);
                         }}

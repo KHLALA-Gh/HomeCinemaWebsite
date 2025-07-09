@@ -156,9 +156,7 @@ export default function MoviePage() {
                     </h3>
                   </div>
                   <div className="flex gap-3 items-center justify-center col-span-3 bg-[#202020] p-2 rounded-md">
-                    <h6 className="md:block hidden col-span-1 text-sm">
-                      {t.size}
-                    </h6>
+                    <h6 className="col-span-1 text-sm">{t.size}</h6>
                   </div>
                 </div>
               );

@@ -22,7 +22,7 @@ export default function Search() {
   }, [searchP]);
   return (
     <>
-      <NavBar />
+      <NavBar mode="Movies" />
       <div className="md:ps-28 md:pe-28 ps-3 pr-3 mt-10 md:mt-20 mb-20">
         <h1 className="md:text-4xl text-xl mb-10 md:mb-20 font-extrabold">
           Search results
