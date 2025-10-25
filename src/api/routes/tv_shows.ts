@@ -5,7 +5,7 @@ export const router = Router();
 
 function HandlerTMDBApiErr(res: Response, err: TMDBError) {
   console.log(TMDBError.format(err));
-  res.status(err.statusCode).json({
+  res.status(err.statusCode || 500).json({
     error: err.message,
   });
   return;
@@ -22,7 +22,7 @@ router.get("/api/tv_shows", async (req, res) => {
     res.status(200).json(data);
   } catch (err) {
     if (err instanceof TMDBError) {
-      res.status(err.statusCode).json({
+      res.status(err.statusCode || 500).json({
         error: err.message,
       });
       console.log(TMDBError.format(err));
@@ -70,7 +70,7 @@ router.get("/api/tv_shows/:id", async (req, res) => {
   } catch (err) {
     if (err instanceof TMDBError) {
       console.log(TMDBError.format(err));
-      res.status(err.statusCode).json({
+      res.status(err.statusCode || 500).json({
         error: err.message,
       });
       return;

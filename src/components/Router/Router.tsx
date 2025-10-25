@@ -10,6 +10,7 @@ import TorrentFiles from "../../pages/TorrentFiles";
 import { useEffect } from "react";
 import PreStreams from "../../pages/PreStreams";
 import Torrents from "../../pages/Torrents";
+import Saved from "../../pages/Saved";
 
 function Root() {
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ export default function Router() {
           />
           <Route path="/home_cinema/torrents/" element={<Torrents />} />
           <Route path="/home_cinema/streams" element={<PreStreams />} />
+          <Route path="/home_cinema/saved" element={<Saved />} />
         </Routes>
       </BrowserRouter>
     </>

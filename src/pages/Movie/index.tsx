@@ -13,6 +13,16 @@ import { useState } from "react";
 export default function MoviePage() {
   const params = useParams();
   const { resp, isLoading } = useGetYTSMovieDetails(params.id as string);
+  return <MovieDetails resp={resp} isLoading={isLoading} />;
+}
+
+export function MovieDetails({
+  resp,
+  isLoading,
+}: {
+  resp?: MovieDetails;
+  isLoading: boolean;
+}) {
   const [showQ, setShowQ] = useState(false);
   const link = (hash: string) => {
     return `/home_cinema/torrents/${hash}/files?about=${resp?.url}`;
