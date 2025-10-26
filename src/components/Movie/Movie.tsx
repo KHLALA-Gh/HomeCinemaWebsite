@@ -9,9 +9,11 @@ import { useEffect, useState } from "react";
 export default function Movie({
   m,
   loading,
+  to,
 }: {
   m?: MovieMetaData;
   loading?: boolean;
+  to?: string;
 }) {
   const [saved, setSaved] = useState<boolean>(false);
   useEffect(() => {
@@ -59,7 +61,7 @@ export default function Movie({
             </div>
             <div
               onClick={() => {
-                location.href = "/home_cinema/watch/" + m.id;
+                location.href = to || "/home_cinema/watch/" + m.id;
               }}
             >
               <h1 className="text-center text-sm lg:text-lg mt-5  font-bold lg:overflow-auto overflow-hidden text-nowrap lg:text-wrap">

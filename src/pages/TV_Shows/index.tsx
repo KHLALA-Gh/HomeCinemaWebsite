@@ -178,11 +178,11 @@ export default function TVShows() {
         <div className="flex justify-center gap-10 flex-wrap">
           {!respQuery &&
             resp?.results.map((show, i) => {
-              return <Show {...show} key={i} />;
+              return <Show show={show} key={i} />;
             })}
           {respQuery &&
             respQuery?.results.map((show, i) => {
-              return <Show {...show} key={i} />;
+              return <Show show={show} key={i} />;
             })}
         </div>
         <div className="mt-5 mb-5">

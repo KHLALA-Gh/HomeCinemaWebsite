@@ -1,4 +1,4 @@
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useGetYTSMovieDetails } from "../../hooks/getMoviesDetails";
 import Button from "../../components/Button/button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -27,13 +27,14 @@ export function MovieDetails({
   const link = (hash: string) => {
     return `/home_cinema/torrents/${hash}/files?about=${resp?.url}`;
   };
+  const nav = useNavigate();
   return (
     <>
       <div className="lg:ps-28 lg:pr-28 ps-8 pr-8 md:mt-20 mt-10">
         <div
           className="md:mb-20 mb-10 cursor-pointer"
           onClick={() => {
-            location.href = "/home_cinema/watch";
+            nav(-1);
           }}
         >
           <FontAwesomeIcon className="h-8" icon={faChevronLeft} />

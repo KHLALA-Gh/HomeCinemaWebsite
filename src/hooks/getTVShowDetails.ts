@@ -1,6 +1,14 @@
 import axios, { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 
+export async function getTVShowDetails(
+  showID: number
+): Promise<TMDBTVShowDetails> {
+  const url = new URL("/api/tv_shows/" + showID, location.origin);
+  const resp = await axios.get(url.href);
+  return resp.data as TMDBTVShowDetails;
+}
+
 export function useGetTVShowDetails(showID: string) {
   const [resp, setResp] = useState<TMDBTVShowDetails>();
   const [err, setErr] = useState<string>();

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { addMovie, getMovies } from "../../lib/idb";
+import { getMovies, getTVShows } from "../../lib/idb";
 import Movie from "../../components/Movie/Movie";
+import Show from "../../components/Show";
 
 type dataCode = "mv" | "tv" | "tr";
 interface typeData {
@@ -26,10 +27,15 @@ const data: typeData[] = [
 export default function Saved() {
   const [selectedData, setSelectedData] = useState<dataCode>("mv");
   const [mvDetails, setMvDetails] = useState<MovieDetails[]>();
+  const [tvShows, setTVShow] = useState<TMDBTVShowDetails[]>();
   useEffect(() => {
     if (selectedData === "mv") {
       getMovies().then((m) => {
         setMvDetails(m);
+      });
+    } else if (selectedData === "tv") {
+      getTVShows().then((tv) => {
+        setTVShow(tv);
       });
     }
   }, [selectedData]);
@@ -58,17 +64,10 @@ export default function Saved() {
         {selectedData === "mv" ? (
           <div className="flex gap-5 flex-wrap">
             {mvDetails?.map((m, i) => {
-              console.log({
-                id: m.id,
-                title: m.title,
-                year: m.year,
-                rating: m.rating,
-                medium_cover_image: m.medium_cover_image,
-                runtime: m.runtime,
-              });
               return (
                 <Movie
                   key={i}
+                  to={`/home_cinema/saved/movies/${m.id}`}
                   m={{
                     id: m.id,
                     title: m.title,
@@ -80,13 +79,46 @@ export default function Saved() {
                 />
               );
             })}
+            {mvDetails?.length === 0 && (
+              <CenteredMessage msg="No saved movies" />
+            )}
           </div>
         ) : selectedData === "tv" ? (
-          <div></div>
+          <div className="flex gap-5 flex-wrap">
+            {tvShows?.map((m, i) => {
+              return (
+                <Show
+                  key={i}
+                  to={`/home_cinema/saved/show/${m.id}`}
+                  show={{
+                    id: m.id,
+                    name: m.name,
+                    first_air_date: m.first_air_date,
+                    vote_average: m.vote_average,
+                    poster_path: m.poster_path,
+                    backdrop_path: m.backdrop_path,
+                    origin_country: m.origin_country,
+                    genre_ids: [],
+                  }}
+                />
+              );
+            })}
+            {tvShows?.length === 0 && (
+              <CenteredMessage msg="No saved TV shows" />
+            )}
+          </div>
         ) : (
           <div></div>
         )}
       </div>
     </>
+  );
+}
+
+function CenteredMessage({ msg }: { msg: string }) {
+  return (
+    <div className="flex opacity-50 justify-center items-center w-full h-screen absolute top-0 left-0 -z-10">
+      <h1>{msg}</h1>
+    </div>
   );
 }
