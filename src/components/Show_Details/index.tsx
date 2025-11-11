@@ -9,6 +9,8 @@ import {
 import { useEffect, useState } from "react";
 import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
+import { SaveButton } from "../Movie/Movie";
+import { addTVShow, getTVShowById, removeTVShow } from "../../lib/idb";
 function getMagnetHash(magnetLink: string) {
   const url = new URL(magnetLink);
   const params = new URLSearchParams(url.search);
@@ -25,6 +27,14 @@ export function ShowDetails(props: TMDBTVShowDetails) {
   const [selectedEp, setSelectedEp] = useState<number>();
   const [limit, setLimit] = useState<number>(10);
   const navigate = useNavigate();
+  const [saved, setSaved] = useState<boolean>(false);
+  useEffect(() => {
+    getTVShowById(props.id).then((t) => {
+      if (t) {
+        setSaved(true);
+      }
+    });
+  }, []);
   const search = () => {
     //@ts-ignore
     let season = document.getElementById("season")?.value;
@@ -80,7 +90,30 @@ export function ShowDetails(props: TMDBTVShowDetails) {
         </div>
 
         <div className="z-10 mb-10">
-          <h1 className="text-4xl font-extrabold">{props.name}</h1>
+          <div className="flex items-center gap-5">
+            <h1 className="text-4xl font-extrabold">{props.name}</h1>
+            <SaveButton
+              onClick={async () => {
+                if (!saved) {
+                  await addTVShow({
+                    id: props?.id,
+                    name: props?.name,
+                    vote_average: props.vote_average,
+                    backdrop_path: props.backdrop_path,
+                    genre_ids: [],
+                    origin_country: props.origin_country,
+                    poster_path: props.poster_path,
+                    first_air_date: props.first_air_date,
+                  });
+                  setSaved(true);
+                } else {
+                  await removeTVShow(props.id);
+                  setSaved(false);
+                }
+              }}
+              saved={saved}
+            />
+          </div>
           <h1 className="text-xl font-semibold mt-3">
             {props.seasons.length} Season{props.seasons.length > 1 ? "s" : ""}
           </h1>

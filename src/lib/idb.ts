@@ -12,17 +12,17 @@ const dbPromise = openDB("user-data", 1, {
   },
 });
 
-export async function addMovie(movie: MovieDetails) {
+export async function addMovie(movie: MovieMetaData) {
   const db = await dbPromise;
   db.put(ObjectStores.MOVIES, movie);
 }
 
-export async function getMovies(): Promise<MovieDetails[]> {
+export async function getMovies(): Promise<MovieMetaData[]> {
   const db = await dbPromise;
   return await db.getAll(ObjectStores.MOVIES);
 }
 
-export async function getMovieById(id: number): Promise<MovieDetails> {
+export async function getMovieById(id: number): Promise<MovieMetaData> {
   const db = await dbPromise;
   return await db.get(ObjectStores.MOVIES, id);
 }
@@ -32,17 +32,17 @@ export async function removeMovie(id: number) {
   await db.delete(ObjectStores.MOVIES, id);
 }
 
-export async function addTVShow(tv: TMDBTVShowDetails) {
+export async function addTVShow(tv: TMDBTVShow) {
   const db = await dbPromise;
   db.put(ObjectStores.TVSHOWS, tv);
 }
 
-export async function getTVShows(): Promise<TMDBTVShowDetails[]> {
+export async function getTVShows(): Promise<TMDBTVShow[]> {
   const db = await dbPromise;
   return await db.getAll(ObjectStores.TVSHOWS);
 }
 
-export async function getTVShowById(id: number): Promise<TMDBTVShowDetails> {
+export async function getTVShowById(id: number): Promise<TMDBTVShow> {
   const db = await dbPromise;
   return await db.get(ObjectStores.TVSHOWS, id);
 }

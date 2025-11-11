@@ -3,7 +3,6 @@ import { faStar, faStopwatch } from "@fortawesome/free-solid-svg-icons";
 import { faBookmark } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { addMovie, getMovieById, removeMovie } from "../../lib/idb";
-import { getMovieDetails } from "../../hooks/getMoviesDetails";
 import { useEffect, useState } from "react";
 
 export default function Movie({
@@ -16,6 +15,7 @@ export default function Movie({
   to?: string;
 }) {
   const [saved, setSaved] = useState<boolean>(false);
+
   useEffect(() => {
     if (m?.id) {
       getMovieById(m.id).then((mov) => {
@@ -36,29 +36,19 @@ export default function Movie({
           }}
         >
           <div className="w-full h-full backdrop-blur-sm opacity-0 hover:opacity-100 relative pt-10 bg-[#0000009c] duration-300">
-            <div
+            <SaveButton
+              saved={saved}
+              className="!absolute top-2 left-2"
               onClick={async () => {
                 if (!saved) {
-                  const md = await getMovieDetails(m.id);
-                  await addMovie(md);
+                  await addMovie(m);
                   setSaved(true);
                 } else {
                   await removeMovie(m.id);
                   setSaved(false);
                 }
               }}
-              className={
-                "absolute top-2 left-2 border-2 rounded-full w-8 h-8 flex justify-center items-center " +
-                (saved ? "border-yellow-500" : "border-white")
-              }
-            >
-              <FontAwesomeIcon
-                /*@ts-ignore*/
-
-                icon={faBookmark}
-                color={`${saved ? "yellow" : "white"}`}
-              />
-            </div>
+            />
             <div
               onClick={() => {
                 location.href = to || "/home_cinema/watch/" + m.id;
@@ -85,5 +75,38 @@ export default function Movie({
         <div className="lg:w-[230px] w-[115px] h-[172px] relative lg:h-[345px] shrink-0 loading-background"></div>
       )}
     </>
+  );
+}
+
+export function SaveButton({
+  onClick,
+  className,
+  saved,
+}: {
+  className?: string;
+  onClick: () => any;
+  saved: boolean;
+}) {
+  return (
+    <div
+      onClick={onClick}
+      className={
+        "relative border-2 cursor-pointer duration-200 rounded-full w-8 h-8 flex justify-center items-center " +
+        className +
+        (saved ? " border-yellow-500 pop-animation" : " border-white")
+      }
+    >
+      <div
+        className={`${
+          saved ? "w-5" : "w-0"
+        } h-[2px] duration-150 top-[13px] absolute rounded-full rotate-[30deg] bg-yellow-500`}
+      ></div>
+      <FontAwesomeIcon
+        /*@ts-ignore*/
+
+        icon={faBookmark}
+        color={`${saved ? "#eab308" : "white"}`}
+      />
+    </div>
   );
 }

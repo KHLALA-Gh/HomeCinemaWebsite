@@ -26,8 +26,8 @@ const data: typeData[] = [
 
 export default function Saved() {
   const [selectedData, setSelectedData] = useState<dataCode>("mv");
-  const [mvDetails, setMvDetails] = useState<MovieDetails[]>();
-  const [tvShows, setTVShow] = useState<TMDBTVShowDetails[]>();
+  const [mvDetails, setMvDetails] = useState<MovieMetaData[]>();
+  const [tvShows, setTVShow] = useState<TMDBTVShow[]>();
   useEffect(() => {
     if (selectedData === "mv") {
       getMovies().then((m) => {
@@ -67,7 +67,6 @@ export default function Saved() {
               return (
                 <Movie
                   key={i}
-                  to={`/home_cinema/saved/movies/${m.id}`}
                   m={{
                     id: m.id,
                     title: m.title,

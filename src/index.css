@@ -38,3 +38,21 @@
 .tv_show:hover {
   background-size: 110%;
 }
+@keyframes pop {
+  0% {
+    scale: 1;
+  }
+  10% {
+    scale: 1.25;
+  }
+  80% {
+    scale: 1.25;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+.pop-animation {
+  animation: pop 0.7s ease-in-out alternate;
+}

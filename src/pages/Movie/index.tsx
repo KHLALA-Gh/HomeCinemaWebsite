@@ -2,13 +2,10 @@ import { useNavigate, useParams } from "react-router";
 import { useGetYTSMovieDetails } from "../../hooks/getMoviesDetails";
 import Button from "../../components/Button/button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faArrowUpRightFromSquare,
-  faChevronLeft,
-  faFile,
-  faX,
-} from "@fortawesome/free-solid-svg-icons";
-import { useState } from "react";
+import { faChevronLeft, faX } from "@fortawesome/free-solid-svg-icons";
+import { useEffect, useState } from "react";
+import { SaveButton } from "../../components/Movie/Movie";
+import { addMovie, getMovieById, removeMovie } from "../../lib/idb";
 
 export default function MoviePage() {
   const params = useParams();
@@ -27,6 +24,16 @@ export function MovieDetails({
   const link = (hash: string) => {
     return `/home_cinema/torrents/${hash}/files?about=${resp?.url}`;
   };
+  const [saved, setSaved] = useState<boolean>(false);
+  useEffect(() => {
+    if (resp?.id) {
+      getMovieById(resp.id).then((mov) => {
+        if (mov) {
+          setSaved(true);
+        }
+      });
+    }
+  }, [resp]);
   const nav = useNavigate();
   return (
     <>
@@ -39,6 +46,7 @@ export function MovieDetails({
         >
           <FontAwesomeIcon className="h-8" icon={faChevronLeft} />
         </div>
+
         <div className="flex items-center md:items-start flex-col-reverse md:flex-row md:gap-16 flex-wrap md:justify-start justify-center md:flex-nowrap">
           <div className={"blur-[100px] absolute z-0"}>
             <img src={resp?.medium_cover_image} alt="" />
@@ -56,16 +64,38 @@ export function MovieDetails({
             <div className="rounded-lg bg-gradient-to-t from-[#000000] to-[#00000091] w-full h-full z-30 block md:hidden"></div>
           </div>
           <div className="lg:text-lg flex flex-col gap-3 z-20">
-            <h1
-              className={
-                "text-3xl font-extrabold" +
-                (isLoading ? " loading-background w-20" : "")
-              }
-            >
-              {resp?.title} {resp?.year ? `(${resp.year})` : ""}
-            </h1>
+            <div className="flex gap-5 items-center">
+              <h1
+                className={
+                  "text-3xl font-extrabold" +
+                  (isLoading ? " loading-background w-20" : "")
+                }
+              >
+                {resp?.title} {resp?.year ? `(${resp.year})` : ""}
+              </h1>
+              <SaveButton
+                onClick={async () => {
+                  if (!saved && resp) {
+                    await addMovie({
+                      id: resp?.id,
+                      title: resp?.title,
+                      year: resp.year,
+                      rating: resp.rating,
+                      medium_cover_image: resp.medium_cover_image,
+                      runtime: resp.runtime.toString(),
+                    });
+                    setSaved(true);
+                  } else {
+                    if (!resp) return;
+                    await removeMovie(resp?.id);
+                    setSaved(false);
+                  }
+                }}
+                saved={saved}
+              />
+            </div>
             <p className={"" + (isLoading ? " loading-background w-10" : "")}>
-              Genres : {resp?.genres.join(" / ")}
+              Genres : {resp?.genres?.join(" / ")}
             </p>
             <div className="flex gap-5 flex-wrap">
               <p>Available in : </p>
