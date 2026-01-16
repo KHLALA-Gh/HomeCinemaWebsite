@@ -62,7 +62,7 @@ export default function List({
             let list = document.getElementById(listID);
             list?.scroll({ left: list.scrollLeft - 300 });
           }}
-          className="absolute hidden md:block w-fit left-[-40px] cursor-pointer  top-[50%] translate-y-[-50%] bg-[#444] p-5 z-10 rounded-md"
+          className="absolute hidden md:block w-fit left-[-40px] cursor-pointer  top-[50%] translate-y-[-50%] bg-[#444] p-5 z-30 rounded-md"
         >
           <FontAwesomeIcon icon={faLeftLong} className="text-white" />
         </div>
@@ -71,7 +71,7 @@ export default function List({
             let list = document.getElementById(listID);
             list?.scroll({ left: list.scrollLeft + 300 });
           }}
-          className="absolute hidden md:block w-fit right-[-40px] cursor-pointer  top-[50%] translate-y-[-50%] bg-[#444] p-5 z-10 rounded-md"
+          className="absolute hidden md:block w-fit right-[-40px] cursor-pointer  top-[50%] translate-y-[-50%] bg-[#444] p-5 z-30 rounded-md"
         >
           <FontAwesomeIcon icon={faRightLong} className="text-white" />
         </div>
@@ -81,6 +81,43 @@ export default function List({
         >
           {children}
         </div>
+      </div>
+    </>
+  );
+}
+
+export function LimitedList({
+  isLoading,
+  err,
+  resp,
+  category,
+  listID,
+  endComponent,
+}: MoviesListResponseData & { endComponent: React.ReactNode }) {
+  const getMovies = () => {
+    if (!resp) return [];
+    const arr = [];
+    const max = 3;
+    for (let i = 0; i <= max && i < resp.length; i++) {
+      arr.push(<Movie key={i} m={resp[i]} />);
+      if (i == max || i == resp.length - 1) {
+        arr.push(endComponent);
+      }
+    }
+    return arr;
+  };
+  return (
+    <>
+      <div className="md:ps-28 md:pe-28 ps-10 pr-10 rounded-md">
+        <h1 className="font-extrabold text-xl md:text-4xl mb-10 md:mb-20 mt-7 md:mt-20">
+          {category}
+        </h1>
+        {isLoading && !err && <List listID="">{returnLoadingMovies()}</List>}
+        {!isLoading && !err && resp && (
+          <List listID={listID}>
+            <>{getMovies()}</>
+          </List>
+        )}
       </div>
     </>
   );

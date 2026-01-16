@@ -21,8 +21,19 @@ export function MovieDetails({
   isLoading: boolean;
 }) {
   const [showQ, setShowQ] = useState(false);
-  const link = (hash: string) => {
-    return `/home_cinema/torrents/${hash}/files?about=${resp?.url}`;
+  const link = (index: number) => {
+    const url = new URL(
+      `/home_cinema/torrents/${resp?.torrents[index].hash}/files`,
+      location.origin,
+    );
+    url.searchParams.set("seeds", `${resp?.torrents[index].seeds}`);
+    url.searchParams.set("about", `${resp?.torrents[index].url}`);
+    url.searchParams.set(
+      "name",
+      `${resp?.title} (${resp?.year}) [${resp?.torrents[index].quality}] [YTS]`,
+    );
+    url.searchParams.set("provider", `YTS`);
+    return url.href;
   };
   const [saved, setSaved] = useState<boolean>(false);
   useEffect(() => {
@@ -37,17 +48,20 @@ export function MovieDetails({
   const nav = useNavigate();
   return (
     <>
-      <div className="lg:ps-28 lg:pr-28 ps-8 pr-8 md:mt-20 mt-10">
+      <div className="xl:ps-28 xl:pr-28 md:ps-8 md:pr-8 sm:ps-0 sm:pr-0 ps-3 pr-3 md:mt-20 mt-10">
         <div
-          className="md:mb-20 mb-10 cursor-pointer"
+          className="md:mb-10 mb-10 cursor-pointer bg-white rounded-full h-10 w-10 flex justify-center items-center"
           onClick={() => {
             nav(-1);
           }}
         >
-          <FontAwesomeIcon className="h-8" icon={faChevronLeft} />
+          <FontAwesomeIcon
+            className="h-5! font-bold text-black"
+            icon={faChevronLeft}
+          />
         </div>
 
-        <div className="flex items-center md:items-start flex-col-reverse md:flex-row md:gap-16 flex-wrap md:justify-start justify-center md:flex-nowrap">
+        <div className="flex items-center md:items-start flex-col-reverse md:flex-row md:gap-10 flex-wrap md:justify-start justify-center md:flex-nowrap">
           <div className={"blur-[100px] absolute z-0"}>
             <img src={resp?.medium_cover_image} alt="" />
           </div>
@@ -56,106 +70,137 @@ export function MovieDetails({
               "z-20  h-[345px] w-[230px] rounded-lg md:relative absolute top-[30%]" +
               (isLoading ? " loading-background relative" : "")
             }
-            style={{
-              backgroundImage: `url(${resp?.medium_cover_image})`,
-              backgroundSize: "cover",
-            }}
+            style={
+              !isLoading
+                ? {
+                    backgroundImage: `url(${resp?.medium_cover_image})`,
+                    backgroundSize: "cover",
+                  }
+                : {}
+            }
           >
             <div className="rounded-lg bg-gradient-to-t from-[#000000] to-[#00000091] w-full h-full z-30 block md:hidden"></div>
           </div>
-          <div className="lg:text-lg flex flex-col gap-3 z-20">
-            <div className="flex gap-5 items-center">
-              <h1
+          {!isLoading && (
+            <div className="lg:text-lg flex flex-col gap-3 z-20">
+              <div className="flex sm:flex-row flex-col sm:items-center gap-3">
+                <h1
+                  className={
+                    "text-3xl font-extrabold" +
+                    (isLoading ? " loading-background w-80 h-5" : "")
+                  }
+                >
+                  {resp?.title} {resp?.year ? `(${resp.year})` : ""}
+                </h1>
+                <SaveButton
+                  onClick={async () => {
+                    if (!saved && resp) {
+                      await addMovie({
+                        id: resp?.id,
+                        title: resp?.title,
+                        year: resp.year,
+                        rating: resp.rating,
+                        medium_cover_image: resp.medium_cover_image,
+                        runtime: resp.runtime.toString(),
+                      });
+                      setSaved(true);
+                    } else {
+                      if (!resp) return;
+                      await removeMovie(resp?.id);
+                      setSaved(false);
+                    }
+                  }}
+                  saved={saved}
+                />
+              </div>
+              <p className="xl:max-w-[1000px] lg:max-w-[700px] max-w-[500px] xl:text-[16px] text-sm">
+                {resp?.description_intro}
+              </p>
+
+              <p
                 className={
-                  "text-3xl font-extrabold" +
-                  (isLoading ? " loading-background w-20" : "")
+                  "" + (isLoading ? " loading-background w-50 h-5" : "")
                 }
               >
-                {resp?.title} {resp?.year ? `(${resp.year})` : ""}
-              </h1>
-              <SaveButton
-                onClick={async () => {
-                  if (!saved && resp) {
-                    await addMovie({
-                      id: resp?.id,
-                      title: resp?.title,
-                      year: resp.year,
-                      rating: resp.rating,
-                      medium_cover_image: resp.medium_cover_image,
-                      runtime: resp.runtime.toString(),
-                    });
-                    setSaved(true);
-                  } else {
-                    if (!resp) return;
-                    await removeMovie(resp?.id);
-                    setSaved(false);
-                  }
-                }}
-                saved={saved}
-              />
-            </div>
-            <p className={"" + (isLoading ? " loading-background w-10" : "")}>
-              Genres : {resp?.genres?.join(" / ")}
-            </p>
-            <div className="flex gap-5 flex-wrap">
-              <p>Available in : </p>
-              {resp?.torrents.map((t, i) => {
-                return (
-                  <div
-                    key={i}
-                    className="lg:text-base text-sm h-fit border-[1px] border-white ps-2 pr-2 cursor-pointer"
-                    onClick={() => {
-                      if (t.quality === "2160p") {
-                        location.href = link(t.hash);
-                      }
-                      location.href = link(t.hash);
-                    }}
-                  >
-                    <p
-                      className={
-                        "" + (t.quality === "2160p" ? "text-yellow-500" : "")
-                      }
+                {isLoading ? "" : "Genres :"} {resp?.genres?.join(" / ")}
+              </p>
+              <div
+                className={
+                  "flex gap-5 flex-wrap " +
+                  (isLoading ? " loading-background w-60 h-5" : "")
+                }
+              >
+                <p>Available in : </p>
+                {resp?.torrents.map((t, i) => {
+                  return (
+                    <div
+                      key={i}
+                      className="lg:text-base text-sm h-fit border-[1px] border-white ps-2 pr-2 cursor-pointer"
+                      onClick={() => {
+                        if (t.quality === "2160p") {
+                          location.href = link(i);
+                        }
+                        location.href = link(i);
+                      }}
                     >
-                      {t.quality}
-                      {""}
-                      {t.video_codec === "x265" ? (
-                        <span className="text-green-600">.{t.video_codec}</span>
-                      ) : (
-                        ""
-                      )}
-                      {t.type != "bluray" ? "." + t.type : ""}
-                    </p>
-                  </div>
-                );
-              })}
+                      <p
+                        className={
+                          "" + (t.quality === "2160p" ? "text-yellow-500" : "")
+                        }
+                      >
+                        {t.quality}
+                        {""}
+                        {t.video_codec === "x265" ? (
+                          <span className="text-green-600">
+                            .{t.video_codec}
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                        {t.type != "bluray" ? "." + t.type : ""}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+              <p>Rating : {resp?.rating}</p>
+              <p>
+                Duration : {Math.floor((resp?.runtime as number) / 60)}h{" "}
+                {(resp?.runtime as number) -
+                  Math.floor((resp?.runtime as number) / 60) * 60}
+                min
+              </p>
+              <div className="flex gap-5">
+                <Button
+                  className="md:text-xl text-lg"
+                  onClick={() => {
+                    setShowQ(!showQ);
+                  }}
+                >
+                  Watch
+                </Button>
+                <Button
+                  onClick={() => {
+                    location.href =
+                      "https://www.youtube.com/watch?v=" +
+                      resp?.yt_trailer_code;
+                  }}
+                  className="md:text-xl text-lg"
+                >
+                  Trailer
+                </Button>
+              </div>
             </div>
-            <p>Rating : {resp?.rating}</p>
-            <p>
-              Duration : {Math.floor((resp?.runtime as number) / 60)}h{" "}
-              {(resp?.runtime as number) -
-                Math.floor((resp?.runtime as number) / 60) * 60}
-              min
-            </p>
-            <div className="flex gap-5">
-              <Button
-                className="md:text-xl text-lg"
-                onClick={() => {
-                  setShowQ(!showQ);
-                }}
-              >
-                Watch
-              </Button>
-              <Button
-                onClick={() => {
-                  location.href =
-                    "https://www.youtube.com/watch?v=" + resp?.yt_trailer_code;
-                }}
-                className="md:text-xl text-lg"
-              >
-                Trailer
-              </Button>
+          )}
+          {isLoading && (
+            <div className="flex flex-col gap-5">
+              <div className=" loading-background w-80 h-5 "></div>
+              <div className=" loading-background w-60 h-5 "></div>
+              <div className=" loading-background w-70 h-5 "></div>
+              <div className=" loading-background w-30 h-5 "></div>
+              <div className=" loading-background w-60 h-10 mt-15"></div>
             </div>
-          </div>
+          )}
         </div>
       </div>
       {showQ && (
@@ -182,7 +227,7 @@ export function MovieDetails({
                   <div
                     className="col-span-9"
                     onClick={() => {
-                      location.href = link(t.hash);
+                      location.href = link(i);
                     }}
                   >
                     <h1 className="text-2xl col-span-6">{t.quality}</h1>

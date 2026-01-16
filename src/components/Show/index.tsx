@@ -32,13 +32,13 @@ export default function Show({ show, to }: { show: TMDBTVShow; to?: string }) {
             }
           }}
           saved={saved}
-          className="!absolute top-2 left-2"
+          className="!absolute md:top-2 top-0 left-0 md:left-2 md:!scale-100 scale-75"
         />
         <div
           onClick={() => {
             navigate(to || "/home_cinema/tv_shows/" + show.id);
           }}
-          className="flex flex-col gap-5 h-full items-center justify-center"
+          className="flex mt-7 flex-col gap-5 h-full items-center justify-center"
         >
           <h1 className="text-center font-bold md:text-base text-sm lg:text-xl">
             {show.name}

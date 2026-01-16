@@ -7,6 +7,12 @@ import { useEffect, useState } from "react";
 import Button from "../../components/Button/button";
 import { useCreatePreStream } from "../../hooks/useCreatePreStream";
 import { TorrentFiles } from "../../components/TorrentFiles";
+import { SaveButton } from "../../components/Movie/Movie";
+import {
+  addTorrents,
+  getTorrentByInfoHash,
+  removeTorrent,
+} from "../../lib/idb";
 
 interface Streams {
   streamUrl: string;
@@ -25,7 +31,20 @@ export default function Files() {
   } = useCreatePreStream();
   const [streams, setStreams] = useState<Streams[]>();
   const [size, setSize] = useState<number>();
+  const [saved, setSaved] = useState<boolean>(false);
+
   const navigate = useNavigate();
+  useEffect(() => {
+    (async () => {
+      if (!p.hash) return;
+      let t = await getTorrentByInfoHash(p.hash);
+      if (t) {
+        setSaved(true);
+      } else {
+        setSaved(false);
+      }
+    })();
+  }, []);
   useEffect(() => {
     if (!resp) return;
     let size = 0;
@@ -49,14 +68,49 @@ export default function Files() {
 
   return (
     <>
-      <div
-        className="cursor-pointer mt-7 ms-3 flex items-center gap-3"
-        onClick={() => {
-          navigate(-1);
-        }}
-      >
-        <FontAwesomeIcon icon={faChevronLeft} className="h-7" />
+      <div className="cursor-pointer mt-7 ms-3 flex items-center gap-3">
+        <FontAwesomeIcon
+          onClick={() => {
+            navigate(-1);
+          }}
+          icon={faChevronLeft}
+          className="h-7"
+        />
         <h1 className="font-bold text-3xl">Inspect Torrent</h1>
+        <SaveButton
+          onClick={async () => {
+            try {
+              if (!p.hash) return;
+
+              if (!saved) {
+                let seeders = 0;
+                let leechers = 0;
+                if (sp.get("seeds")) {
+                  seeders = Number(sp.get("seeds"));
+                }
+                if (sp.get("leechers")) {
+                  leechers = Number(sp.get("leechers"));
+                }
+                await addTorrents({
+                  name: sp.get("name") || "",
+                  provider: sp.get("provider") || "",
+                  seeders: seeders,
+                  leechers: leechers,
+                  infoHash: p.hash,
+                  magnetURI: "",
+                  url: sp.get("about") || "",
+                });
+                setSaved(true);
+              } else {
+                await removeTorrent(p.hash);
+                setSaved(false);
+              }
+            } catch (err) {
+              console.log(err);
+            }
+          }}
+          saved={saved}
+        />
       </div>
 
       {streams && streams?.length > 0 && (

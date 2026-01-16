@@ -10,7 +10,14 @@ import { useEffect, useState } from "react";
 import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
 import { SaveButton } from "../Movie/Movie";
-import { addTVShow, getTVShowById, removeTVShow } from "../../lib/idb";
+import {
+  addTorrents,
+  addTVShow,
+  getTorrentByInfoHash,
+  getTVShowById,
+  removeTorrent,
+  removeTVShow,
+} from "../../lib/idb";
 function getMagnetHash(magnetLink: string) {
   const url = new URL(magnetLink);
   const params = new URLSearchParams(url.search);
@@ -62,15 +69,18 @@ export function ShowDetails(props: TMDBTVShowDetails) {
   }, [resp]);
   return (
     <>
+      <div
+        className="md:mb-10 mb-10 cursor-pointer bg-white rounded-full h-10 w-10 flex justify-center items-center"
+        onClick={() => {
+          navigate(-1);
+        }}
+      >
+        <FontAwesomeIcon
+          className="h-5! font-bold text-black"
+          icon={faChevronLeft}
+        />
+      </div>
       <div className="lg:flex gap-20 relative">
-        <div
-          className="cursor-pointer z-[100]"
-          onClick={() => {
-            navigate(-1);
-          }}
-        >
-          <FontAwesomeIcon icon={faChevronLeft} className="h-7 mb-5" />
-        </div>
         <div className="lg:z-10 left-[50%] lg:top-0 top-[20%] lg:left-0 lg:translate-x-0 translate-x-[-50%] z-[-10] lg:relative w-fit absolute min-w-[300px] min-h-[450px] rounded-md">
           <div className="rounded-md overflow-hidden w-fit">
             <img
@@ -90,7 +100,7 @@ export function ShowDetails(props: TMDBTVShowDetails) {
         </div>
 
         <div className="z-10 mb-10">
-          <div className="flex items-center gap-5">
+          <div className="flex sm:flex-row flex-col sm:items-center gap-3">
             <h1 className="text-4xl font-extrabold">{props.name}</h1>
             <SaveButton
               onClick={async () => {
@@ -209,7 +219,7 @@ export function ShowDetails(props: TMDBTVShowDetails) {
                             className="!bg-[#000000] !text-white !border-0 hover:!bg-[#242424]"
                           >
                             episode {i}
-                          </Option>
+                          </Option>,
                         );
                       }
                       return opts;
@@ -288,14 +298,30 @@ export function ShowDetails(props: TMDBTVShowDetails) {
   );
 }
 
-function Torrent({ t }: { t: TorrentSearch }) {
+export function Torrent({ t }: { t: TorrentSearch }) {
+  const [saved, setSaved] = useState(false);
+  useEffect(() => {
+    getTorrentByInfoHash(t.infoHash).then((torrent) => {
+      if (torrent) return setSaved(true);
+      setSaved(false);
+    });
+  }, []);
   return (
     <>
       <div className="lg:p-5 lg:text-base text-sm p-2 gap-5 grid md:grid-cols-11 grid-cols-10 lg:grid-cols-12 hover:bg-[#50505059] rounded-md duration-200">
         <a
-          href={`/home_cinema/torrents/${getMagnetHash(
-            t.magnetURI
-          )}/files?about=${t.url}&seeds=${t.seeders}&leechers=${t.leechers}`}
+          href={(() => {
+            const url = new URL(
+              `/home_cinema/torrents/${t.infoHash}/files`,
+              location.origin,
+            );
+            url.searchParams.set("seeds", `${t.seeders}`);
+            url.searchParams.set("leechers", `${t.leechers}`);
+            url.searchParams.set("about", `${t.url}`);
+            url.searchParams.set("name", `${t.name}`);
+            url.searchParams.set("provider", `${t.provider}`);
+            return url.href;
+          })()}
           className="col-span-7 hover:underline cursor-pointer break-words"
         >
           {t.name}
@@ -310,6 +336,22 @@ function Torrent({ t }: { t: TorrentSearch }) {
         >
           <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
         </a>
+        <SaveButton
+          onClick={async () => {
+            try {
+              if (!saved) {
+                await addTorrents(t);
+                setSaved(true);
+              } else {
+                await removeTorrent(t.infoHash);
+                setSaved(false);
+              }
+            } catch (err) {
+              console.log(err);
+            }
+          }}
+          saved={saved}
+        />
       </div>
     </>
   );
@@ -327,10 +369,12 @@ function FilterTorrents({
       {torrents?.find((t) => {
         if (t.name.includes(filter)) return true;
       }) && <p className="font-bold underline">{filter} :</p>}
-      {torrents?.map((t, i) => {
-        if (t.name.toUpperCase().includes(filter.toUpperCase()))
-          return <Torrent t={t} key={i}></Torrent>;
-      })}
+      {torrents
+        ?.sort((a, b) => (b.seeders || 0) - (a.seeders || 0))
+        .map((t, i) => {
+          if (t.name.toUpperCase().includes(filter.toUpperCase()))
+            return <Torrent t={t} key={i}></Torrent>;
+        })}
     </>
   );
 }
@@ -344,7 +388,7 @@ function limitOptions() {
         value={(i + 1) * 10}
       >
         {(i + 1) * 10}
-      </Option>
+      </Option>,
     );
   }
   return elements;

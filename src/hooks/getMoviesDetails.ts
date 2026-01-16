@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-const detailsEndPoint = " https://yts.mx/api/v2/movie_details.json";
+const detailsEndPoint = " https://yts.bz/api/v2/movie_details.json";
 
 export async function getMovieDetails(movie_id: number) {
   const url = new URL(detailsEndPoint);

@@ -1,12 +1,14 @@
 import { useGetYTSList } from "../../hooks/getYTSList";
-import Movie from "../../components/Movie/Movie";
+import Movie, { SaveCard } from "../../components/Movie/Movie";
 import NavBar from "../../components/Navbar";
 import "./style.css";
-import { MoviesListCategory } from "../../components/List";
+import { LimitedList, MoviesListCategory } from "../../components/List";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
+import { useSavedMovies } from "../../hooks/useSavedMovies";
 
 export default function Watch() {
+  const savedMv = useSavedMovies();
   const { resp, err, isLoading } = useGetYTSList({
     queries: [["sort_by", "like_count"]],
   });
@@ -14,7 +16,9 @@ export default function Watch() {
     resp: respNew,
     err: errNew,
     isLoading: isLoadingNew,
-  } = useGetYTSList({ queries: [["sort_by", "date_added"]] });
+  } = useGetYTSList({
+    queries: [["sort_by", "date_added"]],
+  });
   const {
     resp: respAction,
     err: errAction,
@@ -30,6 +34,7 @@ export default function Watch() {
     err: errAny,
     isLoading: isLoadingAny,
   } = useGetYTSList({ queries: [["sort_by", "download_count"]] });
+
   return (
     <>
       <NavBar mode="Movies" />
@@ -38,6 +43,16 @@ export default function Watch() {
           <FontAwesomeIcon icon={faXmarkCircle} />
           <h1> {err} </h1>
         </div>
+      )}
+      {savedMv && savedMv.length > 0 && (
+        <LimitedList
+          resp={savedMv}
+          err=""
+          isLoading={false}
+          listID="saved-mv"
+          category="Saved Movies"
+          endComponent={<SaveCard />}
+        />
       )}
       <MoviesListCategory
         resp={resp}

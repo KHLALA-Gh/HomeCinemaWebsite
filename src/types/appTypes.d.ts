@@ -13,6 +13,7 @@ interface TorrentSearch {
   leechers?: number;
   provider: string;
   uploader?: string;
+  infoHash: string;
 }
 
 interface TorrentFile {

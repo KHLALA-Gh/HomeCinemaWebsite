@@ -4,6 +4,7 @@ import { faBookmark } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { addMovie, getMovieById, removeMovie } from "../../lib/idb";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
 export default function Movie({
   m,
@@ -57,11 +58,13 @@ export default function Movie({
               <h1 className="text-center text-sm lg:text-lg mt-5  font-bold lg:overflow-auto overflow-hidden text-nowrap lg:text-wrap">
                 {m.title}
               </h1>
-              <div className="flex flex-col-reverse gap-2 md:mt-5 justify-center">
+              <div className="flex flex-col-reverse gap-2 md:mt-5 justify-center items-center">
                 <h1 className="font-extrabold text-center text-sm lg:text-lg">
                   {m.rating} / 10{" "}
                 </h1>{" "}
-                <FontAwesomeIcon icon={faStar} className="h-3 lg:h-5" />
+                <div>
+                  <FontAwesomeIcon icon={faStar} className="h-3 lg:h-5" />
+                </div>
               </div>
               <div className="flex justify-center items-center gap-1 mt-5">
                 <FontAwesomeIcon icon={faStopwatch} className="h-3 lg:h-5" />
@@ -108,5 +111,42 @@ export function SaveButton({
         color={`${saved ? "#eab308" : "white"}`}
       />
     </div>
+  );
+}
+
+export function SaveCard() {
+  const [hover, setHover] = useState(false);
+  const nav = useNavigate();
+  return (
+    <>
+      <div
+        onClick={() => nav("/home_cinema/saved")}
+        className="lg:w-[230px] bg-[#080808] overflow-visible rounded-xl w-[115px] h-[172px] relative lg:h-[345px] shrink-0 cursor-pointer"
+      >
+        <div
+          className={
+            "w-full absolute  !z-10 h-full rounded-full blur-3xl duration-300 " +
+            (!hover ? "bg-[#141414cb]" : "bg-[#212121e4]")
+          }
+        ></div>
+        <div
+          onMouseOver={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
+          className="flex h-full z-20 opacity-60 hover:opacity-100 duration-300 relative justify-center items-center flex-col"
+        >
+          <div className="border-2 border-white rounded-full lg:w-20 lg:h-20 w-10 h-10 flex justify-center items-center">
+            <FontAwesomeIcon
+              /*@ts-ignore */
+
+              icon={faBookmark}
+              className="lg:h-10! h-5!"
+            />
+          </div>
+          <h1 className="mt-3 lg:text-lg text-[12px] font-bold">
+            See more saved
+          </h1>
+        </div>
+      </div>
+    </>
   );
 }

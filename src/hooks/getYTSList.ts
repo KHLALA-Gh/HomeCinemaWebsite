@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-const listEndPoint = " https://yts.mx/api/v2/list_movies.json";
+const listEndPoint = " https://yts.bz/api/v2/list_movies.json";
 
 interface GetYTSListProps {
   queries?: string[][];

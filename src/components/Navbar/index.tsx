@@ -2,8 +2,9 @@ import { faFilm, faSearch, faX } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Input from "../Input/Input";
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import DrawerMobileNavigation from "./drawer";
+import img from "../../assets/imgs/logo.svg";
 
 interface NavbarProps {
   mode?: "Movies" | "TV";
@@ -62,7 +63,7 @@ export default function NavBar(props: NavbarProps) {
             >
               <div>
                 <div className="flex items-center gap-4">
-                  <FontAwesomeIcon icon={faFilm} className="lg:h-10 h-7 mt-1" />
+                  <img src={img} className="lg:h-12 h-9" />
                   <h1 className="lg:text-xl font-black">
                     Home Cinema
                     {props.mode === "TV" && (
@@ -82,8 +83,8 @@ export default function NavBar(props: NavbarProps) {
             </a>
           )}
           <div className="flex justify-center xl:gap-20 gap-6 items-center text-base">
-            <a
-              href={
+            <Link
+              to={
                 props.mode === "Movies" || !props.mode
                   ? "/home_cinema/watch_tv_shows"
                   : "/home_cinema/watch"
@@ -92,19 +93,22 @@ export default function NavBar(props: NavbarProps) {
             >
               {props.mode === "TV" && <>Movies</>}
               {(props.mode === "Movies" || !props.mode) && <>TV Shows</>}
-            </a>
-            <a
-              href="/home_cinema/streams"
+            </Link>
+            <Link
+              to="/home_cinema/streams"
               className="font-bold lg:block hidden"
             >
               Streams
-            </a>
-            <a
-              href="/home_cinema/torrents"
+            </Link>
+            <Link
+              to="/home_cinema/torrents"
               className="font-bold lg:block hidden"
             >
               Torrents
-            </a>
+            </Link>
+            <Link to="/home_cinema/saved" className="font-bold lg:block hidden">
+              Saved
+            </Link>
             <div className="md:block hidden">
               <Input
                 value={term}

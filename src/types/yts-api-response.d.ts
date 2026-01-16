@@ -14,6 +14,7 @@ interface torrent {
   video_codec: string;
   size: string;
   hash: string;
+  seeds: number;
 }
 
 interface MovieDetails {
@@ -25,7 +26,7 @@ interface MovieDetails {
   medium_cover_image: string;
   runtime: number;
   genres: string[];
-  description: string;
+  description_intro: string;
   yt_trailer_code: string;
   language: "en";
   background_image: string;

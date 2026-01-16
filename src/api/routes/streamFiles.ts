@@ -1,5 +1,5 @@
+import axios from "axios";
 import { Router } from "express";
-
 export const router = Router();
 
 router.get("/api/playlist", (req, res) => {
@@ -41,4 +41,13 @@ router.get("/api/playlist", (req, res) => {
     `attachment; filename="${fileName}.m3u"`
   );
   res.send(playlist);
+  try {
+    const url = new URL("/api/play-vlc", "http://" + req.get("host"));
+    streams.map((s) => {
+      url.searchParams.append("streams", s);
+    });
+    axios.get(url.href);
+  } catch (err) {
+    console.log(err);
+  }
 });

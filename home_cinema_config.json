@@ -1,6 +1,6 @@
 {
   "torrent-streamer-api": {
     "external": false,
-    "origin": "http://192.168.1.26:8080"
+    "origin": "http://192.168.1.26:8081"
   }
 }

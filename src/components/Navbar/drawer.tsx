@@ -138,6 +138,10 @@ export default function DrawerMobileNavigation({
             {" "}
             Streams
           </ListItemButton>
+          <ListItemButton onClick={() => navigate("/home_cinema/saved")}>
+            {" "}
+            Saved
+          </ListItemButton>
         </List>
       </Drawer>
     </React.Fragment>
