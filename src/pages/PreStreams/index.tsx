@@ -1,20 +1,21 @@
 import { useEffect, useState } from "react";
-import { useGetPreStreams } from "../../hooks/getDownloads";
+import { useGetDownloads } from "../../hooks/getDownloads";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCopy, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { useDeleteStream } from "../../hooks/deleteStream";
-import Button from "../../components/Button/button";
+import {
+  faDownload,
+  faPause,
+  faUpload,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
+import { useDeleteDownload } from "../../hooks/deleteStream";
 import NavBar from "../../components/Navbar";
-import { Alert, LinearProgress } from "@mui/material";
-
+import { Alert } from "@mui/material";
+import { usePauseDownload } from "../../hooks/usePauseDownload";
+import pr from "pretty-bytes";
 export default function PreStreams() {
-  const { resp, err, isLoading, fetch } = useGetPreStreams();
-  const {
-    resp: respDel,
-    err: errDel,
-    isLoading: isLoadingDel,
-    fetch: fetchDel,
-  } = useDeleteStream();
+  const { resp, err, isLoading, fetch } = useGetDownloads();
+  const { fetch: fetchPause } = usePauseDownload();
+  const { fetch: fetchDel } = useDeleteDownload();
   const [firstTime, setFirstTime] = useState(true);
   useEffect(() => {
     fetch();
@@ -51,56 +52,91 @@ export default function PreStreams() {
         )}
         {resp && (
           <div>
-            {resp.map((s: any, i: number) => {
+            {resp.map((s: Download, i: number) => {
               return (
-                <div
+                <Download
+                  onClickDel={() => {
+                    fetchDel(s.infoHash);
+                  }}
                   key={i}
-                  className="hover:bg-[#50505059] md:p-5 p-2 rounded-md"
-                >
-                  <div
-                    onClick={() => {
-                      fetchDel(s.id as string);
-                    }}
-                    className="border-2 cursor-pointer ms-[100%] translate-x-[-100%] border-red-600 w-fit ps-[4px] pr-[4px] rounded-md"
-                  >
-                    <FontAwesomeIcon icon={faXmark} className="text-red-600" />
-                  </div>
-                  <div className="lg:flex gap-5 items-center p-5  rounded-md cursor-pointer">
-                    <a
-                      className="font-bold md:text-lg"
-                      href={`/home_cinema/torrents/${s.torrentHash}/files`}
-                      target="_blank"
-                    >
-                      {s.name}
-                    </a>
-                    <div className="flex items-center gap-5">
-                      <div className="w-[200px] relative bg-white h-2 rounded-full">
-                        <div
-                          style={{
-                            width: `${(s.progress * 100).toFixed()}%`,
-                          }}
-                          className={`h-2 bg-green-600 rounded-full`}
-                        ></div>
-                      </div>
-
-                      <p>{(s.progress * 100).toFixed(2)}%</p>
-                    </div>
-                    <Button
-                      className="!text-sm !ps-5 !pr-5 flex items-center"
-                      onClick={() => {
-                        navigator.clipboard.writeText(s.streamUrl);
-                      }}
-                    >
-                      <FontAwesomeIcon icon={faCopy} className="h-5 mr-2" />
-                      Copy Stream URL
-                    </Button>
-                  </div>
-                </div>
+                  onClickPause={() => {
+                    fetchPause(s.infoHash);
+                  }}
+                  download={s}
+                />
               );
             })}
           </div>
         )}
+        {}
       </div>
     </>
+  );
+}
+
+function Download({
+  download,
+  onClickDel,
+  onClickPause,
+}: {
+  download: Download;
+  onClickDel: () => any;
+  onClickPause: () => any;
+}) {
+  return (
+    <div className="hover:bg-[#50505059] md:p-5 p-2 rounded-md">
+      <div
+        onClick={onClickDel}
+        className="border-2 cursor-pointer ms-[100%] translate-x-[-100%] border-red-600 w-fit ps-[4px] pr-[4px] rounded-md"
+      >
+        <FontAwesomeIcon icon={faXmark} className="text-red-600" />
+      </div>
+      <div
+        onClick={onClickPause}
+        className="border-2 cursor-pointer ms-[100%] translate-x-[-100%] border-red-600 w-fit ps-[4px] pr-[4px] rounded-md"
+      >
+        <FontAwesomeIcon icon={faPause} className="text-yellow-600" />
+      </div>
+      <div className="lg:flex gap-5 items-center p-5  rounded-md cursor-pointer">
+        <div>
+          <a
+            className="font-bold md:text-lg"
+            href={`/home_cinema/torrents/${download.infoHash}/files`}
+            target="_blank"
+          >
+            {download.name}
+          </a>
+          <div className="flex items-center">
+            <p>
+              <FontAwesomeIcon icon={faUpload} /> {pr(+download.upSpeed)}
+            </p>
+            <p>
+              <FontAwesomeIcon icon={faDownload} /> {pr(+download.downSpeed)}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-5">
+          <div className="w-[200px] relative bg-white h-2 rounded-full">
+            <div
+              style={{
+                width: `${(download.progress * 100).toFixed()}%`,
+              }}
+              className={`h-2 bg-green-600 rounded-full`}
+            ></div>
+          </div>
+
+          <p>{(download.progress * 100).toFixed(2)}%</p>
+        </div>
+        {/* <Button
+          className="!text-sm !ps-5 !pr-5 flex items-center"
+          onClick={() => {
+            navigator.clipboard.writeText(download.streamUrl);
+          }}
+        >
+          <FontAwesomeIcon icon={faCopy} className="h-5 mr-2" />
+          Copy Stream URL
+        </Button> */}
+      </div>
+    </div>
   );
 }

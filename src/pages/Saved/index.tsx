@@ -38,7 +38,7 @@ export default function Saved() {
   const [torrents, setTorrents] = useState<TorrentSearch[]>([]);
   const [SearchTorrent, setTorrentSearch] = useState<string>("");
   const search = () => {
-    if (!SearchTorrent) return torrents;
+    if (!SearchTorrent.trim()) return torrents;
     const fuse = new Fuse(torrents, {
       keys: ["name"],
       threshold: 0.5,
@@ -46,7 +46,7 @@ export default function Saved() {
       includeScore: true,
     });
     return fuse
-      .search(SearchTorrent)
+      .search(SearchTorrent.trim())
       .sort((a, b) => (a.score || 0) - (b.score || 0))
       .map((t) => t.item);
   };

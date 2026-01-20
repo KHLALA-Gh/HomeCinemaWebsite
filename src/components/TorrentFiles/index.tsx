@@ -1,11 +1,12 @@
 import { FormControlLabel, Switch } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCreatePreStream } from "../../hooks/useCreatePreStream";
 import { useNavigate } from "react-router";
 import {
   faCopy,
   faDownload,
   faFile,
+  faFloppyDisk,
   faPlay,
   faVideo,
   faXmark,
@@ -14,6 +15,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import pr from "pretty-bytes";
 import Button from "@mui/joy/Button";
 import pb from "pretty-bytes";
+import { fetchConfigs } from "../../hooks/getMagnetURI";
+import { useDownloadTorrent } from "../../hooks/useDownloadTorrent";
 
 function getVideos(files: TorrentFile[]): number {
   let num = 0;
@@ -23,6 +26,10 @@ function getVideos(files: TorrentFile[]): number {
     }
   });
   return num;
+}
+interface Streams {
+  streamUrl: string;
+  name: string;
 }
 interface TorrentFilesProps {
   hash: string;
@@ -37,6 +44,7 @@ export function TorrentFiles({
   err,
 }: TorrentFilesProps) {
   const [showStreamUrl, setShowStreamUrl] = useState(false);
+  const [downloadDialog, setDownloadDialog] = useState(false);
   const {
     resp: createStreamResp,
     isLoading: isLoadingPreStream,
@@ -44,17 +52,92 @@ export function TorrentFiles({
     fetch,
   } = useCreatePreStream();
   const [easyView, setEasyView] = useState(false);
-
+  const { run, resp: downloadResp } = useDownloadTorrent();
   const [showOnlyVideo, setShowOnlyVideo] = useState<number>(+localStorage.sov);
   const navigate = useNavigate();
+  const [configs, setConfigs] = useState<ServerConfig>();
   const createStream = (path: string) => {
     fetch(hash as string, path);
     setShowStreamUrl(true);
   };
+  const [size, setSize] = useState<number>();
+  const [streams, setStreams] = useState<Streams[]>();
+  useEffect(() => {
+    if (!resp) return;
+    let size = 0;
+    resp?.map((file) => {
+      if (file.name.endsWith(".mp4") || file.name.endsWith(".mkv")) {
+        size += file.size;
+        setStreams((s) => {
+          if (s) {
+            return [...s, { streamUrl: file.downloadLink, name: file.name }];
+          } else {
+            return [{ streamUrl: file.downloadLink, name: file.name }];
+          }
+        });
+      }
+    });
+    setSize(size);
+  }, [resp]);
+  useEffect(() => {
+    fetchConfigs().then((c) => setConfigs(c));
+  }, []);
+  useEffect(() => {
+    if (downloadResp?.status === 208) {
+      alert(downloadResp.data.err);
+    }
+  }, [downloadResp]);
   return (
     <>
-      <div className="border-[2px] ms-3 mr-3 bg-[#ffffff0d] border-[#ffffff4f] drop-shadow-md rounded-sm">
-        <h1 className="text-xl font-bold p-5">Files</h1>
+      <div className="border-2 ms-3 mr-3 bg-[#ffffff0d] border-[#ffffff4f] drop-shadow-md rounded-sm">
+        <div className="p-5">
+          <h1 className="md:text-3xl font-bold mb-3">
+            {resp && <h1>{resp[0]?.path.split("/")[0]}</h1>}
+          </h1>
+          <div className="flex gap-5 items-center">
+            {streams && streams?.length > 0 && (
+              <Button
+                onClick={() => {
+                  const url = new URL("/api/playlist", location.origin);
+                  streams.map((s) => {
+                    url.searchParams.append("streams", s.streamUrl);
+                    url.searchParams.append("names", s.name);
+                  });
+                  if (resp) {
+                    url.searchParams.set(
+                      "fileName",
+                      resp[0].path.split("/")[0],
+                    );
+                  }
+                  open(url.href);
+                }}
+              >
+                <FontAwesomeIcon icon={faPlay} className="mr-3" /> Play
+              </Button>
+            )}
+            {configs?.desktopMode && !isLoading && (
+              <button
+                onClick={async () => {
+                  if (downloadDialog) return;
+                  setDownloadDialog(true);
+                  const path = await window.electron.selectFolder();
+                  setDownloadDialog(false);
+                  if (!path) return;
+                  run(hash, path);
+                }}
+                className="border-2 cursor-pointer text-[0px] hover:text-[10px] flex-col hover:translate-y-[-2px] hover:scale-150 duration-200 hover:border-[#0000] hover:border-0 border-white rounded-full w-10 h-10 flex items-center justify-center"
+              >
+                <FontAwesomeIcon icon={faFloppyDisk} className="text-base!" />
+                <p>Download</p>
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="ps-5 mb-1">
+          <h1 className="text-xl font-bold">Files</h1>
+          <p className="text-sm mt-1">{pr((size as number) || 0)}</p>
+        </div>
 
         <FormControlLabel
           control={
@@ -88,7 +171,7 @@ export function TorrentFiles({
               </ul>
             </div>
             <Button
-              className="!ms-4 !mt-3"
+              className="ms-4! mt-3!"
               onClick={() => {
                 setEasyView(true);
               }}
@@ -105,7 +188,7 @@ export function TorrentFiles({
                 return (
                   <div
                     key={i}
-                    className="md:p-5 p-2 md:text-base !text-sm items-center grid-cols-12 rounded-md hover:bg-[#50505059] duration-200 md:grid gap-10 cursor-pointer flex-wrap"
+                    className="md:p-5 p-2 md:text-base text-sm! items-center grid-cols-12 rounded-md hover:bg-[#50505059] duration-200 md:grid gap-10 cursor-pointer flex-wrap"
                   >
                     <div className="col-span-1 inline-block md:mr-0 mr-5">
                       {file.name.endsWith(".mp4") ||
@@ -138,7 +221,8 @@ export function TorrentFiles({
                       </span>
                     </button>
                     {(file.name.endsWith(".mp4") ||
-                      file.name.endsWith(".mkv")) && (
+                      file.name.endsWith(".mkv") ||
+                      file.name.endsWith("avi")) && (
                       <button
                         onClick={() => {
                           const url = new URL("/api/playlist", location.origin);
@@ -175,9 +259,10 @@ export function TorrentFiles({
                       </div>
                     </div>
                     {(file.name.endsWith(".mp4") ||
-                      file.name.endsWith(".mkv")) && (
+                      file.name.endsWith(".mkv") ||
+                      file.name.endsWith("avi")) && (
                       <Button
-                        className="xl:col-span-2 col-span-4 !text-base md:!block !hidden"
+                        className="xl:col-span-2 col-span-4 text-base! md:block! hidden!"
                         color="neutral"
                         loading={isLoadingPreStream}
                         disabled={showStreamUrl}

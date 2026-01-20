@@ -68,7 +68,7 @@ export default function Files() {
 
   return (
     <>
-      <div className="cursor-pointer mt-7 ms-3 flex items-center gap-3">
+      <div className="cursor-pointer mt-7 ms-3 flex items-center gap-3 mb-3">
         <FontAwesomeIcon
           onClick={() => {
             navigate(-1);
@@ -112,29 +112,6 @@ export default function Files() {
           saved={saved}
         />
       </div>
-
-      {streams && streams?.length > 0 && (
-        <div className="p-5">
-          <h1 className="md:text-3xl font-bold mb-3">
-            {resp && <h1>{resp[0].path.split("/")[0]}</h1>}
-          </h1>
-          <Button
-            onClick={() => {
-              const url = new URL("/api/playlist", location.origin);
-              streams.map((s) => {
-                url.searchParams.append("streams", s.streamUrl);
-                url.searchParams.append("names", s.name);
-              });
-              if (resp) {
-                url.searchParams.set("fileName", resp[0].path.split("/")[0]);
-              }
-              open(url.href);
-            }}
-          >
-            <FontAwesomeIcon icon={faPlay} className="mr-3" /> Play
-          </Button>
-        </div>
-      )}
 
       <TorrentFiles
         resp={resp || []}

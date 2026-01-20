@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { fetchConfigs } from "./getMagnetURI";
 import axios from "axios";
 
-const endPoint = "/api/streams";
+const endPoint = "/api/downloads";
 
-export function useGetPreStreams() {
+export function useGetDownloads() {
   const [resp, setResp] = useState<any>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [err, setErr] = useState<string>();
@@ -14,7 +14,7 @@ export function useGetPreStreams() {
       endPoint,
       config["torrent-streamer-api"].external
         ? config["torrent-streamer-api"].origin
-        : location.origin
+        : location.origin,
     );
     const resp = await axios.get(url.href);
     return resp.data;

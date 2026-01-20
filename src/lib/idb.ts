@@ -4,6 +4,7 @@ enum ObjectStores {
   MOVIES = "saved_movies",
   TVSHOWS = "saved_tvshows",
   TORRENTS = "torrents",
+  DOWNLOADS = "torrents",
 }
 
 const dbPromise = openDB("data", 1, {
@@ -11,6 +12,7 @@ const dbPromise = openDB("data", 1, {
     db.createObjectStore(ObjectStores.MOVIES, { keyPath: "id" }); // use movie.id as key
     db.createObjectStore(ObjectStores.TVSHOWS, { keyPath: "id" }); // use tv.id as key
     db.createObjectStore(ObjectStores.TORRENTS, { keyPath: "infoHash" }); // use tv.infoHash as key
+    db.createObjectStore(ObjectStores.DOWNLOADS, { keyPath: "infoHash" }); // use infoHash as key
   },
 });
 
@@ -74,4 +76,26 @@ export async function getTorrentByInfoHash(
 export async function removeTorrent(infoHash: string) {
   const db = await dbPromise;
   await db.delete(ObjectStores.TORRENTS, infoHash);
+}
+
+export async function addDownload(d: Download) {
+  const db = await dbPromise;
+  db.put(ObjectStores.DOWNLOADS, d);
+}
+
+export async function getDownloads(): Promise<Download[]> {
+  const db = await dbPromise;
+  return await db.getAll(ObjectStores.DOWNLOADS);
+}
+
+export async function getDownloadByInfoHash(
+  infoHash: string,
+): Promise<Download> {
+  const db = await dbPromise;
+  return await db.get(ObjectStores.DOWNLOADS, infoHash);
+}
+
+export async function removeDownload(infoHash: string) {
+  const db = await dbPromise;
+  await db.delete(ObjectStores.DOWNLOADS, infoHash);
 }

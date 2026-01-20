@@ -1,10 +1,3 @@
-interface Configs {
-  "torrent-streamer-api": {
-    origin: string;
-    external: boolean;
-  };
-}
-
 interface TorrentSearch {
   name: string;
   magnetURI: string;
@@ -22,4 +15,14 @@ interface TorrentFile {
   path: string;
   path64: string;
   downloadLink: string;
+}
+
+interface Download {
+  name: string;
+  infoHash: string;
+  path?: string;
+  selectedFiles?: string[];
+  progress: number;
+  upSpeed: string;
+  downSpeed: string;
 }

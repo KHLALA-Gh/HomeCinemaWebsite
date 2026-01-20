@@ -52,13 +52,13 @@ export default function NavBar(props: NavbarProps) {
           }
         >
           {!openS && (
-            <a
-              href={
+            <Link
+              to={
                 !props.mode
                   ? "/home_cinema/"
                   : props.mode === "Movies"
-                  ? "/home_cinema/watch"
-                  : "/home_cinema/watch_tv_shows"
+                    ? "/home_cinema/watch"
+                    : "/home_cinema/watch_tv_shows"
               }
             >
               <div>
@@ -80,7 +80,7 @@ export default function NavBar(props: NavbarProps) {
                   )}
                 </div>
               </div>
-            </a>
+            </Link>
           )}
           <div className="flex justify-center xl:gap-20 gap-6 items-center text-base">
             <Link
