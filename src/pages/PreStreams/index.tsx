@@ -2,10 +2,17 @@ import { useEffect, useState } from "react";
 import { useGetDownloads } from "../../hooks/getDownloads";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faArrowRotateBack,
   faDownload,
   faFile,
   faPause,
   faPlay,
+  faRecycle,
+  faRedo,
+  faRepeat,
+  faRotate,
+  faSlash,
+  faStop,
   faTrash,
   faUpload,
   faXmark,
@@ -85,23 +92,82 @@ export default function PreStreams() {
                   }
                 />
               </div>
+              {!findSelectedTorrent()?.stopped && (
+                <div
+                  onClick={async () => {
+                    if (!selectedTorrent) return;
+                    const r = await fetchPause(selectedTorrent, true);
+                    if (r.status === 200) {
+                      let arr = resp.map((t) => {
+                        if (t.infoHash !== selectedTorrent) return t;
+                        return { ...t, stopped: true, paused: true };
+                      });
+                      setResp(arr);
+                    }
+                  }}
+                  className={`border-2  cursor-pointer ${selectedTorrent ? "border-orange-600" : "border-gray-500"} w-fit ps-[4px] pr-[4px] rounded-md`}
+                >
+                  <FontAwesomeIcon
+                    icon={faStop}
+                    className={
+                      !selectedTorrent
+                        ? "text-gray-500"
+                        : findSelectedTorrent()?.stopped
+                          ? "text-green-600"
+                          : "text-orange-600"
+                    }
+                  />
+                </div>
+              )}
               <div
+                title={
+                  findSelectedTorrent()?.files.filter((f) => f.streamed).length
+                    ? "Cannot pause (file being streamed)"
+                    : ""
+                }
                 onClick={async () => {
                   if (!selectedTorrent) return;
+                  let t = findSelectedTorrent();
+                  if (t?.files.filter((f) => f.streamed).length) return;
                   let r = await fetchPause(selectedTorrent);
                   if (r.status === 200) {
-                    let t = findSelectedTorrent();
                     if (!t) return;
                     t.paused = !t.paused;
+                    t.stopped = false;
                     setResp(resp);
                   }
                 }}
-                className={`border-2   cursor-pointer ${!selectedTorrent ? "border-gray-500" : findSelectedTorrent()?.paused ? "border-green-600" : "border-yellow-600"} w-fit ps-[4px] pr-[4px] rounded-md`}
+                className={`border-2 relative ${
+                  !selectedTorrent ||
+                  findSelectedTorrent()?.files.filter((f) => f.streamed).length
+                    ? "border-gray-500"
+                    : findSelectedTorrent()?.paused
+                      ? "border-green-600 cursor-pointer"
+                      : "border-yellow-600 cursor-pointer"
+                } w-fit ps-[4px] pr-[4px] rounded-md`}
               >
                 <FontAwesomeIcon
                   icon={findSelectedTorrent()?.paused ? faPlay : faPause}
-                  className={`${!selectedTorrent ? "text-gray-500" : findSelectedTorrent()?.paused ? "text-green-600" : "text-yellow-600"}`}
+                  className={`${
+                    !selectedTorrent ||
+                    findSelectedTorrent()?.files.filter((f) => f.streamed)
+                      .length
+                      ? "text-gray-500"
+                      : findSelectedTorrent()?.paused
+                        ? "text-green-600"
+                        : "text-yellow-600"
+                  }`}
                 />
+                {findSelectedTorrent() &&
+                  findSelectedTorrent()?.files.filter((f) => f.streamed)
+                    .length !== 0 && (
+                    <div className="absolute top-0">
+                      <FontAwesomeIcon
+                        icon={faSlash}
+                        className="text-gray-500 font-bold"
+                      />
+                    </div>
+                  )}
               </div>
               <div
                 onClick={() => {
@@ -157,61 +223,71 @@ function Download({
         nav(`/home_cinema/torrents/${download.infoHash}/files`);
       }}
       onClick={onClick}
-      className={`hover:bg-[#50505059] cursor-pointer ${selected ? "bg-[#005db4bd]!" : ""} flex duration-150 items-center gap-5  rounded-md ${download.paused ? "bg-[#98930054]" : ""}`}
+      className={`hover:bg-[#50505059] cursor-pointer ${selected ? "bg-[#005db4bd]!" : download.stopped ? "bg-[#9200006c]" : download.paused ? "bg-[#98930054]" : ""} flex duration-150 gap-5  rounded-md `}
     >
       <div className="lg:flex  items-center p-5  rounded-md">
         <div>
           <h1 className="font-bold md:text-lg">{download.name}</h1>
           <div className="flex items-center">
-            {download.paused ? (
+            {download.stopped ? (
+              <p>STOPPED</p>
+            ) : download.paused ? (
               <p>PAUSED</p>
             ) : (
               <>
                 {" "}
                 <p>
-                  <FontAwesomeIcon icon={faUpload} /> {pr(+download.upSpeed)}
+                  <FontAwesomeIcon icon={faUpload} />{" "}
+                  {pr(+(download.upSpeed || 0))}/s
                 </p>
                 <p>
                   <FontAwesomeIcon icon={faDownload} />{" "}
-                  {pr(+download.downSpeed)}
+                  {pr(+(download.downSpeed || 0))}/s
                 </p>
               </>
             )}
           </div>
-
+          <div>
+            {pr(download.downloaded || 0)} / {pr(download.downloadSize || 0)}
+          </div>
           <div className="flex items-center gap-5">
             <div className="w-[200px] relative bg-white h-2 rounded-full">
               <div
                 style={{
-                  width: `${(download.progress * 100).toFixed()}%`,
+                  width: `${((download.progress || 0) * 100).toFixed()}%`,
                 }}
                 className={`h-2 bg-green-600 rounded-full`}
               ></div>
             </div>
 
-            <p>{(download.progress * 100).toFixed(2)}%</p>
+            <p>
+              {(
+                ((download.downloaded || 0) / (download.downloadSize || 1)) *
+                100
+              ).toFixed(2)}
+              %
+            </p>
           </div>
         </div>
-
-        {/* <Button
-          className="!text-sm !ps-5 !pr-5 flex items-center"
-          onClick={() => {
-            navigator.clipboard.writeText(download.streamUrl);
-          }}
-        >
-          <FontAwesomeIcon icon={faCopy} className="h-5 mr-2" />
-          Copy Stream URL
-        </Button> */}
       </div>
-      <div className="">
+      <div className="p-5">
         <h1 className="font-bold">Files</h1>
         <p>
-          selected files {download.selectedFiles?.length}/
+          selected files {download.files.filter((f) => f.selected).length}/
           {download.files?.length}
         </p>
         <p>
-          downloading {pr(download.totalSize)}/{pr(download.downloadSize)}
+          streamed files {download.files.filter((f) => f.streamed).length}/
+          {download.files?.length}
         </p>
+        <p>
+          downloading {pr(download.totalSize || 0)}/
+          {pr(download.downloadSize || 0)}
+        </p>
+      </div>
+      <div className="p-5">
+        <h1 className="font-bold">Location</h1>
+        <p>{download.path}</p>
       </div>
     </div>
   );

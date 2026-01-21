@@ -4,7 +4,7 @@ enum ObjectStores {
   MOVIES = "saved_movies",
   TVSHOWS = "saved_tvshows",
   TORRENTS = "torrents",
-  DOWNLOADS = "torrents",
+  DOWNLOADS = "downloads",
 }
 
 const dbPromise = openDB("data", 1, {

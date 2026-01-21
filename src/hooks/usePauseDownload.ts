@@ -8,7 +8,7 @@ export function usePauseDownload() {
   const [resp, setResp] = useState<any>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [err, setErr] = useState<string>();
-  const put = async (hash: string): Promise<AxiosResponse> => {
+  const put = async (hash: string, stop?: boolean): Promise<AxiosResponse> => {
     const config = await fetchConfigs();
     const url = new URL(
       endPoint,
@@ -16,13 +16,16 @@ export function usePauseDownload() {
         ? config["torrent-streamer-api"].origin
         : location.origin,
     );
-    const resp = await axios.put(url.href, { hash });
+    const resp = await axios.put(url.href, { hash, stop });
     return resp;
   };
-  const fetch = async (hash: string): Promise<AxiosResponse> => {
+  const fetch = async (
+    hash: string,
+    stop?: boolean,
+  ): Promise<AxiosResponse> => {
     setIsLoading(true);
     try {
-      const data = await put(hash);
+      const data = await put(hash, stop);
       setResp(data);
       setIsLoading(false);
 

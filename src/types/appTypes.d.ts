@@ -21,12 +21,18 @@ interface Download {
   name: string;
   infoHash: string;
   path?: string;
-  selectedFiles?: string[];
-  progress: number;
-  upSpeed: string;
-  downSpeed: string;
+  progress?: number;
+  upSpeed?: string;
+  downSpeed?: string;
   paused: boolean;
-  files: string[];
-  downloadSize: number;
-  totalSize: number;
+  files: {
+    path: string;
+    streamed: boolean;
+    paused: boolean;
+    selected: boolean;
+  }[];
+  downloadSize?: number;
+  totalSize?: number;
+  downloaded?: number;
+  stopped: boolean;
 }

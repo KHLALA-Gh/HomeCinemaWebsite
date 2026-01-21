@@ -57,6 +57,7 @@ export default function Saved() {
       });
     } else if (selectedData === "tr") {
       getTorrents().then((t) => {
+        console.log(t);
         setTorrents(t);
       });
     }

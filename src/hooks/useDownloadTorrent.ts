@@ -21,11 +21,9 @@ export function useDownloadTorrent() {
       path,
     });
     if (resp.status === 200) {
-      await addDownload({
-        infoHash: hash,
-        path,
-        name: resp.data.name,
-      });
+      const data: Download = resp.data;
+      console.log(data);
+      await addDownload(data);
     }
     return resp;
   };
