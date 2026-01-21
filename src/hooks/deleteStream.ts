@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchConfigs } from "./getMagnetURI";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
 const endPoint = "/api/downloads/:hash";
 
@@ -17,21 +17,20 @@ export function useDeleteDownload() {
         : location.origin,
     );
     const resp = await axios.delete(url.href);
-    return resp.data;
+    return resp;
   };
   useEffect(() => {}, []);
-  const fetch = (id: string) => {
+  const fetch = async (hash: string) => {
     setIsLoading(true);
-    del(id)
-      .then((data) => {
-        setResp(data);
-      })
-      .catch((err) => {
-        setErr(err.message);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+    try {
+      const resp = await del(hash);
+      setResp(resp);
+      setIsLoading(false);
+      return resp as AxiosResponse;
+    } catch (err: any) {
+      setErr(err.message);
+      throw new Error(err);
+    }
   };
   return {
     resp,

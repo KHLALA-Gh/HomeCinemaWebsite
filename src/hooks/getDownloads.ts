@@ -5,7 +5,7 @@ import axios from "axios";
 const endPoint = "/api/downloads";
 
 export function useGetDownloads() {
-  const [resp, setResp] = useState<any>();
+  const [resp, setResp] = useState<Download[]>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [err, setErr] = useState<string>();
   const get = async () => {
@@ -17,7 +17,7 @@ export function useGetDownloads() {
         : location.origin,
     );
     const resp = await axios.get(url.href);
-    return resp.data;
+    return resp.data as Download[];
   };
   useEffect(() => {}, []);
   const fetch = () => {
@@ -38,5 +38,6 @@ export function useGetDownloads() {
     isLoading,
     err,
     fetch,
+    setResp,
   };
 }

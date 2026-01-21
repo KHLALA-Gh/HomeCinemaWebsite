@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { fetchConfigs } from "./getMagnetURI";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
 const endPoint = "/api/downloads";
 
@@ -8,7 +8,7 @@ export function usePauseDownload() {
   const [resp, setResp] = useState<any>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [err, setErr] = useState<string>();
-  const put = async (hash: string) => {
+  const put = async (hash: string): Promise<AxiosResponse> => {
     const config = await fetchConfigs();
     const url = new URL(
       endPoint,
@@ -17,21 +17,21 @@ export function usePauseDownload() {
         : location.origin,
     );
     const resp = await axios.put(url.href, { hash });
-    return resp.data;
+    return resp;
   };
-  useEffect(() => {}, []);
-  const fetch = (hash: string) => {
+  const fetch = async (hash: string): Promise<AxiosResponse> => {
     setIsLoading(true);
-    put(hash)
-      .then((data) => {
-        setResp(data);
-      })
-      .catch((err) => {
-        setErr(err.message);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+    try {
+      const data = await put(hash);
+      setResp(data);
+      setIsLoading(false);
+
+      return data;
+    } catch (err: any) {
+      setErr(err.message);
+      setIsLoading(false);
+      throw err;
+    }
   };
   return {
     resp,

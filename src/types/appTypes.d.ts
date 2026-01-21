@@ -25,4 +25,8 @@ interface Download {
   progress: number;
   upSpeed: string;
   downSpeed: string;
+  paused: boolean;
+  files: string[];
+  downloadSize: number;
+  totalSize: number;
 }
