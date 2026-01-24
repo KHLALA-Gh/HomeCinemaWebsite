@@ -220,23 +220,20 @@ export function TorrentFiles({
                         Copy Stream URL
                       </span>
                     </button>
-                    {(file.name.endsWith(".mp4") ||
-                      file.name.endsWith(".mkv") ||
-                      file.name.endsWith("avi")) && (
-                      <button
-                        onClick={() => {
-                          const url = new URL("/api/playlist", location.origin);
-                          url.searchParams.set("streams", file.downloadLink);
-                          url.searchParams.set("names", file.name);
-                          url.searchParams.set("fileName", file.name);
-                          open(url.href);
-                        }}
-                        className="items-center col-span-1 xl:flex hidden"
-                      >
-                        <FontAwesomeIcon icon={faPlay} className="mr-2" />
-                        play
-                      </button>
-                    )}
+                    {configs?.desktopMode &&
+                      (file.name.endsWith(".mp4") ||
+                        file.name.endsWith(".mkv") ||
+                        file.name.endsWith("avi")) && (
+                        <button
+                          onClick={() => {
+                            window.electron.openVLC([file.downloadLink]);
+                          }}
+                          className="items-center col-span-1 xl:flex hidden cursor-pointer"
+                        >
+                          <FontAwesomeIcon icon={faPlay} className="mr-2" />
+                          play
+                        </button>
+                      )}
                     <div className=" md:flex hidden xl:hidden gap-3 items-center justify-center col-span-3 bg-[#202020] p-2 rounded-md">
                       <h6 className="md:block hidden col-span-1 text-[13px]">
                         {pb(file.size)}

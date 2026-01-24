@@ -6,6 +6,7 @@ const detailsEndPoint = " https://yts.bz/api/v2/movie_details.json";
 export async function getMovieDetails(movie_id: number) {
   const url = new URL(detailsEndPoint);
   url.searchParams.set("movie_id", `${movie_id}`);
+  url.searchParams.set("with_images", `true`);
   const resp = await axios.get(url.href);
   if (resp.status === 200 && resp.data.status === "ok") {
     let m: MovieDetails = resp.data.data.movie;

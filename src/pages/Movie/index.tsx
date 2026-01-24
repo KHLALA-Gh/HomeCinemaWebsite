@@ -101,7 +101,7 @@ export function MovieDetails({
                         year: resp.year,
                         rating: resp.rating,
                         medium_cover_image: resp.medium_cover_image,
-                        runtime: resp.runtime.toString(),
+                        runtime: resp.runtime?.toString(),
                       });
                       setSaved(true);
                     } else {

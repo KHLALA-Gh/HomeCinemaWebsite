@@ -45,13 +45,13 @@ export class TMDBApi {
       throw new TMDBError(
         `${(e.response?.data as ErrResp).status_message}`,
         e.status,
-        TMDBErrorStatusCode.BAD_REQUEST
+        TMDBErrorStatusCode.BAD_REQUEST,
       );
     }
     throw new TMDBError(
       `${e.message}`,
       e.status!,
-      TMDBErrorStatusCode.GET_TVSHOWS_ERR
+      TMDBErrorStatusCode.GET_TVSHOWS_ERR,
     );
   }
   async getTVShows(page?: string): Promise<TVShowsResp> {
@@ -70,13 +70,13 @@ export class TMDBApi {
           throw new TMDBError(
             `Cannot get tv shows : ${e.response?.data.status_message}`,
             e.status,
-            TMDBErrorStatusCode.BAD_REQUEST
+            TMDBErrorStatusCode.BAD_REQUEST,
           );
         }
         throw new TMDBError(
           `unable to get tv shows : ${e.message}`,
           e.status!,
-          TMDBErrorStatusCode.GET_TVSHOWS_ERR
+          TMDBErrorStatusCode.GET_TVSHOWS_ERR,
         );
       }
       throw e;
@@ -102,7 +102,7 @@ export class TMDBApi {
 
   async getSeasonDetails(
     series_id: string,
-    season_number: string
+    season_number: string,
   ): Promise<SeasonDetails> {
     let url = TMDBApi.tvShowSeasonDetails.replace(":series_id", series_id);
     url = url.replace(":season_number", season_number);

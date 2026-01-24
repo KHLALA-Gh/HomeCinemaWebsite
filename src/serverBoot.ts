@@ -59,7 +59,10 @@ export async function bootServer(port: number, config?: Partial<ServerConfig>) {
     ...defaultServerConf,
     ...config,
   };
-  if (c["torrent-streamer-api"].external === false) {
+  const router = declareRoutes(c);
+  app.use(router);
+
+  if (!c["torrent-streamer-api"].external) {
     const streamerRouter = (await import("torrent-streamer-api")).default;
     app.use(
       streamerRouter({
@@ -69,9 +72,7 @@ export async function bootServer(port: number, config?: Partial<ServerConfig>) {
     );
   }
 
-  const router = declareRoutes(c);
-  app.use(router);
-  if (config && config.openVLC) {
+  if (c.openVLC) {
     app.get("/api/play-vlc", async (req, res) => {
       try {
         let streams: string[];

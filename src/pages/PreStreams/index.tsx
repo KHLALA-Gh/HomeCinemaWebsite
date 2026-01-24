@@ -5,6 +5,7 @@ import {
   faArrowRotateBack,
   faDownload,
   faFile,
+  faMoon,
   faPause,
   faPlay,
   faRecycle,
@@ -13,8 +14,10 @@ import {
   faRotate,
   faSlash,
   faStop,
+  faStream,
   faTrash,
   faUpload,
+  faVideo,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { useDeleteDownload } from "../../hooks/deleteStream";
@@ -23,27 +26,32 @@ import { Alert } from "@mui/material";
 import { usePauseDownload } from "../../hooks/usePauseDownload";
 import pr from "pretty-bytes";
 import { useNavigate } from "react-router";
+import { DownloadBar } from "../../components/Download";
 export default function PreStreams() {
   const { resp, err, isLoading, fetch, setResp } = useGetDownloads();
+  const [torrents, setTorrents] = useState<Map<string, Download>>(new Map());
   const { fetch: fetchPause, resp: respPause } = usePauseDownload();
   const { fetch: fetchDel } = useDeleteDownload();
   const [firstTime, setFirstTime] = useState(true);
-  const [selectedTorrent, setSelectedTorrent] = useState<string>();
+  const [selectedTorrent, setSelectedTorrent] = useState<string>("");
   useEffect(() => {
     fetch();
     setInterval(() => {
       fetch();
     }, 2000);
   }, []);
+  useEffect(() => {
+    resp?.forEach((d) => {
+      torrents.set(d.infoHash, d);
+    });
+    setTorrents(torrents);
+  }, [resp]);
   useEffect(() => {}, [respPause]);
   useEffect(() => {
     if (!isLoading) setFirstTime(false);
   }, [isLoading]);
   const findSelectedTorrent = () => {
-    if (!resp) return;
-    for (let d of resp) {
-      if (d.infoHash.toLowerCase() === selectedTorrent?.toLowerCase()) return d;
-    }
+    return torrents.get(selectedTorrent);
   };
   return (
     <>
@@ -69,7 +77,7 @@ export default function PreStreams() {
             <h1 className="text-lg">There is no pre stream created</h1>
           </div>
         )}
-        {resp && resp.length !== 0 && (
+        {torrents && resp && torrents.size !== 0 && (
           <div>
             <div className="flex mb-3 gap-2">
               <div
@@ -92,7 +100,7 @@ export default function PreStreams() {
                   }
                 />
               </div>
-              {!findSelectedTorrent()?.stopped && (
+              {!torrents.get(selectedTorrent)?.stopped && (
                 <div
                   onClick={async () => {
                     if (!selectedTorrent) return;
@@ -120,15 +128,11 @@ export default function PreStreams() {
                 </div>
               )}
               <div
-                title={
-                  findSelectedTorrent()?.files.filter((f) => f.streamed).length
-                    ? "Cannot pause (file being streamed)"
-                    : ""
-                }
+                title={findSelectedTorrent()?.idling ? "torrent is idling" : ""}
                 onClick={async () => {
                   if (!selectedTorrent) return;
                   let t = findSelectedTorrent();
-                  if (t?.files.filter((f) => f.streamed).length) return;
+                  if (t?.idling) return;
                   let r = await fetchPause(selectedTorrent);
                   if (r.status === 200) {
                     if (!t) return;
@@ -138,8 +142,7 @@ export default function PreStreams() {
                   }
                 }}
                 className={`border-2 relative ${
-                  !selectedTorrent ||
-                  findSelectedTorrent()?.files.filter((f) => f.streamed).length
+                  !selectedTorrent || findSelectedTorrent()?.idling
                     ? "border-gray-500"
                     : findSelectedTorrent()?.paused
                       ? "border-green-600 cursor-pointer"
@@ -147,32 +150,34 @@ export default function PreStreams() {
                 } w-fit ps-[4px] pr-[4px] rounded-md`}
               >
                 <FontAwesomeIcon
-                  icon={findSelectedTorrent()?.paused ? faPlay : faPause}
+                  icon={
+                    findSelectedTorrent()?.paused ||
+                    findSelectedTorrent()?.stopped
+                      ? faPlay
+                      : faPause
+                  }
                   className={`${
-                    !selectedTorrent ||
-                    findSelectedTorrent()?.files.filter((f) => f.streamed)
-                      .length
+                    !selectedTorrent || findSelectedTorrent()?.idling
                       ? "text-gray-500"
                       : findSelectedTorrent()?.paused
                         ? "text-green-600"
                         : "text-yellow-600"
                   }`}
                 />
-                {findSelectedTorrent() &&
-                  findSelectedTorrent()?.files.filter((f) => f.streamed)
-                    .length !== 0 && (
-                    <div className="absolute top-0">
-                      <FontAwesomeIcon
-                        icon={faSlash}
-                        className="text-gray-500 font-bold"
-                      />
-                    </div>
-                  )}
+                {findSelectedTorrent()?.idling && (
+                  <div className="absolute top-0">
+                    <FontAwesomeIcon
+                      icon={faSlash}
+                      className="text-gray-500 font-bold"
+                    />
+                  </div>
+                )}
               </div>
               <div
-                onClick={() => {
+                onClick={async () => {
                   if (!selectedTorrent) return;
-                  fetchDel(selectedTorrent);
+                  const r = await fetchDel(selectedTorrent);
+                  if (r.status === 200) setSelectedTorrent("");
                 }}
                 className={`border-2 ${!selectedTorrent ? "border-gray-500" : ""} cursor-pointer w-fit ps-[4px] pr-[4px] rounded-md`}
               >
@@ -182,22 +187,25 @@ export default function PreStreams() {
                 />
               </div>
             </div>
-            {resp.map((s: Download, i: number) => {
-              return (
-                <Download
-                  onClick={() => {
-                    if (selectedTorrent === s.infoHash) {
-                      setSelectedTorrent(undefined);
-                      return;
-                    }
-                    setSelectedTorrent(s.infoHash);
-                  }}
-                  selected={s.infoHash === selectedTorrent}
-                  key={i}
-                  download={s}
-                />
-              );
-            })}
+            <div className="flex gap-2 flex-col">
+              {resp.map((s: Download, i: number) => {
+                return (
+                  <Download
+                    status={s.status}
+                    onClick={() => {
+                      if (selectedTorrent === s.infoHash) {
+                        setSelectedTorrent("");
+                        return;
+                      }
+                      setSelectedTorrent(s.infoHash);
+                    }}
+                    selected={s.infoHash === selectedTorrent}
+                    key={i}
+                    download={s}
+                  />
+                );
+              })}
+            </div>
           </div>
         )}
         {}
@@ -210,30 +218,66 @@ function Download({
   download,
   onClick,
   selected,
+  status,
 }: {
   download: Download;
   onClick: () => any;
   selected: boolean;
+  status: string;
 }) {
   const nav = useNavigate();
-
+  const isJustStream = () => {
+    for (let d of download.files) {
+      if (d.selected) return false;
+    }
+    return true;
+  };
+  const isStreaming = () => {
+    for (let d of download.files) {
+      if (d.streamed) return true;
+    }
+    return false;
+  };
   return (
     <div
       onDoubleClick={() => {
         nav(`/home_cinema/torrents/${download.infoHash}/files`);
       }}
       onClick={onClick}
-      className={`hover:bg-[#50505059] cursor-pointer ${selected ? "bg-[#005db4bd]!" : download.stopped ? "bg-[#9200006c]" : download.paused ? "bg-[#98930054]" : ""} flex duration-150 gap-5  rounded-md `}
+      className={`hover:bg-[#50505059] cursor-pointer ${status === "setting" ? "bg-blue-600" : selected ? "bg-[#005db4bd]! border-[#005db4] border-2" : download.idling ? "bg-[#430073]" : download.stopped ? "bg-[#9200006c]" : download.paused ? "bg-[#98930054]" : ""} flex duration-150 gap-5  rounded-md `}
     >
       <div className="lg:flex  items-center p-5  rounded-md">
         <div>
-          <h1 className="font-bold md:text-lg">{download.name}</h1>
-          <div className="flex items-center">
-            {download.stopped ? (
+          <div className="flex items-center gap-2">
+            <FontAwesomeIcon
+              icon={
+                download.status === "setting"
+                  ? faRotate
+                  : download.stopped
+                    ? faStop
+                    : download.idling
+                      ? faMoon
+                      : download.paused
+                        ? faPause
+                        : faDownload
+              }
+            />
+            {download.status === "setting" ? (
+              <p>Loading...</p>
+            ) : download.stopped ? (
               <p>STOPPED</p>
+            ) : download.idling ? (
+              <p>IDLING</p>
             ) : download.paused ? (
               <p>PAUSED</p>
             ) : (
+              <p>DOWNLOADING</p>
+            )}
+          </div>
+          <h1 className="font-bold md:text-lg">{download.name}</h1>
+          <div className="flex items-center">
+            {((!download.stopped && !download.paused && !download.idling) ||
+              isStreaming()) && (
               <>
                 {" "}
                 <p>
@@ -247,27 +291,39 @@ function Download({
               </>
             )}
           </div>
-          <div>
-            {pr(download.downloaded || 0)} / {pr(download.downloadSize || 0)}
-          </div>
-          <div className="flex items-center gap-5">
-            <div className="w-[200px] relative bg-white h-2 rounded-full">
-              <div
-                style={{
-                  width: `${((download.progress || 0) * 100).toFixed()}%`,
-                }}
-                className={`h-2 bg-green-600 rounded-full`}
-              ></div>
+          {download.downloadSize !== 0 && !isJustStream() ? (
+            <DownloadBar
+              download={{
+                downloaded: download.downloaded || 0,
+                size: download.downloadSize || 0,
+              }}
+            />
+          ) : (
+            <p>{"No selected files".toUpperCase()}</p>
+          )}
+          {isStreaming() && (
+            <div>
+              <div className="flex gap-2 items-center">
+                <FontAwesomeIcon icon={faVideo} />
+                <h1>STREAMING</h1>
+              </div>
+              {download.files.map((f, i) => {
+                if (f.streamed) {
+                  return (
+                    <div key={i}>
+                      <p>{f.path}</p>
+                      <DownloadBar
+                        download={{
+                          downloaded: f.downloaded,
+                          size: f.size,
+                        }}
+                      />
+                    </div>
+                  );
+                }
+              })}
             </div>
-
-            <p>
-              {(
-                ((download.downloaded || 0) / (download.downloadSize || 1)) *
-                100
-              ).toFixed(2)}
-              %
-            </p>
-          </div>
+          )}
         </div>
       </div>
       <div className="p-5">
@@ -281,8 +337,8 @@ function Download({
           {download.files?.length}
         </p>
         <p>
-          downloading {pr(download.totalSize || 0)}/
-          {pr(download.downloadSize || 0)}
+          downloading {pr(download.downloadSize || 0)}/
+          {pr(download.totalSize || 0)}
         </p>
       </div>
       <div className="p-5">

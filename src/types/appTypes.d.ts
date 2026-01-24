@@ -30,9 +30,13 @@ interface Download {
     streamed: boolean;
     paused: boolean;
     selected: boolean;
+    size: number;
+    downloaded: number;
   }[];
   downloadSize?: number;
   totalSize?: number;
   downloaded?: number;
   stopped: boolean;
+  status: string;
+  idling: boolean;
 }
