@@ -16,7 +16,14 @@ interface TorrentFile {
   path64: string;
   downloadLink: string;
 }
-
+interface DownloadFile {
+  path: string;
+  streamed: boolean;
+  paused: boolean;
+  selected: boolean;
+  size: number;
+  downloaded: number;
+}
 interface Download {
   name: string;
   infoHash: string;
@@ -25,18 +32,12 @@ interface Download {
   upSpeed?: string;
   downSpeed?: string;
   paused: boolean;
-  files: {
-    path: string;
-    streamed: boolean;
-    paused: boolean;
-    selected: boolean;
-    size: number;
-    downloaded: number;
-  }[];
+  files: DownloadFile[];
   downloadSize?: number;
   totalSize?: number;
   downloaded?: number;
   stopped: boolean;
   status: string;
   idling: boolean;
+  isComplete: boolean;
 }

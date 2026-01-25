@@ -2,23 +2,18 @@ import { useEffect, useState } from "react";
 import { useGetDownloads } from "../../hooks/getDownloads";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faArrowRotateBack,
+  faCheck,
   faDownload,
   faFile,
   faMoon,
   faPause,
   faPlay,
-  faRecycle,
-  faRedo,
-  faRepeat,
   faRotate,
   faSlash,
   faStop,
-  faStream,
   faTrash,
   faUpload,
   faVideo,
-  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { useDeleteDownload } from "../../hooks/deleteStream";
 import NavBar from "../../components/Navbar";
@@ -26,7 +21,10 @@ import { Alert } from "@mui/material";
 import { usePauseDownload } from "../../hooks/usePauseDownload";
 import pr from "pretty-bytes";
 import { useNavigate } from "react-router";
-import { DownloadBar } from "../../components/Download";
+import { DownloadBar, SelectFiles } from "../../components/Download";
+import { Button } from "@mui/joy";
+import path from "path-browserify";
+import { fetchConfigs } from "../../hooks/getMagnetURI";
 export default function PreStreams() {
   const { resp, err, isLoading, fetch, setResp } = useGetDownloads();
   const [torrents, setTorrents] = useState<Map<string, Download>>(new Map());
@@ -34,6 +32,7 @@ export default function PreStreams() {
   const { fetch: fetchDel } = useDeleteDownload();
   const [firstTime, setFirstTime] = useState(true);
   const [selectedTorrent, setSelectedTorrent] = useState<string>("");
+  const [openSelectMenu, setOpenSelectMenu] = useState(false);
   useEffect(() => {
     fetch();
     setInterval(() => {
@@ -41,12 +40,16 @@ export default function PreStreams() {
     }, 2000);
   }, []);
   useEffect(() => {
+    let found = false;
     resp?.forEach((d) => {
+      if (d.infoHash.toLowerCase() === selectedTorrent.toLowerCase()) {
+        found = true;
+      }
       torrents.set(d.infoHash, d);
     });
+    if (!found) setSelectedTorrent("");
     setTorrents(torrents);
   }, [resp]);
-  useEffect(() => {}, [respPause]);
   useEffect(() => {
     if (!isLoading) setFirstTime(false);
   }, [isLoading]);
@@ -56,6 +59,29 @@ export default function PreStreams() {
   return (
     <>
       <NavBar />
+      {openSelectMenu && (
+        <>
+          <div
+            className="w-full h-screen fixed bg-[#00000069]"
+            onClick={() => setOpenSelectMenu(false)}
+          ></div>
+          <div className="absolute top-[50%] left-[50%] translate-[-50%]">
+            <SelectFiles
+              files={findSelectedTorrent()?.files || []}
+              infoHash={selectedTorrent}
+              onSet={(files) => {
+                const t = findSelectedTorrent();
+                if (t) t.files = files;
+                setResp(resp);
+                setOpenSelectMenu(false);
+              }}
+              onError={(err) => {
+                alert(err?.message);
+              }}
+            />
+          </div>
+        </>
+      )}
       <div className="ms-5 mr-5 mt-20">
         {err && (
           <Alert
@@ -176,8 +202,7 @@ export default function PreStreams() {
               <div
                 onClick={async () => {
                   if (!selectedTorrent) return;
-                  const r = await fetchDel(selectedTorrent);
-                  if (r.status === 200) setSelectedTorrent("");
+                  setOpenSelectMenu(true);
                 }}
                 className={`border-2 ${!selectedTorrent ? "border-gray-500" : ""} cursor-pointer w-fit ps-[4px] pr-[4px] rounded-md`}
               >
@@ -244,7 +269,7 @@ function Download({
         nav(`/home_cinema/torrents/${download.infoHash}/files`);
       }}
       onClick={onClick}
-      className={`hover:bg-[#50505059] cursor-pointer ${status === "setting" ? "bg-blue-600" : selected ? "bg-[#005db4bd]! border-[#005db4] border-2" : download.idling ? "bg-[#430073]" : download.stopped ? "bg-[#9200006c]" : download.paused ? "bg-[#98930054]" : ""} flex duration-150 gap-5  rounded-md `}
+      className={`hover:bg-[#50505059] cursor-pointer ${status === "setting" ? "bg-blue-600" : selected ? "bg-[#005db4bd]! border-[#005db4] border-2" : download.stopped ? "bg-[#9200006c]" : download.idling ? "bg-[#430073]" : download.isComplete ? "bg-[#0f8500bb]" : download.paused ? "bg-[#98930054]" : "bg-[#151515]"} flex duration-150 gap-5  rounded-md `}
     >
       <div className="lg:flex  items-center p-5  rounded-md">
         <div>
@@ -257,9 +282,11 @@ function Download({
                     ? faStop
                     : download.idling
                       ? faMoon
-                      : download.paused
-                        ? faPause
-                        : faDownload
+                      : download.isComplete
+                        ? faCheck
+                        : download.paused
+                          ? faPause
+                          : faDownload
               }
             />
             {download.status === "setting" ? (
@@ -268,6 +295,8 @@ function Download({
               <p>STOPPED</p>
             ) : download.idling ? (
               <p>IDLING</p>
+            ) : download.isComplete ? (
+              <p>COMPLETE</p>
             ) : download.paused ? (
               <p>PAUSED</p>
             ) : (
@@ -344,6 +373,17 @@ function Download({
       <div className="p-5">
         <h1 className="font-bold">Location</h1>
         <p>{download.path}</p>
+        <Button
+          onClick={async () => {
+            if (!download.path) return;
+            const c = await fetchConfigs();
+            if (!c.desktopMode) return;
+            window.electron.openFolder(path.join(download.path, download.name));
+          }}
+          className="mt-2!"
+        >
+          Open
+        </Button>
       </div>
     </div>
   );
