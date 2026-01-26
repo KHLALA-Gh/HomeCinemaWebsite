@@ -25,6 +25,8 @@ import { DownloadBar, SelectFiles } from "../../components/Download";
 import { Button } from "@mui/joy";
 import path from "path-browserify";
 import { fetchConfigs } from "../../hooks/getMagnetURI";
+import { FloatingDiv } from "../../components/Utils/floating-div";
+import axios from "axios";
 export default function PreStreams() {
   const { resp, err, isLoading, fetch, setResp } = useGetDownloads();
   const [torrents, setTorrents] = useState<Map<string, Download>>(new Map());
@@ -61,25 +63,34 @@ export default function PreStreams() {
       <NavBar />
       {openSelectMenu && (
         <>
-          <div
-            className="w-full h-screen fixed bg-[#00000069]"
-            onClick={() => setOpenSelectMenu(false)}
-          ></div>
-          <div className="absolute top-[50%] left-[50%] translate-[-50%]">
+          <FloatingDiv onClose={() => setOpenSelectMenu(false)}>
             <SelectFiles
               files={findSelectedTorrent()?.files || []}
               infoHash={selectedTorrent}
-              onSet={(files) => {
-                const t = findSelectedTorrent();
-                if (t) t.files = files;
-                setResp(resp);
-                setOpenSelectMenu(false);
+              onSet={async (files) => {
+                const configs = await fetchConfigs();
+
+                const url = new URL(
+                  `/api/downloads/${selectedTorrent}/files`,
+                  configs["torrent-streamer-api"].external
+                    ? configs["torrent-streamer-api"].origin
+                    : location.origin,
+                );
+                const r = await axios.put(url.href, {
+                  selectedFiles: files.map((f) => (f.selected ? f.path : "")),
+                });
+                if (r.status === 200) {
+                  const t = findSelectedTorrent();
+                  if (t) t.files = files;
+                  setResp(resp);
+                  setOpenSelectMenu(false);
+                }
               }}
               onError={(err) => {
                 alert(err?.message);
               }}
             />
-          </div>
+          </FloatingDiv>
         </>
       )}
       <div className="ms-5 mr-5 mt-20">
@@ -103,7 +114,7 @@ export default function PreStreams() {
             <h1 className="text-lg">There is no pre stream created</h1>
           </div>
         )}
-        {torrents && resp && torrents.size !== 0 && (
+        {resp && torrents.size !== 0 && (
           <div>
             <div className="flex mb-3 gap-2">
               <div
@@ -233,7 +244,6 @@ export default function PreStreams() {
             </div>
           </div>
         )}
-        {}
       </div>
     </>
   );

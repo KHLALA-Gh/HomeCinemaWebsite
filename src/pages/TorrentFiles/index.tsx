@@ -13,6 +13,7 @@ import {
   getTorrentByInfoHash,
   removeTorrent,
 } from "../../lib/idb";
+import { Back } from "../../components/Utils/back";
 
 interface Streams {
   streamUrl: string;
@@ -30,8 +31,8 @@ export default function Files() {
     err: errPreStream,
   } = useCreatePreStream();
   const [streams, setStreams] = useState<Streams[]>();
-  const [size, setSize] = useState<number>();
   const [saved, setSaved] = useState<boolean>(false);
+  const [size, setSize] = useState<number>();
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -68,49 +69,8 @@ export default function Files() {
 
   return (
     <>
-      <div className="cursor-pointer mt-7 ms-3 flex items-center gap-3 mb-3">
-        <FontAwesomeIcon
-          onClick={() => {
-            navigate(-1);
-          }}
-          icon={faChevronLeft}
-          className="h-7"
-        />
-        <h1 className="font-bold text-3xl">Inspect Torrent</h1>
-        <SaveButton
-          onClick={async () => {
-            try {
-              if (!p.hash) return;
-
-              if (!saved) {
-                let seeders = 0;
-                let leechers = 0;
-                if (sp.get("seeds")) {
-                  seeders = Number(sp.get("seeds"));
-                }
-                if (sp.get("leechers")) {
-                  leechers = Number(sp.get("leechers"));
-                }
-                await addTorrents({
-                  name: sp.get("name") || "",
-                  provider: sp.get("provider") || "",
-                  seeders: seeders,
-                  leechers: leechers,
-                  infoHash: p.hash,
-                  magnetURI: "",
-                  url: sp.get("about") || "",
-                });
-                setSaved(true);
-              } else {
-                await removeTorrent(p.hash);
-                setSaved(false);
-              }
-            } catch (err) {
-              console.log(err);
-            }
-          }}
-          saved={saved}
-        />
+      <div className="p-5">
+        <Back />
       </div>
 
       <TorrentFiles
@@ -118,10 +78,41 @@ export default function Files() {
         hash={p.hash as string}
         err={err}
         isLoading={isLoading}
+        saved={saved}
+        onSave={async () => {
+          try {
+            if (!p.hash) return;
+
+            if (!saved) {
+              let seeders = 0;
+              let leechers = 0;
+              if (sp.get("seeds")) {
+                seeders = Number(sp.get("seeds"));
+              }
+              if (sp.get("leechers")) {
+                leechers = Number(sp.get("leechers"));
+              }
+              await addTorrents({
+                name: sp.get("name") || "",
+                provider: sp.get("provider") || "",
+                seeders: seeders,
+                leechers: leechers,
+                infoHash: p.hash,
+                magnetURI: "",
+                url: sp.get("about") || "",
+              });
+              setSaved(true);
+            } else {
+              await removeTorrent(p.hash);
+              setSaved(false);
+            }
+          } catch (err) {
+            console.log(err);
+          }
+        }}
       />
 
       <div className="ps-5 mt-7">
-        <p className="mb-3">{pr((size as number) || 0)}</p>
         {sp.get("peers") && sp.get("seeds") && (
           <p>
             Seeds : {sp.get("seeds")} leechers : {sp.get("leechers")}
@@ -139,7 +130,6 @@ export default function Files() {
             </a>
           </p>
         )}
-        <p className="text-sm mb-5">Info Hash : {p.hash}</p>
       </div>
       {err && (
         <h1 className="text-red-500">An error occurred while getting files</h1>

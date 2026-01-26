@@ -17,6 +17,10 @@ import Button from "@mui/joy/Button";
 import pb from "pretty-bytes";
 import { fetchConfigs } from "../../hooks/getMagnetURI";
 import { useDownloadTorrent } from "../../hooks/useDownloadTorrent";
+import { SaveButton } from "../Movie/Movie";
+import { FloatingDiv } from "../Utils/floating-div";
+import { SelectFiles } from "../Download";
+import axios from "axios";
 
 function getVideos(files: TorrentFile[]): number {
   let num = 0;
@@ -36,12 +40,16 @@ interface TorrentFilesProps {
   resp: TorrentFile[];
   isLoading: boolean;
   err?: string;
+  onSave: () => void;
+  saved: boolean;
 }
 export function TorrentFiles({
   hash,
   resp,
   isLoading,
   err,
+  saved,
+  onSave,
 }: TorrentFilesProps) {
   const [showStreamUrl, setShowStreamUrl] = useState(false);
   const [downloadDialog, setDownloadDialog] = useState(false);
@@ -62,6 +70,7 @@ export function TorrentFiles({
   };
   const [size, setSize] = useState<number>();
   const [streams, setStreams] = useState<Streams[]>();
+  const [openSelectFiles, setOpenSelectFiles] = useState(false);
   useEffect(() => {
     if (!resp) return;
     let size = 0;
@@ -89,11 +98,57 @@ export function TorrentFiles({
   }, [downloadResp]);
   return (
     <>
+      {openSelectFiles && (
+        <FloatingDiv onClose={() => setOpenSelectFiles(false)}>
+          <SelectFiles
+            files={resp.map((f) => {
+              return {
+                selected: true,
+                paused: false,
+                downloaded: 0,
+                size: f.size,
+                streamed: false,
+                path: f.path,
+              } as DownloadFile;
+            })}
+            infoHash={hash}
+            onSet={async (files) => {
+              setOpenSelectFiles(false);
+
+              const configs = await fetchConfigs();
+
+              const url = new URL(
+                `/api/torrents/${hash}/download`,
+                configs["torrent-streamer-api"].external
+                  ? configs["torrent-streamer-api"].origin
+                  : location.origin,
+              );
+
+              const r = await axios.post(url.href, {
+                files: files.map((f) => (f.selected ? f.path : "")),
+                path: await window.electron.selectFolder(),
+              });
+              if (r.status === 200) {
+                return;
+              }
+              throw new Error(r.data);
+            }}
+            onError={(err) => {
+              alert(err?.message);
+            }}
+          />
+        </FloatingDiv>
+      )}
       <div className="border-2 ms-3 mr-3 bg-[#ffffff0d] border-[#ffffff4f] drop-shadow-md rounded-sm">
         <div className="p-5">
-          <h1 className="md:text-3xl font-bold mb-3">
-            {resp && <h1>{resp[0]?.path.split("/")[0]}</h1>}
-          </h1>
+          <div className="flex gap-3 items-center mb-3">
+            <h1 className="md:text-3xl font-bold">
+              {resp && <h1>{resp[0]?.path.split("/")[0]}</h1>}
+            </h1>
+            <SaveButton onClick={onSave} saved={saved} />
+          </div>
+          <p className="mb-3">Info Hash : {hash}</p>
+
           <div className="flex gap-5 items-center">
             {streams && streams?.length > 0 && (
               <Button
@@ -118,12 +173,7 @@ export function TorrentFiles({
             {configs?.desktopMode && !isLoading && (
               <button
                 onClick={async () => {
-                  if (downloadDialog) return;
-                  setDownloadDialog(true);
-                  const path = await window.electron.selectFolder();
-                  setDownloadDialog(false);
-                  if (!path) return;
-                  run(hash, path);
+                  setOpenSelectFiles(true);
                 }}
                 className="border-2 cursor-pointer text-[0px] hover:text-[10px] flex-col hover:translate-y-[-2px] hover:scale-150 duration-200 hover:border-[#0000] hover:border-0 border-white rounded-full w-10 h-10 flex items-center justify-center"
               >
@@ -376,6 +426,7 @@ export function TorrentFiles({
           </div>
         </>
       )}
+
       {easyView && (
         <>
           <div
@@ -393,7 +444,7 @@ export function TorrentFiles({
                 <FontAwesomeIcon icon={faXmark} className="h-7 mr-2" />
               </div>
             </div>
-            <EasyView resp={resp} />
+            <EasyView resp={resp} config={configs} />
           </div>
         </>
       )}
@@ -401,7 +452,13 @@ export function TorrentFiles({
   );
 }
 
-function EasyView({ resp }: { resp: TorrentFile[] }) {
+function EasyView({
+  resp,
+  config,
+}: {
+  resp: TorrentFile[];
+  config?: ServerConfig;
+}) {
   let elements = resp.map((f, i) => {
     if (!f.name.endsWith(".mp4") && !f.name.endsWith(".mkv")) return;
     let match = f.name.toUpperCase().match(/S(\d+)E(\d+)/);
@@ -438,10 +495,14 @@ function EasyView({ resp }: { resp: TorrentFile[] }) {
           <div
             className="w-fit cursor-pointer"
             onClick={() => {
+              if (config?.desktopMode) {
+                window.electron.openVLC([f.downloadLink]);
+                return;
+              }
               open(f.downloadLink, "_blank");
             }}
           >
-            <FontAwesomeIcon icon={faDownload} />
+            <FontAwesomeIcon icon={config?.desktopMode ? faPlay : faDownload} />
           </div>
         </div>
       </div>

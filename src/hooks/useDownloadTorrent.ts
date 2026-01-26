@@ -9,7 +9,7 @@ export function useDownloadTorrent() {
   const [resp, setResp] = useState<AxiosResponse>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [err, setErr] = useState<string>();
-  const post = async (hash: string, path: string) => {
+  const post = async (hash: string, path: string, files?: string[]) => {
     const config = await fetchConfigs();
     const url = new URL(
       endPoint.replace(":hash", hash),
@@ -19,6 +19,7 @@ export function useDownloadTorrent() {
     );
     const resp = await axios.post(url.href, {
       path,
+      files,
     });
     if (resp.status === 200) {
       const data: Download = resp.data;
@@ -27,11 +28,11 @@ export function useDownloadTorrent() {
     }
     return resp;
   };
-  const run = (hash: string, path: string) => {
+  const run = (hash: string, path: string, files?: string[]) => {
     setIsLoading(true);
     setErr("");
     setResp(undefined);
-    post(hash, path)
+    post(hash, path, files)
       .then((data) => {
         setResp(data);
       })
