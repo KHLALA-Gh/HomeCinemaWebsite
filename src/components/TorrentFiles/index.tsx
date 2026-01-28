@@ -99,7 +99,10 @@ export function TorrentFiles({
   return (
     <>
       {openSelectFiles && (
-        <FloatingDiv onClose={() => setOpenSelectFiles(false)}>
+        <FloatingDiv
+          title="Select Files"
+          onClose={() => setOpenSelectFiles(false)}
+        >
           <SelectFiles
             files={resp.map((f) => {
               return {
@@ -153,18 +156,22 @@ export function TorrentFiles({
             {streams && streams?.length > 0 && (
               <Button
                 onClick={() => {
-                  const url = new URL("/api/playlist", location.origin);
-                  streams.map((s) => {
-                    url.searchParams.append("streams", s.streamUrl);
-                    url.searchParams.append("names", s.name);
-                  });
-                  if (resp) {
-                    url.searchParams.set(
-                      "fileName",
-                      resp[0].path.split("/")[0],
-                    );
+                  if (configs?.desktopMode) {
+                    window.electron.openVLC(streams.map((s) => s.streamUrl));
+                  } else {
+                    const url = new URL("/api/playlist", location.origin);
+                    streams.map((s) => {
+                      url.searchParams.append("streams", s.streamUrl);
+                      url.searchParams.append("names", s.name);
+                    });
+                    if (resp) {
+                      url.searchParams.set(
+                        "fileName",
+                        resp[0].path.split("/")[0],
+                      );
+                    }
+                    open(url.href);
                   }
-                  open(url.href);
                 }}
               >
                 <FontAwesomeIcon icon={faPlay} className="mr-3" /> Play
@@ -230,11 +237,11 @@ export function TorrentFiles({
             </Button>
             <div className="p-5">
               {resp?.map((file, i) => {
-                if (
-                  showOnlyVideo &&
-                  !(file.name.endsWith(".mp4") || file.name.endsWith(".mkv"))
-                )
-                  return;
+                const isVid =
+                  file.name.endsWith(".mp4") ||
+                  file.name.endsWith(".mkv") ||
+                  file.name.endsWith(".avi");
+                if (showOnlyVideo && !isVid) return;
                 return (
                   <div
                     key={i}
@@ -249,18 +256,40 @@ export function TorrentFiles({
                       )}
                     </div>
                     <a
-                      target="_blank"
-                      href={file.downloadLink}
-                      className="col-span-4 hover:underline"
+                      title={
+                        configs?.desktopMode && isVid
+                          ? "double click to open"
+                          : ""
+                      }
+                      onDoubleClick={() => {
+                        if (configs?.desktopMode && isVid) {
+                          window.electron.openVLC([file.downloadLink]);
+                        }
+                      }}
+                      target={configs?.desktopMode ? "" : "_blank"}
+                      href={!configs?.desktopMode ? file.downloadLink : "#"}
+                      className="col-span-6 hover:underline"
                     >
                       {file.name}
                     </a>
-                    <p className="xl:col-span-1 col-span-3 xl:block hidden">
-                      {pr(file.size)}
-                    </p>
 
                     <button
-                      className="lg:col-span-3 col-span-1 xl:block hidden"
+                      onClick={() => {
+                        if (!isVid) return;
+                        window.electron.openVLC([file.downloadLink]);
+                      }}
+                      className="items-center col-span-1 flex cursor-pointer"
+                    >
+                      {isVid && (
+                        <>
+                          <FontAwesomeIcon icon={faPlay} className="mr-2" />
+                          play
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      className="lg:col-span-3 col-span-1 xl:block hidden cursor-pointer"
                       onClick={() => {
                         navigator.clipboard.writeText(file.downloadLink);
                       }}
@@ -270,20 +299,9 @@ export function TorrentFiles({
                         Copy Stream URL
                       </span>
                     </button>
-                    {configs?.desktopMode &&
-                      (file.name.endsWith(".mp4") ||
-                        file.name.endsWith(".mkv") ||
-                        file.name.endsWith("avi")) && (
-                        <button
-                          onClick={() => {
-                            window.electron.openVLC([file.downloadLink]);
-                          }}
-                          className="items-center col-span-1 xl:flex hidden cursor-pointer"
-                        >
-                          <FontAwesomeIcon icon={faPlay} className="mr-2" />
-                          play
-                        </button>
-                      )}
+                    <p className="xl:col-span-1 col-span-3 xl:block hidden">
+                      {pr(file.size)}
+                    </p>
                     <div className=" md:flex hidden xl:hidden gap-3 items-center justify-center col-span-3 bg-[#202020] p-2 rounded-md">
                       <h6 className="md:block hidden col-span-1 text-[13px]">
                         {pb(file.size)}
@@ -296,32 +314,17 @@ export function TorrentFiles({
                       >
                         <FontAwesomeIcon icon={faFile} />
                       </div>
-                      <div
-                        className="w-fit cursor-pointer"
-                        onClick={() => {
-                          open(file.downloadLink, "_blank");
-                        }}
-                      >
-                        <FontAwesomeIcon icon={faDownload} />
-                      </div>
+                      {!configs?.desktopMode && (
+                        <div
+                          className="w-fit cursor-pointer"
+                          onClick={() => {
+                            open(file.downloadLink, "_blank");
+                          }}
+                        >
+                          <FontAwesomeIcon icon={faDownload} />
+                        </div>
+                      )}
                     </div>
-                    {(file.name.endsWith(".mp4") ||
-                      file.name.endsWith(".mkv") ||
-                      file.name.endsWith("avi")) && (
-                      <Button
-                        className="xl:col-span-2 col-span-4 text-base! md:block! hidden!"
-                        color="neutral"
-                        loading={isLoadingPreStream}
-                        disabled={showStreamUrl}
-                        onClick={() => {
-                          createStream(file.path);
-                        }}
-                        variant="soft"
-                        size="lg"
-                      >
-                        Create PreStream
-                      </Button>
-                    )}
 
                     <div className="md:hidden mt-3 flex items-center gap-5">
                       <div className="flex xl:hidden gap-3 items-center justify-center col-span-3 bg-[#202020] p-2 rounded-md">
@@ -345,22 +348,6 @@ export function TorrentFiles({
                           <FontAwesomeIcon icon={faDownload} />
                         </div>
                       </div>
-                      {(file.name.endsWith(".mp4") ||
-                        file.name.endsWith(".mkv")) && (
-                        <Button
-                          className="!text-[14px] !pt-0 !pb-0 !ps-2 !pr-2"
-                          color="neutral"
-                          loading={isLoadingPreStream}
-                          disabled={showStreamUrl}
-                          onClick={() => {
-                            createStream(file.path);
-                          }}
-                          variant="soft"
-                          size="sm"
-                        >
-                          Create PreStream
-                        </Button>
-                      )}
                     </div>
                   </div>
                 );
@@ -429,23 +416,9 @@ export function TorrentFiles({
 
       {easyView && (
         <>
-          <div
-            onClick={() => setEasyView(false)}
-            className="top-0 fixed bg-[#00000050] w-full h-screen flex items-center  justify-center"
-          ></div>
-
-          <div className="fixed top-[50%] left-[50%] translate-x-[-50%]  translate-y-[-50%]">
-            <div className="flex justify-between bg-black p-2">
-              <h1 className=" text-xl font-bold  relative">Easy View </h1>
-              <div
-                className="cursor-pointer"
-                onClick={() => setEasyView(false)}
-              >
-                <FontAwesomeIcon icon={faXmark} className="h-7 mr-2" />
-              </div>
-            </div>
+          <FloatingDiv title="Easy View" onClose={() => setEasyView(false)}>
             <EasyView resp={resp} config={configs} />
-          </div>
+          </FloatingDiv>
         </>
       )}
     </>

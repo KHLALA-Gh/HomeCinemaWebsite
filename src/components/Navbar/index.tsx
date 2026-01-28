@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import DrawerMobileNavigation from "./drawer";
 import img from "../../assets/imgs/logo.svg";
+import { fetchConfigs } from "../../hooks/getMagnetURI";
 
 interface NavbarProps {
   mode?: "Movies" | "TV";
@@ -15,6 +16,7 @@ export default function NavBar(props: NavbarProps) {
   const [changeW, setChangeW] = useState(false);
   const [searchP] = useSearchParams();
   const [term, setTerm] = useState("");
+  const [version, setVersion] = useState<Version>();
   const navigate = useNavigate();
   useEffect(() => {
     if (openS === true) {
@@ -31,6 +33,11 @@ export default function NavBar(props: NavbarProps) {
       setTerm(t);
     }
   }, [searchP]);
+  useEffect(() => {
+    fetchConfigs().then((c) => {
+      setVersion(c.version);
+    });
+  }, []);
   const onPressEnter = (id: string, key: string) => {
     if (key === "Enter") {
       // @ts-ignore
@@ -66,18 +73,13 @@ export default function NavBar(props: NavbarProps) {
                   <img src={img} className="lg:h-12 h-9" />
                   <h1 className="lg:text-xl font-black">
                     Home Cinema
-                    {props.mode === "TV" && (
-                      <p className="text-sm font-normal p-0">TV Shows</p>
-                    )}
-                    {props.mode === "Movies" && (
-                      <p className="text-sm font-normal p-0">Movies</p>
-                    )}
-                  </h1>
-                  {props.mode === "TV" && (
-                    <p className="border-2 border-green-600 pr-5 ps-5 font-semibold text-green-600 rounded-full">
-                      Beta
+                    <p
+                      title={`Version : ${version?.semVer}`}
+                      className="text-sm font-semibold p-0 text-green-600 rounded-full"
+                    >
+                      {version?.name}
                     </p>
-                  )}
+                  </h1>
                 </div>
               </div>
             </Link>
@@ -95,10 +97,10 @@ export default function NavBar(props: NavbarProps) {
               {(props.mode === "Movies" || !props.mode) && <>TV Shows</>}
             </Link>
             <Link
-              to="/home_cinema/streams"
+              to="/home_cinema/downloads"
               className="font-bold lg:block hidden"
             >
-              Streams
+              Downloads
             </Link>
             <Link
               to="/home_cinema/torrents"

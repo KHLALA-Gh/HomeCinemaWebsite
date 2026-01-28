@@ -1,8 +1,6 @@
 import pr from "pretty-bytes";
 import { useEffect, useState } from "react";
 import Button from "../Button/button";
-import axios from "axios";
-import { fetchConfigs } from "../../hooks/getMagnetURI";
 
 export function DownloadBar({
   download,
@@ -48,12 +46,7 @@ interface SelectFilesProps {
   onError?: (err: any) => void;
   selectAll?: boolean;
 }
-export function SelectFiles({
-  files,
-  onSet,
-  onError,
-  selectAll,
-}: SelectFilesProps) {
+export function SelectFiles({ files, onSet, onError }: SelectFilesProps) {
   const [editFiles, setEditFiles] = useState<DownloadFile[]>([]);
   useEffect(() => {
     setEditFiles([...files]);
@@ -62,10 +55,9 @@ export function SelectFiles({
     f.selected = !f.selected;
     setEditFiles([...editFiles]);
   };
-  const [selectAllS, setSelectAll] = useState(selectAll);
 
   return (
-    <div className="rounded-md p-3 border-2 max-h-[80vh] border-white bg-black min-w-[400px] select-none">
+    <div className="rounded-md p-3 max-h-[80vh] bg-[#161616] min-w-[400px] select-none">
       <h1 className="text-xl font-bold mb-3">Files</h1>
       <div className="overflow-y-scroll  max-h-[60vh]">
         {editFiles &&
@@ -118,7 +110,6 @@ export function SelectFiles({
           className="cursor-pointer"
           onClick={() => {
             if (!editFiles.length) return;
-            console.log(selectAllS);
             let arr = editFiles.map((f) => {
               return {
                 ...f,

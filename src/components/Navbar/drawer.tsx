@@ -134,9 +134,9 @@ export default function DrawerMobileNavigation({
             {" "}
             Torrents
           </ListItemButton>
-          <ListItemButton onClick={() => navigate("/home_cinema/streams")}>
+          <ListItemButton onClick={() => navigate("/home_cinema/downloads")}>
             {" "}
-            Streams
+            Downloads
           </ListItemButton>
           <ListItemButton onClick={() => navigate("/home_cinema/saved")}>
             {" "}

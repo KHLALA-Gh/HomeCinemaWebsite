@@ -8,9 +8,10 @@ import TVShows from "../../pages/TV_Shows";
 import Show from "../../pages/Show";
 import TorrentFiles from "../../pages/TorrentFiles";
 import { useEffect } from "react";
-import PreStreams from "../../pages/PreStreams";
+import Downloads from "../../pages/Downloads";
 import Torrents from "../../pages/Torrents";
 import Saved from "../../pages/Saved";
+import { NotFound } from "../../pages/404";
 
 function Root() {
   const navigate = useNavigate();
@@ -38,8 +39,9 @@ export default function Router() {
             element={<TorrentFiles />}
           />
           <Route path="/home_cinema/torrents/" element={<Torrents />} />
-          <Route path="/home_cinema/streams" element={<PreStreams />} />
+          <Route path="/home_cinema/downloads" element={<Downloads />} />
           <Route path="/home_cinema/saved" element={<Saved />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </>

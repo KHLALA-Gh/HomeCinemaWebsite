@@ -18,6 +18,7 @@ import {
   removeTorrent,
   removeTVShow,
 } from "../../lib/idb";
+import NavBar from "../Navbar";
 function getMagnetHash(magnetLink: string) {
   const url = new URL(magnetLink);
   const params = new URLSearchParams(url.search);

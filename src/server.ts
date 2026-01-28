@@ -7,6 +7,10 @@ if (process.env.NODE_ENV === "production") {
   PORT = 4173;
 }
 bootServer(PORT, {
+  version: {
+    name: "Alpha 6",
+    semVer: "0.0.6",
+  },
   openVLC: true,
   desktopMode: true,
   "torrent-streamer-api": {

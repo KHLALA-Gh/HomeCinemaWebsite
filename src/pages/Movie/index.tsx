@@ -6,6 +6,7 @@ import { faChevronLeft, faX } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import { SaveButton } from "../../components/Movie/Movie";
 import { addMovie, getMovieById, removeMovie } from "../../lib/idb";
+import NavBar from "../../components/Navbar";
 
 export default function MoviePage() {
   const params = useParams();
@@ -48,6 +49,7 @@ export function MovieDetails({
   const nav = useNavigate();
   return (
     <>
+      <NavBar />
       <div className="xl:ps-28 xl:pr-28 md:ps-8 md:pr-8 sm:ps-0 sm:pr-0 ps-3 pr-3 md:mt-20 mt-10">
         <div
           className="md:mb-10 mb-10 cursor-pointer bg-white rounded-full h-10 w-10 flex justify-center items-center"

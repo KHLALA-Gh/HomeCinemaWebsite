@@ -8,6 +8,7 @@ import {
   faMoon,
   faPause,
   faPlay,
+  faPlus,
   faRotate,
   faSlash,
   faStop,
@@ -22,11 +23,12 @@ import { usePauseDownload } from "../../hooks/usePauseDownload";
 import pr from "pretty-bytes";
 import { useNavigate } from "react-router";
 import { DownloadBar, SelectFiles } from "../../components/Download";
-import { Button } from "@mui/joy";
+import { Button, Input } from "@mui/joy";
 import path from "path-browserify";
 import { fetchConfigs } from "../../hooks/getMagnetURI";
 import { FloatingDiv } from "../../components/Utils/floating-div";
 import axios from "axios";
+import { AddTorrent } from "../../components/Utils/addTorrent";
 export default function PreStreams() {
   const { resp, err, isLoading, fetch, setResp } = useGetDownloads();
   const [torrents, setTorrents] = useState<Map<string, Download>>(new Map());
@@ -35,6 +37,7 @@ export default function PreStreams() {
   const [firstTime, setFirstTime] = useState(true);
   const [selectedTorrent, setSelectedTorrent] = useState<string>("");
   const [openSelectMenu, setOpenSelectMenu] = useState(false);
+  const [openAddTorrent, setOpenAddTorrent] = useState(false);
   useEffect(() => {
     fetch();
     setInterval(() => {
@@ -61,9 +64,13 @@ export default function PreStreams() {
   return (
     <>
       <NavBar />
+
       {openSelectMenu && (
         <>
-          <FloatingDiv onClose={() => setOpenSelectMenu(false)}>
+          <FloatingDiv
+            title="Change Files"
+            onClose={() => setOpenSelectMenu(false)}
+          >
             <SelectFiles
               files={findSelectedTorrent()?.files || []}
               infoHash={selectedTorrent}
@@ -110,13 +117,29 @@ export default function PreStreams() {
           </div>
         )}
         {resp?.length == 0 && (
-          <div className="w-full absolute top-0 h-screen flex justify-center items-center z-[-10] left-0">
-            <h1 className="text-lg">There is no pre stream created</h1>
+          <div className="w-full absolute top-0 h-screen gap-2 flex flex-col justify-center items-center z-[-10] left-0">
+            <h1 className="text-lg">There is no download created</h1>
+            <Button onClick={() => setOpenAddTorrent(true)}>Create</Button>
           </div>
+        )}
+        {openAddTorrent && (
+          <FloatingDiv
+            title="Create new download"
+            onClose={() => setOpenAddTorrent(false)}
+          >
+            <AddTorrent />
+          </FloatingDiv>
         )}
         {resp && torrents.size !== 0 && (
           <div>
             <div className="flex mb-3 gap-2">
+              <div
+                onClick={() => setOpenAddTorrent(true)}
+                className="border-2 rounded-full cursor-pointer w-7 flex justify-center items-center h-7 border-blue-700"
+              >
+                <FontAwesomeIcon className="text-blue-700" icon={faPlus} />
+              </div>
+              <div className="w-0.5 bg-white"></div>
               <div
                 onClick={async () => {
                   if (!selectedTorrent) return;

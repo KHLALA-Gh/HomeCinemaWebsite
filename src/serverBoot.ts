@@ -15,6 +15,7 @@ const base = process.env.BASE || "/";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const defaultServerConf: ServerConfig = {
+  version: { name: "development", semVer: "0.0.0" },
   openVLC: false,
   desktopMode: false,
   "torrent-streamer-api": {

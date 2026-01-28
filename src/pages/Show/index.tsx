@@ -1,6 +1,7 @@
 import { useParams } from "react-router";
 import { useGetTVShowDetails } from "../../hooks/getTVShowDetails";
 import { ShowDetails } from "../../components/Show_Details";
+import NavBar from "../../components/Navbar";
 
 export default function Show() {
   const p = useParams();
@@ -8,6 +9,7 @@ export default function Show() {
 
   return (
     <>
+      <NavBar />
       <div className="ps-2 pr-2 md:pr-16  md:ps-16 mt-20">
         {!err && !isLoading && resp && <ShowDetails {...resp} />}
       </div>
