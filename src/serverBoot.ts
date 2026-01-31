@@ -76,6 +76,12 @@ export async function bootServer(port: number, config?: Partial<ServerConfig>) {
   if (c.openVLC) {
     app.get("/api/play-vlc", async (req, res) => {
       try {
+        if (!c.desktopMode && !c.openVLC) {
+          res.status(403).json({
+            err: "play on vlc is not allowed",
+          });
+          return;
+        }
         let streams: string[];
         if (typeof req.query.streams === "string") {
           streams = [req.query.streams];

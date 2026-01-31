@@ -11,10 +11,4 @@ bootServer(PORT, {
     name: "Alpha 6",
     semVer: "0.0.6",
   },
-  openVLC: true,
-  desktopMode: true,
-  "torrent-streamer-api": {
-    external: true,
-    origin: "http://localhost:8081",
-  },
 });

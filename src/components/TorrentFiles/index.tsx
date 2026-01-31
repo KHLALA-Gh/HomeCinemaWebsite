@@ -273,20 +273,22 @@ export function TorrentFiles({
                       {file.name}
                     </a>
 
-                    <button
-                      onClick={() => {
-                        if (!isVid) return;
-                        window.electron.openVLC([file.downloadLink]);
-                      }}
-                      className="items-center col-span-1 flex cursor-pointer"
-                    >
-                      {isVid && (
-                        <>
-                          <FontAwesomeIcon icon={faPlay} className="mr-2" />
-                          play
-                        </>
-                      )}
-                    </button>
+                    {configs?.desktopMode && (
+                      <button
+                        onClick={() => {
+                          if (!isVid) return;
+                          window.electron.openVLC([file.downloadLink]);
+                        }}
+                        className="items-center col-span-1 flex cursor-pointer"
+                      >
+                        {isVid && (
+                          <>
+                            <FontAwesomeIcon icon={faPlay} className="mr-2" />
+                            play
+                          </>
+                        )}
+                      </button>
+                    )}
 
                     <button
                       className="lg:col-span-3 col-span-1 xl:block hidden cursor-pointer"

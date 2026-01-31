@@ -21,6 +21,7 @@ export function useGetDownloads() {
   };
   useEffect(() => {}, []);
   const fetch = () => {
+    setErr(undefined);
     setIsLoading(true);
     get()
       .then((data) => {

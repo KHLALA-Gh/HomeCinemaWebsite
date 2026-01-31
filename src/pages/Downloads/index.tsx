@@ -46,6 +46,7 @@ export default function PreStreams() {
   }, []);
   useEffect(() => {
     let found = false;
+    const torrents = new Map();
     resp?.forEach((d) => {
       if (d.infoHash.toLowerCase() === selectedTorrent.toLowerCase()) {
         found = true;
@@ -129,6 +130,12 @@ export default function PreStreams() {
           >
             <AddTorrent />
           </FloatingDiv>
+        )}
+        {!resp && (
+          <div className="flex items-center justify-center gap-3 flex-col w-full h-screen">
+            <FontAwesomeIcon icon={faRotate} size="4x" />
+            <h1>Loading...</h1>
+          </div>
         )}
         {resp && torrents.size !== 0 && (
           <div>
@@ -283,6 +290,10 @@ function Download({
   selected: boolean;
   status: string;
 }) {
+  const [configs, setConfigs] = useState<ServerConfig>();
+  useEffect(() => {
+    fetchConfigs().then((c) => setConfigs(c));
+  }, []);
   const nav = useNavigate();
   const isJustStream = () => {
     for (let d of download.files) {
@@ -406,17 +417,20 @@ function Download({
       <div className="p-5">
         <h1 className="font-bold">Location</h1>
         <p>{download.path}</p>
-        <Button
-          onClick={async () => {
-            if (!download.path) return;
-            const c = await fetchConfigs();
-            if (!c.desktopMode) return;
-            window.electron.openFolder(path.join(download.path, download.name));
-          }}
-          className="mt-2!"
-        >
-          Open
-        </Button>
+        {configs?.desktopMode && (
+          <Button
+            onClick={async () => {
+              if (!download.path) return;
+              if (!configs?.desktopMode) return;
+              window.electron.openFolder(
+                path.join(download.path, download.name),
+              );
+            }}
+            className="mt-2!"
+          >
+            Open
+          </Button>
+        )}
       </div>
     </div>
   );
