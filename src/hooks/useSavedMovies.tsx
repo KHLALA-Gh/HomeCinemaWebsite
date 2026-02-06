@@ -5,6 +5,7 @@ export function useSavedMovies() {
   const [savedMv, setSavedMv] = useState<MovieMetaData[]>();
   useEffect(() => {
     getMovies().then((m) => {
+      console.log(m);
       setSavedMv(m);
     });
   }, []);

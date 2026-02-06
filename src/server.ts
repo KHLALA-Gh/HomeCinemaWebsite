@@ -11,4 +11,5 @@ bootServer(PORT, {
     name: "Alpha 6",
     semVer: "0.0.6",
   },
+  desktopMode: true,
 });

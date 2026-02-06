@@ -15,6 +15,7 @@ interface TorrentFile {
   path: string;
   path64: string;
   downloadLink: string;
+  playing?: boolean;
 }
 interface DownloadFile {
   path: string;

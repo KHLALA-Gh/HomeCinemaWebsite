@@ -53,6 +53,7 @@ export function TorrentFiles({
 }: TorrentFilesProps) {
   const [showStreamUrl, setShowStreamUrl] = useState(false);
   const [downloadDialog, setDownloadDialog] = useState(false);
+  const [playing, setPlaying] = useState<Set<string>>(new Set());
   const {
     resp: createStreamResp,
     isLoading: isLoadingPreStream,
@@ -274,12 +275,22 @@ export function TorrentFiles({
                     </a>
 
                     {configs?.desktopMode && (
-                      <button
-                        onClick={() => {
+                      <Button
+                        loading={playing.has(file.path)}
+                        onClick={async () => {
                           if (!isVid) return;
-                          window.electron.openVLC([file.downloadLink]);
+                          try {
+                            setPlaying(new Set([...playing, file.path]));
+                            await window.electron.openVLC([file.downloadLink]);
+                          } catch {
+                            alert("error when starting vlc.");
+                          } finally {
+                            const newSet = new Set(playing);
+                            newSet.delete(file.path);
+                            setPlaying(newSet);
+                          }
                         }}
-                        className="items-center col-span-1 flex cursor-pointer"
+                        className="items-center bg-transparent! col-span-1 flex cursor-pointer"
                       >
                         {isVid && (
                           <>
@@ -287,7 +298,7 @@ export function TorrentFiles({
                             play
                           </>
                         )}
-                      </button>
+                      </Button>
                     )}
 
                     <button
