@@ -27,10 +27,7 @@ const data: typeData[] = [
     code: "tr",
   },
 ];
-function grepLike(pattern: string, text: string) {
-  const safe = pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return new RegExp(safe, "i").test(text);
-}
+
 export default function Saved() {
   const [selectedData, setSelectedData] = useState<dataCode>("mv");
   const mvDetails = useSavedMovies();

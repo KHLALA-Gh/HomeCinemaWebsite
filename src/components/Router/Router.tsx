@@ -13,6 +13,7 @@ import Torrents from "../../pages/Torrents";
 import Saved from "../../pages/Saved";
 import { NotFound } from "../../pages/404";
 import NewUpdate from "../../pages/new-update";
+import History from "../../pages/History";
 
 function Root() {
   const navigate = useNavigate();
@@ -43,6 +44,7 @@ export default function Router() {
           <Route path="/home_cinema/downloads" element={<Downloads />} />
           <Route path="/new-update" element={<NewUpdate />} />
           <Route path="/home_cinema/saved" element={<Saved />} />
+          <Route path="/home_cinema/download-history" element={<History />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

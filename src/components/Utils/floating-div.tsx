@@ -8,12 +8,14 @@ export function FloatingDiv({
   onClose,
   blur,
   title,
+  borders,
 }: {
   classname?: string;
   children: React.ReactNode;
   onClose: () => any;
   blur?: boolean;
   title?: string;
+  borders?: boolean;
 }) {
   const [scale, setScale] = useState(0);
   useEffect(() => {
@@ -43,7 +45,8 @@ export function FloatingDiv({
           scale: scale,
         }}
         className={
-          "duration-225 fixed top-[50%] bg-black left-[50%] translate-[-50%]  min-w-[500px]  z-999 ${classname} scale"
+          "duration-225 fixed top-[50%] bg-black left-[50%] translate-[-50%]  min-w-[500px]  z-999 ${classname} scale " +
+          (borders ? "border-2 border-white rounded-md" : "")
         }
       >
         <div className="flex justify-between p-2">

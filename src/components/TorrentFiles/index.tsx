@@ -127,18 +127,22 @@ export function TorrentFiles({
                   ? configs["torrent-streamer-api"].origin
                   : location.origin,
               );
-
+              let path = await window.electron.getDHPath();
+              window.electron.setDH(hash.toLowerCase(), {
+                infoHash: hash,
+                name: resp[0]?.path.split("/")[0],
+                path: path || "undefined",
+              });
               const r = await axios.post(url.href, {
                 files: files.map((f) => (f.selected ? f.path : "")),
-                path: await window.electron.selectFolder(),
+                path,
               });
-              if (r.status === 200) {
-                return;
-              }
+
               throw new Error(r.data);
             }}
             onError={(err) => {
-              alert(err?.message);
+              alert("an error occured");
+              console.log(err);
             }}
           />
         </FloatingDiv>

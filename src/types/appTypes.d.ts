@@ -9,6 +9,12 @@ interface TorrentSearch {
   infoHash: string;
 }
 
+interface DownloadHistory {
+  infoHash: string;
+  name: string;
+  path: string;
+}
+
 interface TorrentFile {
   name: string;
   size: number;

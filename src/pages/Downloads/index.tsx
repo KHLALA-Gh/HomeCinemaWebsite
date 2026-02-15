@@ -38,6 +38,7 @@ export default function PreStreams() {
   const [selectedTorrent, setSelectedTorrent] = useState<string>("");
   const [openSelectMenu, setOpenSelectMenu] = useState(false);
   const [openAddTorrent, setOpenAddTorrent] = useState(false);
+  const nav = useNavigate();
   useEffect(() => {
     fetch();
     setInterval(() => {
@@ -102,6 +103,14 @@ export default function PreStreams() {
         </>
       )}
       <div className="ms-5 mr-5 mt-20">
+        <Button
+          onClick={() => {
+            nav("/home_cinema/download-history");
+          }}
+          className="mb-7!"
+        >
+          Library
+        </Button>
         {err && (
           <Alert
             severity="error"
@@ -253,7 +262,7 @@ export default function PreStreams() {
                 />
               </div>
             </div>
-            <div className="flex gap-2 flex-col">
+            <div className="flex gap-2 flex-col overflow-y-scroll max-h-[100vh]">
               {resp.map((s: Download, i: number) => {
                 return (
                   <Download

@@ -20,6 +20,11 @@ declare global {
       getSavedTorrents(): Promise<[string, Torrent][]>;
       getSavedTorrent(hash: string): Promise<Torrent | undefined>;
       deleteSavedTorrent(hash: string): Promise<void>;
+      getDH(hash: string): DownloadHistory;
+      getAllDH(): Promise<Map<string, DownloadHistory>>;
+      setDH(hash: string, d: DownloadHistory);
+      deleteDH(hash: string);
+      getDHPath(): Promise<string>;
     };
   }
 }
