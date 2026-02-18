@@ -4,12 +4,21 @@ import Input from "../Input/Input";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import DrawerMobileNavigation from "./drawer";
-import img from "../../assets/imgs/logo.svg";
+import img from "../../assets/imgs/icon.png";
 import { fetchConfigs } from "../../hooks/getMagnetURI";
 
 interface NavbarProps {
   mode?: "Movies" | "TV";
 }
+
+const links = [
+  {
+    to: "/home_cinema/downloads",
+    name: "Downloads",
+  },
+  { to: "/home_cinema/torrents", name: "Torrents" },
+  { to: "/home_cinema/saved", name: "Saved" },
+];
 
 export default function NavBar(props: NavbarProps) {
   const [openS, setOpenS] = useState(false);
@@ -51,11 +60,10 @@ export default function NavBar(props: NavbarProps) {
   };
   return (
     <>
-      <div className="w-full mt-10">
+      <div className="flex z-999  sticky top-8 justify-center items-center">
         <div
           className={
-            "flex justify-between ps-8 pr-8 sm:ps-32 sm:pr-32 " +
-            (openS ? "!justify-center" : "")
+            " items-center w-[80%] flex justify-between rounded-full p-3 inset-shadow-sm/40 shadow-2xl border border-black/10 inset-shadow-black/70 bg-black/40 backdrop-blur-xs "
           }
         >
           {!openS && (
@@ -91,26 +99,33 @@ export default function NavBar(props: NavbarProps) {
                   ? "/home_cinema/watch_tv_shows"
                   : "/home_cinema/watch"
               }
-              className="font-bold lg:block hidden"
+              className={
+                "font-bold lg:block hidden " +
+                (location.pathname === "/home_cinema/watch_tv_shows" ||
+                location.pathname === "/home_cinema/watch"
+                  ? "glass-white p-3 bg-white/25 rounded-full"
+                  : "")
+              }
             >
               {props.mode === "TV" && <>Movies</>}
               {(props.mode === "Movies" || !props.mode) && <>TV Shows</>}
             </Link>
-            <Link
-              to="/home_cinema/downloads"
-              className="font-bold lg:block hidden"
-            >
-              Downloads
-            </Link>
-            <Link
-              to="/home_cinema/torrents"
-              className="font-bold lg:block hidden"
-            >
-              Torrents
-            </Link>
-            <Link to="/home_cinema/saved" className="font-bold lg:block hidden">
-              Saved
-            </Link>
+            {links.map((l) => {
+              return (
+                <Link
+                  to={l.to}
+                  className={
+                    "font-bold lg:block hidden " +
+                    (location.pathname === l.to
+                      ? "glass-white p-3 bg-white/25 rounded-full"
+                      : "")
+                  }
+                >
+                  {l.name}
+                </Link>
+              );
+            })}
+
             <div className="md:block hidden">
               <Input
                 value={term}

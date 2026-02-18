@@ -35,7 +35,7 @@ export default function AnimatedText({
   return (
     <div
       className={className}
-      style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}
+      style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}
     >
       <AnimatePresence>
         {visible &&

@@ -209,9 +209,9 @@ export function MovieDetails({
         <>
           <div
             onClick={() => setShowQ(false)}
-            className="w-full h-full bg-[#000000c0] absolute z-40 top-0 left-0"
+            className="w-full h-full bg-[#0000002a] absolute z-1000 top-0 left-0"
           ></div>
-          <div className="h-[80vh] xl:w-auto w-[90%] overflow-y-scroll fixed p-3 md:p-10 bg-[#0f0f0f] top-[50%] z-50 left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-md border-2 border-white">
+          <div className="h-[80vh] inset-shadow-sm/40 text-white shadow-2xl border border-white/10 inset-shadow-white/40 bg-black/40 backdrop-blur-xs  xl:w-auto w-[90%] overflow-y-scroll fixed p-3 md:p-10 bg-[#0f0f0f] top-[50%] z-1001 left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-md border-2 border-white">
             <div
               className="ms-3 mb-5 mt-5 cursor-pointer"
               onClick={() => {

@@ -11,7 +11,7 @@ export function AddTorrent() {
     nav(`/home_cinema/torrents/${value.trim()}/files`);
   };
   return (
-    <div className="p-5 bg-[#161616] flex flex-col gap-3">
+    <div className="p-5 flex flex-col gap-3">
       <Input
         onChange={(e) => setValue(e.target.value)}
         placeholder="info hash"

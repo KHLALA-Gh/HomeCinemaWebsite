@@ -36,7 +36,7 @@ export function FloatingDiv({
           opacity: scale,
         }}
         className={
-          "duration-200 w-full h-screen top-0 left-0 fixed bg-[#00000069] z-998"
+          "duration-200 w-full h-screen top-0 left-0 fixed bg-[#00000021] z-998"
         }
         onClick={close}
       ></div>
@@ -45,7 +45,7 @@ export function FloatingDiv({
           scale: scale,
         }}
         className={
-          "duration-225 fixed top-[50%] bg-black left-[50%] translate-[-50%]  min-w-[500px]  z-999 ${classname} scale " +
+          "duration-225 fixed glass-dark top-[50%] left-[50%] translate-[-50%]  min-w-[500px]  z-999 ${classname} scale " +
           (borders ? "border-2 border-white rounded-md" : "")
         }
       >

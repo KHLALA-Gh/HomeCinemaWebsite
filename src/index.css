@@ -54,3 +54,39 @@
 .pop-animation {
   animation: pop 0.7s ease-in-out alternate;
 }
+
+@layer components {
+  .glass-white {
+    @apply inset-shadow-sm/40 text-white shadow-2xl border border-white/10 inset-shadow-white/40 bg-white/40 backdrop-blur-xs;
+  }
+  .glass-dark {
+    @apply inset-shadow-sm/40 text-white shadow-2xl border border-white/10 inset-shadow-white/40 bg-black/40 backdrop-blur-xs;
+  }
+}
+
+.spin-animation {
+  animation: spin-animation 2s infinite ease-in-out;
+}
+@keyframes spin-animation {
+  0% {
+    rotate: 0deg;
+  }
+  100% {
+    rotate: 360deg;
+  }
+}
+
+.ani-bounce {
+  animation: bounce 3s infinite;
+}
+.ani-bounce-delay {
+  animation: bounce 3s infinite 1s;
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(-100%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+}

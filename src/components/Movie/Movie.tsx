@@ -36,7 +36,7 @@ export default function Movie({
             backgroundSize: "cover",
           }}
         >
-          <div className="w-full h-full backdrop-blur-sm opacity-0 hover:opacity-100 relative pt-10 bg-[#0000009c] duration-300">
+          <div className="w-full h-full glass-dark rounded-xl  backdrop-blur-sm opacity-0 hover:opacity-100 relative pt-10 duration-300">
             <SaveButton
               saved={saved}
               className="!absolute top-2 left-2"
@@ -121,7 +121,7 @@ export function SaveCard() {
     <>
       <div
         onClick={() => nav("/home_cinema/saved")}
-        className="lg:w-[230px] bg-[#080808] overflow-visible rounded-xl w-[115px] h-[172px] relative lg:h-[345px] shrink-0 cursor-pointer"
+        className="lg:w-[230px] bg-[#080808] glass-dark overflow-visible rounded-xl w-[115px] h-[172px] relative lg:h-[345px] shrink-0 cursor-pointer"
       >
         <div
           className={

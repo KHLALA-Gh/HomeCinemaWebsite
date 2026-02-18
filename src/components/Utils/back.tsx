@@ -6,7 +6,7 @@ export function Back() {
   const nav = useNavigate();
   return (
     <div
-      className="cursor-pointer bg-white rounded-full h-10 w-10 flex justify-center items-center"
+      className="cursor-pointer inset-shadow-sm/40 text-white shadow-2xl border border-white/10 inset-shadow-white/40 bg-white/40 backdrop-blur-xs rounded-full h-10 w-10 flex justify-center items-center"
       onClick={() => {
         nav(-1);
       }}

@@ -57,7 +57,7 @@ export function SelectFiles({ files, onSet, onError }: SelectFilesProps) {
   };
 
   return (
-    <div className="rounded-md p-3 max-h-[80vh] bg-[#161616] min-w-[400px] select-none">
+    <div className="rounded-md p-3 max-h-[80vh] min-w-[400px] select-none">
       <h1 className="text-xl font-bold mb-3">Files</h1>
       <div className="overflow-y-scroll  max-h-[60vh]">
         {editFiles &&
