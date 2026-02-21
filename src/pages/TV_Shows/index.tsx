@@ -24,26 +24,31 @@ function Page({
   query?: string;
 }) {
   return (
-    <div
-      onClick={() => {
-        setSearchParams([
-          ["page", page],
-          ["query", query || ""],
-        ]);
-      }}
-      className={
-        "rounded-full text-black w-7 h-7 flex items-center justify-center cursor-pointer " +
-        (focus ? "bg-white" : "")
-      }
-    >
-      <h1
-        className={
-          "text-center font-bold " + (focus ? "text-black" : "text-white")
-        }
-      >
-        {page}
-      </h1>
-    </div>
+    <>
+      <div className="relative shadow-2xs shadow-[#00000068] cursor-pointer border border-white/5 rounded-full overflow-hidden flex items-center justify-center w-10 h-10">
+        <h1
+          className={
+            "text-center font-bold " + (focus ? "text-white" : "text-white")
+          }
+        >
+          {page}
+        </h1>
+        <div
+          onClick={() => {
+            setSearchParams([
+              ["page", page],
+              ["query", query || ""],
+            ]);
+          }}
+          className={
+            "absolute w-[150%] h-[150%] text-black top-[-2px] " +
+            (focus
+              ? "glass-white backdrop-blur-xs bg-[#ffffff40] inset-shadow-sm/10! inset-shadow-[#ffffff10]!"
+              : "")
+          }
+        ></div>
+      </div>
+    </>
   );
 }
 

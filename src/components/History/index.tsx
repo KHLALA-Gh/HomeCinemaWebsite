@@ -11,6 +11,8 @@ import { join } from "path-browserify";
 import MoreVert from "@mui/icons-material/MoreVert";
 import { FloatingDiv } from "../Utils/floating-div";
 import { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 export function TorrentHistory({
   name,
   infoHash,
@@ -23,7 +25,7 @@ export function TorrentHistory({
     <>
       {showDelete && (
         <FloatingDiv
-          blur
+          blur={true}
           onClose={() => {
             setShowDelete(false);
           }}
@@ -59,12 +61,27 @@ export function TorrentHistory({
       )}
       <div
         onDoubleClick={() => {
+          if (infoHash.startsWith("unknown:")) return;
           nav(`/home_cinema/torrents/${infoHash}/files`);
         }}
         className="p-5 bg-[#ffffff19] rounded-md flex flex-col gap-3 cursor-pointer"
       >
         <div className="flex justify-between">
-          <h1>{name}</h1>
+          <div className="flex gap-2">
+            {infoHash.startsWith("unknown:") && (
+              <div
+                className="alert-title"
+                title="This folder has no torrent hash"
+              >
+                <FontAwesomeIcon
+                  size="lg"
+                  className="text-red-600"
+                  icon={faCircleExclamation}
+                />
+              </div>
+            )}
+            <h1>{name}</h1>
+          </div>
           <div>
             <Dropdown>
               <MenuButton

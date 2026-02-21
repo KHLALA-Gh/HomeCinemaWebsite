@@ -62,6 +62,9 @@
   .glass-dark {
     @apply inset-shadow-sm/40 text-white shadow-2xl border border-white/10 inset-shadow-white/40 bg-black/40 backdrop-blur-xs;
   }
+  .glass {
+    @apply inset-shadow-sm/40 shadow-2xl inset-shadow-white/40 backdrop-blur-xs;
+  }
 }
 
 .spin-animation {
@@ -89,4 +92,49 @@
     transform: translateY(-100%);
     animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
   }
+}
+.alert-title {
+  position: relative;
+}
+
+.alert-title[title]::after {
+  content: attr(data-title);
+  background-color: #00ff00;
+  color: #111;
+  position: absolute;
+  padding: 1px 5px 2px 5px;
+  bottom: -1.6em;
+  left: 100%;
+  white-space: nowrap;
+  box-shadow: 1px 1px 3px #222222;
+  opacity: 0;
+  border: 1px solid #111111;
+  z-index: 99999;
+  visibility: hidden;
+  height: fit-content;
+}
+
+.alert-title[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  top: -100%;
+  left: 20px;
+  background-color: rgb(145, 0, 0);
+  padding: 6px;
+  opacity: 1;
+  border-radius: 10px;
+  color: white;
+  font-size: small;
+  opacity: 1;
+  transition: all 0.1s ease;
+  visibility: visible;
+}
+
+.settings-lib div {
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.settings-lib div:hover {
+  background-color: rgba(255, 255, 255, 0.132);
 }

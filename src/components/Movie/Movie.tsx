@@ -94,7 +94,7 @@ export function SaveButton({
     <div
       onClick={onClick}
       className={
-        "relative border-2 cursor-pointer duration-200 rounded-full w-8 h-8 flex justify-center items-center " +
+        "relative  glass bg-white/20 border-[1.5px] shadow-md shadow-black cursor-pointer duration-200 rounded-full w-8 h-8 flex justify-center items-center " +
         className +
         (saved ? " border-yellow-500 pop-animation" : " border-white")
       }

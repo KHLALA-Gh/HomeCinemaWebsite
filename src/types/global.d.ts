@@ -25,6 +25,7 @@ declare global {
       setDH(hash: string, d: DownloadHistory);
       deleteDH(hash: string);
       getDHPath(): Promise<string>;
+      changeDHDir: (newDir: string) => void;
     };
   }
 }

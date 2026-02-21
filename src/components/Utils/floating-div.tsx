@@ -36,7 +36,8 @@ export function FloatingDiv({
           opacity: scale,
         }}
         className={
-          "duration-200 w-full h-screen top-0 left-0 fixed bg-[#00000021] z-998"
+          "duration-200 w-full h-screen top-0 left-0 fixed bg-[#00000036] z-998" +
+          (blur ? " backdrop-blur-xs" : "")
         }
         onClick={close}
       ></div>
