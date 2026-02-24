@@ -23,7 +23,10 @@ export function AddTorrent() {
         value={value}
         type="text"
       />
-      <Button className="text-base! w-fit! ps-8! pr-8!" onClick={onCreate}>
+      <Button
+        className="text-base! w-fit! bg-white/10! ps-8! pr-8!"
+        onClick={onCreate}
+      >
         Add
       </Button>
     </div>

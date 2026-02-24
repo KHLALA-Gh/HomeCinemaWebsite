@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router";
 import { useGetYTSMovieDetails } from "../../hooks/getMoviesDetails";
 import Button from "../../components/Button/button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faX } from "@fortawesome/free-solid-svg-icons";
+import { faChevronLeft, faX, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import { SaveButton } from "../../components/Movie/Movie";
 import { addMovie, getMovieById, removeMovie } from "../../lib/idb";
@@ -181,16 +181,14 @@ export function MovieDetails({
                 >
                   Watch
                 </Button>
-                <Button
-                  onClick={() => {
-                    location.href =
-                      "https://www.youtube.com/watch?v=" +
-                      resp?.yt_trailer_code;
-                  }}
-                  className="md:text-xl text-lg"
+                <a
+                  target="_blank"
+                  href={
+                    "https://www.youtube.com/watch?v=" + resp?.yt_trailer_code
+                  }
                 >
-                  Trailer
-                </Button>
+                  <Button className="md:text-xl text-lg">Trailer</Button>
+                </a>
               </div>
             </div>
           )}
@@ -211,14 +209,14 @@ export function MovieDetails({
             onClick={() => setShowQ(false)}
             className="w-full h-full bg-[#0000002a] absolute z-1000 top-0 left-0"
           ></div>
-          <div className="h-[80vh] inset-shadow-sm/40 text-white shadow-2xl border border-white/10 inset-shadow-white/40 bg-black/40 backdrop-blur-xs  xl:w-auto w-[90%] overflow-y-scroll fixed p-3 md:p-10 bg-[#0f0f0f] top-[50%] z-1001 left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-md border-2 border-white">
+          <div className="h-[80vh] hide-scrollbar h-fit inset-shadow-sm/40 text-white shadow-2xl border border-white/10 inset-shadow-white/40 bg-black/40 backdrop-blur-xs  xl:w-auto w-[90%] overflow-y-scroll fixed p-3 md:p-5 bg-[#0f0f0f] top-[50%] z-1001 left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-md border-2 border-white">
             <div
-              className="ms-3 mb-5 mt-5 cursor-pointer"
+              className="ms-3 mb-3 mt-3 flex justify-end cursor-pointer"
               onClick={() => {
                 setShowQ(false);
               }}
             >
-              <FontAwesomeIcon icon={faX} />
+              <FontAwesomeIcon size="lg" icon={faXmark} />
             </div>
             {resp?.torrents.map((t, i) => {
               return (

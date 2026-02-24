@@ -47,7 +47,8 @@ export function FloatingDiv({
         }}
         className={
           "duration-225 fixed glass-dark top-[50%] left-[50%] translate-[-50%]  min-w-[500px]  z-999 ${classname} scale " +
-          (borders ? "border-2 border-white rounded-md" : "")
+          classname +
+          (borders ? " border-2 border-white rounded-md" : "")
         }
       >
         <div className="flex justify-between p-2">

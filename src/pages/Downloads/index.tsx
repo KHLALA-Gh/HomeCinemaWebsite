@@ -5,6 +5,7 @@ import {
   faCheck,
   faDownload,
   faFile,
+  faFolderOpen,
   faMoon,
   faPause,
   faPlay,
@@ -23,12 +24,13 @@ import { usePauseDownload } from "../../hooks/usePauseDownload";
 import pr from "pretty-bytes";
 import { useNavigate } from "react-router";
 import { DownloadBar, SelectFiles } from "../../components/Download";
-import { Button, Input } from "@mui/joy";
+import { Button } from "@mui/joy";
 import path from "path-browserify";
 import { fetchConfigs } from "../../hooks/getMagnetURI";
 import { FloatingDiv } from "../../components/Utils/floating-div";
 import axios from "axios";
 import { AddTorrent } from "../../components/Utils/addTorrent";
+import Btn from "../../components/Button/button";
 export default function PreStreams() {
   const { resp, err, isLoading, fetch, setResp } = useGetDownloads();
   const [torrents, setTorrents] = useState<Map<string, Download>>(new Map());
@@ -103,14 +105,17 @@ export default function PreStreams() {
         </>
       )}
       <div className="ms-5 mr-5 mt-20">
-        <Button
+        <Btn
           onClick={() => {
             nav("/home_cinema/download-history");
           }}
-          className="mb-7!"
+          className="mb-7! gap-3 flex items-center glass-dark bg-[#ffffff1e]! text-base! ps-5! pr-5!"
         >
+          <div>
+            <FontAwesomeIcon icon={faFolderOpen} />
+          </div>
           Library
-        </Button>
+        </Btn>
         {err && (
           <Alert
             severity="error"
@@ -129,7 +134,12 @@ export default function PreStreams() {
         {resp?.length == 0 && (
           <div className="w-full absolute top-0 h-screen gap-2 flex flex-col justify-center items-center z-[-10] left-0">
             <h1 className="text-lg">There is no download created</h1>
-            <Button onClick={() => setOpenAddTorrent(true)}>Create</Button>
+            <Btn
+              className="glass-white bg-white/10! ps-7! pr-7! text-base!"
+              onClick={() => setOpenAddTorrent(true)}
+            >
+              Create
+            </Btn>
           </div>
         )}
         {openAddTorrent && (

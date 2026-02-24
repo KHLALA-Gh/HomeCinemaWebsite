@@ -30,6 +30,7 @@ export function TorrentHistory({
             setShowDelete(false);
           }}
           borders
+          classname="glass border-0! shadow-sm shadow-white/20"
         >
           <div className="flex justify-center items-center flex-col gap-5 mb-6">
             <h1 className="text-xl">
@@ -64,7 +65,7 @@ export function TorrentHistory({
           if (infoHash.startsWith("unknown:")) return;
           nav(`/home_cinema/torrents/${infoHash}/files`);
         }}
-        className="p-5 bg-[#ffffff19] rounded-md flex flex-col gap-3 cursor-pointer"
+        className="p-5 bg-[#ffffff11]  glass-dark rounded-md flex flex-col gap-3 cursor-pointer"
       >
         <div className="flex justify-between">
           <div className="flex gap-2">
@@ -95,8 +96,9 @@ export function TorrentHistory({
               >
                 <MoreVert className="text-white" />
               </MenuButton>
-              <Menu className="p-0!">
+              <Menu className=" p-0! border-0! bg-white/2! inset-shadow-sm/100! shadow-2xl! shadow-white/10! inset-shadow-black/40! backdrop-blur-xs!">
                 <MenuItem
+                  className="inset-shadow-sm/40 text-white! bg-white/0! hover:bg-white/10! shadow-2xl inset-shadow-white/40 backdrop-blur-xs"
                   onClick={() => {
                     window.electron.openFolder(join(path, name));
                   }}
@@ -107,7 +109,7 @@ export function TorrentHistory({
                   onClick={() => {
                     setShowDelete(true);
                   }}
-                  className="bg-red-700! text-white!"
+                  className="bg-red-700/30! border-0 text-white! duration-500 inset-shadow-sm/40 hover:bg-red-700/10! shadow-2xl inset-shadow-white/40 backdrop-blur-xs"
                 >
                   Delete
                 </MenuItem>

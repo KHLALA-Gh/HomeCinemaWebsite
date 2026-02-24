@@ -309,7 +309,7 @@ export function Torrent({ t }: { t: TorrentSearch }) {
   }, []);
   return (
     <>
-      <div className="lg:p-5 lg:text-base text-sm p-2 gap-5 grid md:grid-cols-11 grid-cols-10 lg:grid-cols-12 hover:bg-[#50505059] rounded-md duration-200">
+      <div className="lg:p-5 glass items-center lg:text-base text-sm p-2 gap-5 grid md:grid-cols-11 grid-cols-10 lg:grid-cols-12 hover:bg-[#50505059] rounded-md duration-200">
         <a
           href={(() => {
             const url = new URL(
