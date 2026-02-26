@@ -48,7 +48,7 @@ export function TorrentHistory({
               </Button>
               <Button
                 onClick={async () => {
-                  await window.electron.deleteDH(infoHash);
+                  await window.electron.deleteDH(name);
                   setShowDelete(false);
                   if (onDeleteTorrent) onDeleteTorrent(infoHash);
                 }}

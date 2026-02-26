@@ -12,9 +12,10 @@ export default function Torrents() {
   return (
     <>
       <NavBar />
-      <div className="lg:ms-32 mt-24">
+      <div className="lg:ms-32 ms-8 mt-24">
         <h1 className="text-2xl font-bold mb-5">Search torrents</h1>
         <Input
+          className="backdrop-blur-sm! text-white! bg-white/10! shadow-sm! shadow-white/20! inset-shadow-sm! inset-shadow-white/10!"
           onChange={(e) => {
             setQuery(e.target.value);
           }}
@@ -35,6 +36,10 @@ export default function Torrents() {
         />
         <div className="mt-5">
           <Button
+            className={
+              "backdrop-blur-sm! bg-white/10! shadow-sm! shadow-white/20! inset-shadow-sm! inset-shadow-white/10! " +
+              (isLoading ? "text-transparent!" : " text-white!")
+            }
             color="neutral"
             loading={isLoading}
             onClick={function () {
