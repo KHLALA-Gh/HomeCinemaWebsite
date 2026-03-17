@@ -46,7 +46,7 @@ export function FloatingDiv({
           scale: scale,
         }}
         className={
-          "duration-225 fixed glass-dark top-[50%] left-[50%] translate-[-50%]  min-w-[500px]  z-999 ${classname} scale " +
+          "duration-225 rounded-2xl! p-3 fixed glass-dark top-[50%] left-[50%] translate-[-50%]  min-w-[500px]  z-999 ${classname} scale " +
           classname +
           (borders ? " border-2 border-white rounded-md" : "")
         }

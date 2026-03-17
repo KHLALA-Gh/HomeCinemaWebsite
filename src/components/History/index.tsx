@@ -12,15 +12,24 @@ import MoreVert from "@mui/icons-material/MoreVert";
 import { FloatingDiv } from "../Utils/floating-div";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCircleExclamation,
+  faExclamationCircle,
+} from "@fortawesome/free-solid-svg-icons";
+import { SmallTorrentSearch } from "../Utils/torrentSearch";
 export function TorrentHistory({
   name,
   infoHash,
   path,
   onDeleteTorrent,
-}: DownloadHistory & { onDeleteTorrent: (infoHash: string) => void }) {
+  unknownTorrent,
+}: DownloadHistory & {
+  onDeleteTorrent: (infoHash: string) => void;
+  unknownTorrent: boolean;
+}) {
   let nav = useNavigate();
   const [showDelete, setShowDelete] = useState(false);
+  const [torrentSearchQuery, setTorrentSearchQuery] = useState("");
   return (
     <>
       {showDelete && (
@@ -96,7 +105,7 @@ export function TorrentHistory({
               >
                 <MoreVert className="text-white" />
               </MenuButton>
-              <Menu className=" p-0! border-0! bg-white/2! inset-shadow-sm/100! shadow-2xl! shadow-white/10! inset-shadow-black/40! backdrop-blur-xs!">
+              <Menu className="overflow-hidden! p-0! border-0! bg-white/2! inset-shadow-sm/100! shadow-2xl! shadow-white/10! inset-shadow-black/40! backdrop-blur-xs!">
                 <MenuItem
                   className="inset-shadow-sm/40 text-white! bg-white/0! hover:bg-white/10! shadow-2xl inset-shadow-white/40 backdrop-blur-xs"
                   onClick={() => {
@@ -105,6 +114,21 @@ export function TorrentHistory({
                 >
                   Open Torrent Folder
                 </MenuItem>
+                {unknownTorrent && (
+                  <MenuItem
+                    className="inset-shadow-sm/40 text-white! bg-white/0! hover:bg-white/10! shadow-2xl inset-shadow-white/40 backdrop-blur-xs"
+                    onClick={() => {
+                      setTorrentSearchQuery(name);
+                    }}
+                  >
+                    Search torrent
+                    <FontAwesomeIcon
+                      className=""
+                      icon={faExclamationCircle}
+                      color="yellow"
+                    />
+                  </MenuItem>
+                )}
                 <MenuItem
                   onClick={() => {
                     setShowDelete(true);
@@ -123,6 +147,17 @@ export function TorrentHistory({
           </span>
         </p>
       </div>
+      {torrentSearchQuery && (
+        <FloatingDiv
+          title="Torrent Search"
+          blur
+          onClose={() => {
+            setTorrentSearchQuery("");
+          }}
+        >
+          <SmallTorrentSearch query={torrentSearchQuery} />
+        </FloatingDiv>
+      )}
     </>
   );
 }

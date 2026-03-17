@@ -92,6 +92,7 @@ export default function History() {
             Array.from(search()).map((t, i) => {
               return (
                 <TorrentHistory
+                  unknownTorrent={t[0].startsWith("unknown:")}
                   onDeleteTorrent={(infoHash: string) => {
                     let n = new Map(torrents);
                     n.delete(infoHash);

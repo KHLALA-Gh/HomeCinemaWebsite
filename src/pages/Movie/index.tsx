@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { SaveButton } from "../../components/Movie/Movie";
 import { addMovie, getMovieById, removeMovie } from "../../lib/idb";
 import NavBar from "../../components/Navbar";
+import { FloatingDiv } from "../../components/Utils/floating-div";
 
 export default function MoviePage() {
   const params = useParams();
@@ -205,49 +206,45 @@ export function MovieDetails({
       </div>
       {showQ && (
         <>
-          <div
-            onClick={() => setShowQ(false)}
-            className="w-full h-full bg-[#0000002a] absolute z-1000 top-0 left-0"
-          ></div>
-          <div className="h-[80vh] hide-scrollbar h-fit inset-shadow-sm/40 text-white shadow-2xl border border-white/10 inset-shadow-white/40 bg-black/40 backdrop-blur-xs  xl:w-auto w-[90%] overflow-y-scroll fixed p-3 md:p-5 bg-[#0f0f0f] top-[50%] z-1001 left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-md border-2 border-white">
-            <div
-              className="ms-3 mb-3 mt-3 flex justify-end cursor-pointer"
-              onClick={() => {
-                setShowQ(false);
-              }}
-            >
-              <FontAwesomeIcon size="lg" icon={faXmark} />
-            </div>
-            {resp?.torrents.map((t, i) => {
-              return (
-                <div
-                  key={i}
-                  className="grid grid-cols-12 items-center mb-5 gap-3 hover:bg-[#b4b4b43e] p-3 duration-100 rounded-md cursor-pointer"
-                >
+          <FloatingDiv
+            blur
+            onClose={() => setShowQ(false)}
+            title="Choose quality"
+          >
+            <div className="h-[80vh] mt-3 hide-scrollbar h-fit text-white xl:w-auto overflow-y-scroll z-1001 rounded-2xl">
+              {resp?.torrents.map((t, i) => {
+                return (
                   <div
-                    className="col-span-9"
-                    onClick={() => {
-                      location.href = link(i);
-                    }}
+                    key={i}
+                    className="grid pop grid-cols-12 items-center mb-5 gap-3 hover:bg-[#b4b4b43e] p-3 duration-100 rounded-2xl cursor-pointer"
                   >
-                    <h1 className="text-2xl col-span-6">{t.quality}</h1>
-                    <h3 className="col-span-3">
-                      {t.type}
-                      {""}
-                      {t.video_codec === "x265" ? (
-                        <span className="text-green-600">.{t.video_codec}</span>
-                      ) : (
-                        ""
-                      )}
-                    </h3>
+                    <div
+                      className="col-span-9"
+                      onClick={() => {
+                        location.href = link(i);
+                      }}
+                    >
+                      <h1 className="text-2xl col-span-6">{t.quality}</h1>
+                      <h3 className="col-span-3">
+                        {t.type}
+                        {""}
+                        {t.video_codec === "x265" ? (
+                          <span className="text-green-600">
+                            .{t.video_codec}
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                      </h3>
+                    </div>
+                    <div className="flex gap-3 items-center justify-center col-span-3 bg-[#202020] p-2 rounded-md">
+                      <h6 className="col-span-1 text-sm">{t.size}</h6>
+                    </div>
                   </div>
-                  <div className="flex gap-3 items-center justify-center col-span-3 bg-[#202020] p-2 rounded-md">
-                    <h6 className="col-span-1 text-sm">{t.size}</h6>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          </FloatingDiv>
         </>
       )}
     </>

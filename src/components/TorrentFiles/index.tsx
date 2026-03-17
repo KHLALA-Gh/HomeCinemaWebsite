@@ -13,7 +13,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import pr from "pretty-bytes";
-import Button from "@mui/joy/Button";
+import Button from "../../components/Button/button";
+import { Button as JoyButton } from "@mui/joy";
 import pb from "pretty-bytes";
 import { fetchConfigs } from "../../hooks/getMagnetURI";
 import { useDownloadTorrent } from "../../hooks/useDownloadTorrent";
@@ -116,7 +117,7 @@ export function TorrentFiles({
               } as DownloadFile;
             })}
             infoHash={hash}
-            onSet={async (files) => {
+            onSet={async (files, l) => {
               setOpenSelectFiles(false);
 
               const configs = await fetchConfigs();
@@ -127,7 +128,7 @@ export function TorrentFiles({
                   ? configs["torrent-streamer-api"].origin
                   : location.origin,
               );
-              let path = await window.electron.getDHPath();
+              let path = l || (await window.electron.getDHPath());
               window.electron.setDH(hash.toLowerCase(), {
                 infoHash: hash,
                 name: resp[0]?.path.split("/")[0],
@@ -147,7 +148,7 @@ export function TorrentFiles({
           />
         </FloatingDiv>
       )}
-      <div className="border-2 ms-3 mr-3 bg-[#ffffff0d] border-[#ffffff4f] drop-shadow-md rounded-sm">
+      <div className=" ms-3 mr-3 bg-[#ffffff0d]  drop-shadow-md rounded-2xl pop">
         <div className="p-5">
           <div className="flex gap-3 items-center mb-3">
             <h1 className="md:text-3xl font-bold">
@@ -155,11 +156,29 @@ export function TorrentFiles({
             </h1>
             <SaveButton onClick={onSave} saved={saved} />
           </div>
-          <p className="mb-3">Info Hash : {hash}</p>
+          <p
+            onClick={(t) => {
+              //@ts-ignore
 
-          <div className="flex gap-5 items-center">
+              if (t.target.textContent === "Copied ✔") return;
+              navigator.clipboard.writeText(hash);
+              //@ts-ignore
+              t.target.textContent = "Copied ✔";
+              setTimeout(() => {
+                //@ts-ignore
+
+                t.target.textContent = hash;
+              }, 5000);
+            }}
+            className="mb-3 select-none min-w-[400px] text-center glass rounded-2xl p-2 w-fit duration-200 cursor-pointer hover:scale-105 hover:ps-3 hover:pr-3"
+          >
+            {hash}
+          </p>
+
+          <div className="flex gap-3 items-center">
             {streams && streams?.length > 0 && (
               <Button
+                className="glass-white flex  justify-center items-center h-10 text-center text-[0px]! duration-200 hover:text-[16px]! bg-white/10! ps-6! pr-6! pt-3! pb-3! text-base!"
                 onClick={() => {
                   if (configs?.desktopMode) {
                     window.electron.openVLC(streams.map((s) => s.streamUrl));
@@ -179,7 +198,8 @@ export function TorrentFiles({
                   }
                 }}
               >
-                <FontAwesomeIcon icon={faPlay} className="mr-3" /> Play
+                <FontAwesomeIcon icon={faPlay} className=" text-base!" />
+                <p> Play</p>
               </Button>
             )}
             {configs?.desktopMode && !isLoading && (
@@ -187,7 +207,7 @@ export function TorrentFiles({
                 onClick={async () => {
                   setOpenSelectFiles(true);
                 }}
-                className="border-2 cursor-pointer text-[0px] hover:text-[10px] flex-col hover:translate-y-[-2px] hover:scale-150 duration-200 hover:border-[#0000] hover:border-0 border-white rounded-full w-10 h-10 flex items-center justify-center"
+                className="bg-white/10 glass cursor-pointer text-[0px] hover:text-base duration-200 rounded-full min-w-10 h-10 flex items-center justify-center p-2 font-bold"
               >
                 <FontAwesomeIcon icon={faFloppyDisk} className="text-base!" />
                 <p>Download</p>
@@ -233,7 +253,7 @@ export function TorrentFiles({
               </ul>
             </div>
             <Button
-              className="ms-4! mt-3!"
+              className="ms-4! mt-3! glass-white bg-white/10! ps-6! pr-6! pt-2! pb-2! text-base!"
               onClick={() => {
                 setEasyView(true);
               }}
@@ -250,7 +270,7 @@ export function TorrentFiles({
                 return (
                   <div
                     key={i}
-                    className="md:p-5 p-2 md:text-base text-sm! items-center grid-cols-12 rounded-md hover:bg-[#50505059] duration-200 md:grid gap-10 cursor-pointer flex-wrap"
+                    className="md:p-5 pop p-2 md:text-base text-sm! items-center grid-cols-12 rounded-2xl hover:bg-[#50505059] duration-200 md:grid gap-10 cursor-pointer flex-wrap"
                   >
                     <div className="col-span-1 inline-block md:mr-0 mr-5">
                       {file.name.endsWith(".mp4") ||
@@ -279,7 +299,7 @@ export function TorrentFiles({
                     </a>
 
                     {configs?.desktopMode && (
-                      <Button
+                      <JoyButton
                         loading={playing.has(file.path)}
                         onClick={async () => {
                           if (!isVid) return;
@@ -302,7 +322,7 @@ export function TorrentFiles({
                             play
                           </>
                         )}
-                      </Button>
+                      </JoyButton>
                     )}
 
                     <button
@@ -457,7 +477,7 @@ function EasyView({
     return (
       <div
         key={i}
-        className="mb-2 p-2  grid grid-cols-12 duration-200 hover:bg-[#b4b4b43e]"
+        className="mb-2 p-3 pop rounded-2xl grid grid-cols-12 duration-200 hover:bg-[#b4b4b43e]"
       >
         <div className="col-span-9">
           <h1 className="font-bold">
@@ -470,7 +490,7 @@ function EasyView({
               : "H264"}
           </h1>
         </div>
-        <div className="flex gap-3 items-center justify-center col-span-3 bg-[#202020] p-2 rounded-md">
+        <div className="flex gap-3 items-center justify-center col-span-3 bg-[#202020] p-2 rounded-2xl">
           <h6 className="md:block hidden col-span-1 text-[13px]">
             {pb(f.size)}
           </h6>
@@ -501,7 +521,7 @@ function EasyView({
   elements = elements.filter((e) => e !== undefined);
   return (
     <>
-      <div className="bg-[#0f0f0f] min-w-[300px] max-w-[500px] relative min-h-[100px] max-h-[300px] overflow-y-auto">
+      <div className="min-w-[300px] max-w-[500px] relative min-h-[100px] max-h-[300px] overflow-y-auto">
         {resp && elements}
         {!elements.length && (
           <div className="flex justify-center items-center h-full">

@@ -65,6 +65,9 @@
   .glass {
     @apply inset-shadow-sm/40 shadow-2xl inset-shadow-white/40 backdrop-blur-xs;
   }
+  .pop {
+    @apply hover:inset-shadow-2xs hover:inset-shadow-white/10 hover:shadow-xs hover:shadow-white/10;
+  }
 }
 
 .spin-animation {

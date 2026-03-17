@@ -42,7 +42,7 @@ export function DownloadBar({
 interface SelectFilesProps {
   files: DownloadFile[];
   infoHash: string;
-  onSet?: (files: DownloadFile[]) => void;
+  onSet?: (files: DownloadFile[], location?: string) => void;
   onError?: (err: any) => void;
   selectAll?: boolean;
 }
@@ -132,19 +132,37 @@ export function SelectFiles({ files, onSet, onError }: SelectFilesProps) {
             }
           />
         </div>
-        <Button
-          onClick={async () => {
-            try {
-              if (!onSet) return;
-              await onSet(editFiles);
-            } catch (err) {
-              if (onError) onError(err);
-            }
-          }}
-          className="text-base! ps-8! pr-8! rounded-xl! pt-2! pb-2!"
-        >
-          Set
-        </Button>
+        <div className="flex gap-3 items-center">
+          <p
+            onClick={async () => {
+              try {
+                if (!onSet) return;
+                let p = await window.electron.selectFolder();
+                if (!p) return;
+                await onSet(editFiles, p);
+              } catch (err) {
+                if (onError) onError(err);
+              }
+            }}
+            className="text-blue-800 cursor-pointer"
+          >
+            Choose Location
+          </p>
+
+          <Button
+            onClick={async () => {
+              try {
+                if (!onSet) return;
+                await onSet(editFiles);
+              } catch (err) {
+                if (onError) onError(err);
+              }
+            }}
+            className="text-base! ps-8! pr-8! rounded-xl! pt-2! pb-2!"
+          >
+            Download
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -78,26 +78,32 @@ export default function PreStreams() {
             <SelectFiles
               files={findSelectedTorrent()?.files || []}
               infoHash={selectedTorrent}
-              onSet={async (files) => {
+              onSet={async (files, l) => {
                 const configs = await fetchConfigs();
-
+                let t = findSelectedTorrent();
+                if (!t) return;
                 const url = new URL(
-                  `/api/downloads/${selectedTorrent}/files`,
+                  `/api/torrents/${selectedTorrent}/download`,
                   configs["torrent-streamer-api"].external
                     ? configs["torrent-streamer-api"].origin
                     : location.origin,
                 );
-                const r = await axios.put(url.href, {
-                  selectedFiles: files.map((f) => (f.selected ? f.path : "")),
+                let path = l || t.path;
+                window.electron.setDH(selectedTorrent.toLowerCase(), {
+                  infoHash: selectedTorrent,
+                  name: findSelectedTorrent()?.name || "undefined",
+                  path: path || "undefined",
                 });
-                if (r.status === 200) {
-                  const t = findSelectedTorrent();
-                  if (t) t.files = files;
-                  setResp(resp);
-                  setOpenSelectMenu(false);
-                }
+                t.files = files;
+                setResp(resp);
+                setOpenSelectMenu(false);
+                axios.post(url.href, {
+                  files: files.map((f) => (f.selected ? f.path : "")),
+                  path,
+                });
               }}
               onError={(err) => {
+                console.log(err);
                 alert(err?.message);
               }}
             />
