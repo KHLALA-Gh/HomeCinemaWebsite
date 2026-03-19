@@ -68,6 +68,9 @@
   .pop {
     @apply hover:inset-shadow-2xs hover:inset-shadow-white/10 hover:shadow-xs hover:shadow-white/10;
   }
+  .bg-pop {
+    @apply inset-shadow-2xs inset-shadow-white/10 shadow-xs shadow-white/10;
+  }
 }
 
 .spin-animation {

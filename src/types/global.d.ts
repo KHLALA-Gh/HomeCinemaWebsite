@@ -26,6 +26,7 @@ declare global {
       deleteDH(hash: string);
       getDHPath(): Promise<string>;
       changeDHDir: (newDir: string) => void;
+      getTorrentProps: (infoHash: string) => Promise<null | TorrentProps>;
     };
   }
 }

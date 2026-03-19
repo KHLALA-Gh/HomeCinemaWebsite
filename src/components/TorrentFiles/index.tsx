@@ -133,6 +133,8 @@ export function TorrentFiles({
                 infoHash: hash,
                 name: resp[0]?.path.split("/")[0],
                 path: path || "undefined",
+                size: size || 0,
+                date: Date.now(),
               });
               const r = await axios.post(url.href, {
                 files: files.map((f) => (f.selected ? f.path : "")),
@@ -148,7 +150,7 @@ export function TorrentFiles({
           />
         </FloatingDiv>
       )}
-      <div className=" ms-3 mr-3 bg-[#ffffff0d]  drop-shadow-md rounded-2xl pop">
+      <div className=" ms-3 mr-3 bg-[#ffffff0d]  drop-shadow-md rounded-2xl bg-pop">
         <div className="p-5">
           <div className="flex gap-3 items-center mb-3">
             <h1 className="md:text-3xl font-bold">

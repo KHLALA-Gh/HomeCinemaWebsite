@@ -17,6 +17,7 @@ import {
   faExclamationCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { SmallTorrentSearch } from "../Utils/torrentSearch";
+import { TorrentProps } from "../TorrentProps";
 export function TorrentHistory({
   name,
   infoHash,
@@ -30,6 +31,8 @@ export function TorrentHistory({
   let nav = useNavigate();
   const [showDelete, setShowDelete] = useState(false);
   const [torrentSearchQuery, setTorrentSearchQuery] = useState("");
+  const [openProps, setOpenProps] = useState(false);
+  const [torrentProps, setTorrentProps] = useState<TorrentProps | null>(null);
   return (
     <>
       {showDelete && (
@@ -57,7 +60,11 @@ export function TorrentHistory({
               </Button>
               <Button
                 onClick={async () => {
-                  await window.electron.deleteDH(name);
+                  try {
+                    await window.electron.deleteDH(name);
+                  } catch (err: any) {
+                    alert(err?.message);
+                  }
                   setShowDelete(false);
                   if (onDeleteTorrent) onDeleteTorrent(infoHash);
                 }}
@@ -114,6 +121,16 @@ export function TorrentHistory({
                 >
                   Open Torrent Folder
                 </MenuItem>
+                <MenuItem
+                  className="inset-shadow-sm/40 text-white! bg-white/0! hover:bg-white/10! shadow-2xl inset-shadow-white/40 backdrop-blur-xs"
+                  onClick={async () => {
+                    let props = await window.electron.getTorrentProps(infoHash);
+                    setTorrentProps(props);
+                    setOpenProps(true);
+                  }}
+                >
+                  Properties
+                </MenuItem>
                 {unknownTorrent && (
                   <MenuItem
                     className="inset-shadow-sm/40 text-white! bg-white/0! hover:bg-white/10! shadow-2xl inset-shadow-white/40 backdrop-blur-xs"
@@ -156,6 +173,25 @@ export function TorrentHistory({
           }}
         >
           <SmallTorrentSearch query={torrentSearchQuery} />
+        </FloatingDiv>
+      )}
+      {openProps && (
+        <FloatingDiv
+          onClose={() => {
+            setOpenProps(false);
+          }}
+          blur
+        >
+          {torrentProps && (
+            <div className="w-[500px]">
+              <TorrentProps {...torrentProps} />
+            </div>
+          )}
+          {!torrentProps && (
+            <div className="flex justify-center items-center ">
+              <h1 className="font-bold">Cannot get torrent properties.</h1>
+            </div>
+          )}
         </FloatingDiv>
       )}
     </>

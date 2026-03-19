@@ -13,6 +13,8 @@ interface DownloadHistory {
   infoHash: string;
   name: string;
   path: string;
+  size: number;
+  date: number;
 }
 
 interface TorrentFile {
@@ -47,4 +49,13 @@ interface Download {
   status: string;
   idling: boolean;
   isComplete: boolean;
+}
+
+interface TorrentProps {
+  name: string;
+  infoHash: string;
+  date: number;
+  size: number;
+  downloadedSize: number;
+  path: string;
 }

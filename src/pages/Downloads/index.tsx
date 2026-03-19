@@ -89,11 +89,7 @@ export default function PreStreams() {
                     : location.origin,
                 );
                 let path = l || t.path;
-                window.electron.setDH(selectedTorrent.toLowerCase(), {
-                  infoHash: selectedTorrent,
-                  name: findSelectedTorrent()?.name || "undefined",
-                  path: path || "undefined",
-                });
+
                 t.files = files;
                 setResp(resp);
                 setOpenSelectMenu(false);
