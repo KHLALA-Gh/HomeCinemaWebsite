@@ -305,9 +305,15 @@ export function TorrentFiles({
                         loading={playing.has(file.path)}
                         onClick={async () => {
                           if (!isVid) return;
+                          const history = await window.electron.getDH(hash);
+                          const streamUrl = new URL(file.downloadLink);
+                          if (history) {
+                            streamUrl.searchParams.set("path", history.path);
+                          }
                           try {
                             setPlaying(new Set([...playing, file.path]));
-                            await window.electron.openVLC([file.downloadLink]);
+                            console.log(streamUrl.href);
+                            await window.electron.openVLC([streamUrl.href]);
                           } catch {
                             alert("error when starting vlc.");
                           } finally {

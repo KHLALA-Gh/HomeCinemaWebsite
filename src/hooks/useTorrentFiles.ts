@@ -9,30 +9,31 @@ export function useTorrentFiles() {
   const [resp, setResp] = useState<TorrentFile[]>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [err, setErr] = useState<string>();
-  const get = async (hash: string): Promise<TorrentFile[]> => {
+  const get = async (hash: string, path?: string): Promise<TorrentFile[]> => {
     const config = await fetchConfigs();
     const url = new URL(
       endPoint.replace(":hash", hash),
       config["torrent-streamer-api"].external
         ? config["torrent-streamer-api"].origin
-        : location.origin
+        : location.origin,
     );
+    if (path) url.searchParams.set("path", path);
     const resp = await axios.get(url.href);
     for (let file of resp.data as TorrentFile[]) {
       const url = new URL(
         endPointDownload.replace(":hash", hash).replace(":path64", file.path64),
         config["torrent-streamer-api"].external
           ? config["torrent-streamer-api"].origin
-          : location.origin
+          : location.origin,
       );
       file.downloadLink = url.href;
     }
     return resp.data as TorrentFile[];
   };
-  const fetch = (hash: string) => {
+  const fetch = (hash: string, path?: string) => {
     setIsLoading(true);
     setErr("");
-    get(hash)
+    get(hash, path)
       .then((data) => {
         setResp(data);
       })

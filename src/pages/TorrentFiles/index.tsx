@@ -64,7 +64,10 @@ export default function Files() {
     setSize(size);
   }, [resp]);
   useEffect(() => {
-    fetchFiles(p.hash as string);
+    (async () => {
+      let history = await window.electron.getDH(p.hash as string);
+      fetchFiles(p.hash as string, history?.path);
+    })();
   }, []);
 
   return (

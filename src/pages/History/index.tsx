@@ -89,20 +89,27 @@ export default function History() {
         </div>
         <div className="mt-5 flex flex-col gap-3">
           {torrents &&
-            Array.from(search()).map((t, i) => {
-              return (
-                <TorrentHistory
-                  unknownTorrent={t[0].startsWith("unknown:")}
-                  onDeleteTorrent={(infoHash: string) => {
-                    let n = new Map(torrents);
-                    n.delete(infoHash);
-                    setTorrents(n);
-                  }}
-                  key={i}
-                  {...t[1]}
-                />
-              );
-            })}
+            Array.from(search())
+              .sort((a, b) => b[1].date - a[1].date)
+              .map((t, i, arr) => {
+                return (
+                  <>
+                    {i === 0 || !isSameDate(arr[i - 1][1].date, t[1].date) ? (
+                      <h1>{formatUnixDate(t[1].date)}</h1>
+                    ) : null}
+                    <TorrentHistory
+                      unknownTorrent={t[0].startsWith("unknown:")}
+                      onDeleteTorrent={(infoHash: string) => {
+                        let n = new Map(torrents);
+                        n.delete(infoHash);
+                        setTorrents(n);
+                      }}
+                      key={i}
+                      {...t[1]}
+                    />
+                  </>
+                );
+              })}
           {torrents.size === 0 && (
             <div className="flex justify-center items-center h-[70vh] w-full">
               <h1>No torrent in the library</h1>
@@ -112,4 +119,40 @@ export default function History() {
       </div>
     </>
   );
+}
+
+function isSameDate(unix1: number, unix2: number) {
+  const d1 = new Date(unix1);
+  const d2 = new Date(unix2);
+
+  return (
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate()
+  );
+}
+function formatUnixDate(unix: number) {
+  const date = new Date(unix);
+
+  const day = date.getDate();
+  const year = date.getFullYear();
+
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const month = months[date.getMonth()];
+
+  return `${day} ${month} ${year !== new Date().getFullYear() ? `,${year}` : ""}`;
 }

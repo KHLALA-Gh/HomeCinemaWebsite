@@ -46,7 +46,12 @@ interface SelectFilesProps {
   onError?: (err: any) => void;
   selectAll?: boolean;
 }
-export function SelectFiles({ files, onSet, onError }: SelectFilesProps) {
+export function SelectFiles({
+  files,
+  onSet,
+  onError,
+  infoHash,
+}: SelectFilesProps) {
   const [editFiles, setEditFiles] = useState<DownloadFile[]>([]);
   useEffect(() => {
     setEditFiles([...files]);
@@ -153,7 +158,9 @@ export function SelectFiles({ files, onSet, onError }: SelectFilesProps) {
             onClick={async () => {
               try {
                 if (!onSet) return;
-                await onSet(editFiles);
+                let history = await window.electron.getDH(infoHash);
+
+                await onSet(editFiles, history?.path);
               } catch (err) {
                 if (onError) onError(err);
               }
