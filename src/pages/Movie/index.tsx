@@ -8,6 +8,7 @@ import { SaveButton } from "../../components/Movie/Movie";
 import { addMovie, getMovieById, removeMovie } from "../../lib/idb";
 import NavBar from "../../components/Navbar";
 import { FloatingDiv } from "../../components/Utils/floating-div";
+import { Back } from "../../components/Utils/back";
 
 export default function MoviePage() {
   const params = useParams();
@@ -52,16 +53,8 @@ export function MovieDetails({
     <>
       <NavBar />
       <div className="xl:ps-28 xl:pr-28 md:ps-8 md:pr-8 sm:ps-0 sm:pr-0 ps-3 pr-3 md:mt-20 mt-10">
-        <div
-          className="md:mb-10 mb-10 cursor-pointer bg-white rounded-full h-10 w-10 flex justify-center items-center"
-          onClick={() => {
-            nav(-1);
-          }}
-        >
-          <FontAwesomeIcon
-            className="h-5! font-bold text-black"
-            icon={faChevronLeft}
-          />
+        <div className="mb-6">
+          <Back />
         </div>
 
         <div className="flex items-center md:items-start flex-col-reverse md:flex-row md:gap-10 flex-wrap md:justify-start justify-center md:flex-nowrap">

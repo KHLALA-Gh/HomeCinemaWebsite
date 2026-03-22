@@ -12,6 +12,7 @@ import MoreVert from "@mui/icons-material/MoreVert";
 import { FloatingDiv } from "../Utils/floating-div";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Btn from "../Button/button";
 import {
   faCircleExclamation,
   faExclamationCircle,
@@ -50,15 +51,15 @@ export function TorrentHistory({
             </h1>
             <p className="text-[#ffffff75]">This action is irreversible.</p>
             <div className="flex gap-3">
-              <Button
+              <Btn
                 onClick={() => {
                   setShowDelete(false);
                 }}
-                color="neutral"
+                className="glass! bg-white/10! hover:inset-shadow-white/60! hover:inset-shadow-sm duration-300! text-base! ps-6! pr-6!"
               >
                 Cancel
-              </Button>
-              <Button
+              </Btn>
+              <Btn
                 onClick={async () => {
                   try {
                     await window.electron.deleteDH(name);
@@ -68,10 +69,10 @@ export function TorrentHistory({
                   setShowDelete(false);
                   if (onDeleteTorrent) onDeleteTorrent(infoHash);
                 }}
-                color="danger"
+                className="glass! bg-red-500/20! hover:bg-red-500/30! duration-300! text-base! ps-6! pr-6!"
               >
                 Delete
-              </Button>
+              </Btn>
             </div>
           </div>
         </FloatingDiv>
@@ -81,7 +82,7 @@ export function TorrentHistory({
           if (infoHash.startsWith("unknown:")) return;
           nav(`/home_cinema/torrents/${infoHash}/files`);
         }}
-        className="p-5 bg-[#ffffff11]  glass-dark rounded-md flex flex-col gap-3 cursor-pointer"
+        className="p-5 bg-[#ffffff11] bg-pop rounded-md flex flex-col gap-3 cursor-pointer"
       >
         <div className="flex justify-between">
           <div className="flex gap-2">

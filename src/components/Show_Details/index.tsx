@@ -1,15 +1,17 @@
-import Button from "@mui/joy/Button";
 import { useTorrentSearch } from "../../hooks/getTorrentSearch";
 import { useNavigate } from "react-router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowUpRightFromSquare,
   faChevronLeft,
+  faMousePointer,
+  faPen,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
 import { SaveButton } from "../Movie/Movie";
+import Btn from "../Button/button";
 import {
   addTorrents,
   addTVShow,
@@ -18,25 +20,20 @@ import {
   removeTorrent,
   removeTVShow,
 } from "../../lib/idb";
-import NavBar from "../Navbar";
-function getMagnetHash(magnetLink: string) {
-  const url = new URL(magnetLink);
-  const params = new URLSearchParams(url.search);
-  const xt = params.get("xt");
-  if (xt && xt.startsWith("urn:btih:")) {
-    return xt.replace("urn:btih:", "");
-  }
-  return null;
-}
+import { Input } from "@mui/joy";
+import { Back } from "../Utils/back";
 
 export function ShowDetails(props: TMDBTVShowDetails) {
   const { resp, err, isLoading, fetch } = useTorrentSearch();
   const [selectedSeason, setSelectedSeason] = useState<number>();
+  const [searchOption, setSearchOption] = useState<"text" | "select">("select");
+  const [query, setQuery] = useState<string>(`${props.name} S01`);
   const [selectedEp, setSelectedEp] = useState<number>();
   const [limit, setLimit] = useState<number>(10);
   const navigate = useNavigate();
   const [saved, setSaved] = useState<boolean>(false);
   useEffect(() => {
+    console.log(props.seasons);
     getTVShowById(props.id).then((t) => {
       if (t) {
         setSaved(true);
@@ -44,6 +41,11 @@ export function ShowDetails(props: TMDBTVShowDetails) {
     });
   }, []);
   const search = () => {
+    if (searchOption === "text") {
+      fetch(query, limit);
+
+      return;
+    }
     //@ts-ignore
     let season = document.getElementById("season")?.value;
     //@ts-ignore
@@ -70,16 +72,8 @@ export function ShowDetails(props: TMDBTVShowDetails) {
   }, [resp]);
   return (
     <>
-      <div
-        className="md:mb-10 mb-10 cursor-pointer bg-white rounded-full h-10 w-10 flex justify-center items-center"
-        onClick={() => {
-          navigate(-1);
-        }}
-      >
-        <FontAwesomeIcon
-          className="h-5! font-bold text-black"
-          icon={faChevronLeft}
-        />
+      <div className="mb-6">
+        <Back />
       </div>
       <div className="lg:flex gap-20 relative">
         <div className="lg:z-10 left-[50%] lg:top-0 top-[20%] lg:left-0 lg:translate-x-0 translate-x-[-50%] z-[-10] lg:relative w-fit absolute min-w-[300px] min-h-[450px] rounded-md">
@@ -126,7 +120,10 @@ export function ShowDetails(props: TMDBTVShowDetails) {
             />
           </div>
           <h1 className="text-xl font-semibold mt-3">
-            {props.seasons.length} Season{props.seasons.length > 1 ? "s" : ""}
+            {props.seasons.filter((s) => s.name !== "Specials").length} Season
+            {props.seasons.filter((s) => s.name !== "Specials").length > 1
+              ? "s"
+              : ""}
           </h1>
           <h1 className="text-lg mt-2">
             Genres :{" "}
@@ -139,97 +136,129 @@ export function ShowDetails(props: TMDBTVShowDetails) {
           </h1>
           <h1 className="text-lg">Rating :{props.vote_average}</h1>
           <p className="mt-7 text-base md:text-lg">{props.overview}</p>
-          <div className="flex flex-wrap">
+          <div
+            onClick={() =>
+              setSearchOption(searchOption === "text" ? "select" : "text")
+            }
+            className="bg-pop mt-3 cursor-pointer relative flex justify-between rounded-full w-fit bg-white/10 pt-2 pb-2 ps-3 pr-3 gap-5"
+          >
             <div>
-              <p className="mt-5">Season </p>
-              <Select
-                onChange={(_, v) => {
-                  if (typeof v !== "number") return;
-                  if (v == 0) {
-                    setSelectedEp(0);
-                  }
-                  setSelectedSeason(v);
-                }}
-                placeholder="Choose one…"
-                name=""
-                id="season"
-                className=" mr-2 !bg-[#151515] !text-white after:bg-black !w-[150px]"
-                sx={{
-                  padding: 0,
-                  paddingLeft: "10px",
-                }}
-              >
-                <Option
-                  className="!bg-[#000000] !text-white !border-0 hover:!bg-[#242424]"
-                  value={0}
-                >
-                  any
-                </Option>
-                {props.seasons.map((s, i) => {
-                  if (s.name === "Specials") return;
-
-                  return (
+              <FontAwesomeIcon icon={faMousePointer} />
+            </div>
+            <div>
+              <FontAwesomeIcon icon={faPen} />
+            </div>
+            <div
+              className={`absolute h-[100%] w-[50%] top-0 rounded-full duration-200 ease-in-out h-5 ${searchOption === "select" ? "left-0" : "left-full translate-x-[-100%]"} bg-white/30`}
+            ></div>
+          </div>
+          <div className="flex flex-wrap mt-5">
+            {searchOption === "select" && (
+              <>
+                <div>
+                  <p>Season </p>
+                  <Select
+                    onChange={(_, v) => {
+                      if (typeof v !== "number") return;
+                      if (v == 0) {
+                        setSelectedEp(0);
+                      }
+                      setSelectedSeason(v);
+                    }}
+                    placeholder="Choose one…"
+                    name=""
+                    id="season"
+                    className=" mr-2 !bg-[#151515] !text-white after:bg-black !w-[150px]"
+                    sx={{
+                      padding: 0,
+                      paddingLeft: "10px",
+                    }}
+                  >
                     <Option
                       className="!bg-[#000000] !text-white !border-0 hover:!bg-[#242424]"
-                      value={s.season_number}
-                      key={i}
+                      value={0}
                     >
-                      {s.name}
+                      any
                     </Option>
-                  );
-                })}
-              </Select>
-            </div>
+                    {props.seasons.map((s, i) => {
+                      if (s.name === "Specials") return;
+
+                      return (
+                        <Option
+                          className="!bg-[#000000] !text-white !border-0 hover:!bg-[#242424]"
+                          value={s.season_number}
+                          key={i}
+                        >
+                          {s.name}
+                        </Option>
+                      );
+                    })}
+                  </Select>
+                </div>
+                <div>
+                  <p>Episode </p>
+                  <Select
+                    disabled={!selectedSeason}
+                    onChange={(_, v) => {
+                      if (typeof v !== "number") return;
+                      setSelectedEp(v);
+                    }}
+                    placeholder="Choose one…"
+                    name=""
+                    id="ep"
+                    className="mr-2 !bg-[#151515] !text-white after:bg-black !w-[150px]"
+                    sx={{
+                      padding: 0,
+                      paddingLeft: "10px",
+                      "&.Mui-disabled": {
+                        backgroundColor: "#000 !important",
+                        color: "#797979 !important",
+                        border: "2px solid #ccc",
+                      },
+                    }}
+                  >
+                    <Option
+                      className="!bg-[#000000] !text-white !border-0 hover:!bg-[#242424]"
+                      value={0}
+                    >
+                      any
+                    </Option>
+                    {selectedSeason &&
+                      props.seasons.map((s) => {
+                        if (s.season_number === selectedSeason) {
+                          let opts = [];
+                          for (let i = 1; i < s.episode_count + 1; i++) {
+                            opts.push(
+                              <Option
+                                value={i}
+                                key={i}
+                                className="!bg-[#000000] !text-white !border-0 hover:!bg-[#242424]"
+                              >
+                                episode {i}
+                              </Option>,
+                            );
+                          }
+                          return opts;
+                        }
+                      })}
+                  </Select>
+                </div>
+              </>
+            )}
+            {searchOption === "text" && (
+              <>
+                <div>
+                  <p>Search query</p>
+                  <Input
+                    value={query}
+                    onChange={(t) => setQuery(t.target.value)}
+                    className="w-min-28! h-fit mr-2 bg-white/10! bg-pop! text-white! outline-none!"
+                  />
+                </div>
+              </>
+            )}
             <div>
-              <p className="mt-5">Episode </p>
-              <Select
-                disabled={!selectedSeason}
-                onChange={(_, v) => {
-                  if (typeof v !== "number") return;
-                  setSelectedEp(v);
-                }}
-                placeholder="Choose one…"
-                name=""
-                id="ep"
-                className="mr-2 !bg-[#151515] !text-white after:bg-black !w-[150px]"
-                sx={{
-                  padding: 0,
-                  paddingLeft: "10px",
-                  "&.Mui-disabled": {
-                    backgroundColor: "#000 !important",
-                    color: "#797979 !important",
-                    border: "2px solid #ccc",
-                  },
-                }}
-              >
-                <Option
-                  className="!bg-[#000000] !text-white !border-0 hover:!bg-[#242424]"
-                  value={0}
-                >
-                  any
-                </Option>
-                {selectedSeason &&
-                  props.seasons.map((s) => {
-                    if (s.season_number === selectedSeason) {
-                      let opts = [];
-                      for (let i = 1; i < s.episode_count + 1; i++) {
-                        opts.push(
-                          <Option
-                            value={i}
-                            key={i}
-                            className="!bg-[#000000] !text-white !border-0 hover:!bg-[#242424]"
-                          >
-                            episode {i}
-                          </Option>,
-                        );
-                      }
-                      return opts;
-                    }
-                  })}
-              </Select>
-            </div>
-            <div>
-              <p className="mt-5">Search Limit</p>
+              <p>Search Limit</p>
               <Select
                 onChange={(_, v) => {
                   if (typeof v !== "number") return;
@@ -250,14 +279,14 @@ export function ShowDetails(props: TMDBTVShowDetails) {
               </Select>
             </div>
           </div>
-          <Button
-            loading={isLoading}
-            color="neutral"
+
+          <Btn
+            disabled={isLoading}
             onClick={search}
-            className="!text-base !pr-7 !ps-7 !pt-2 !pb-2 !mt-3"
+            className="!text-base glass! bg-white/10! !pr-7 !ps-7 !pt-2 !pb-2 !mt-3"
           >
-            Search
-          </Button>
+            {isLoading ? <div className="loader"></div> : "Search"}
+          </Btn>
         </div>
       </div>
       <div>
