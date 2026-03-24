@@ -49,7 +49,7 @@ export default function Files() {
   useEffect(() => {
     if (!resp) return;
     let size = 0;
-    resp?.map((file) => {
+    resp?.files.map((file) => {
       if (file.name.endsWith(".mp4") || file.name.endsWith(".mkv")) {
         size += file.size;
         setStreams((s) => {
@@ -77,7 +77,7 @@ export default function Files() {
       </div>
 
       <TorrentFiles
-        resp={resp || []}
+        resp={resp}
         hash={p.hash as string}
         err={err}
         isLoading={isLoading}
@@ -96,8 +96,8 @@ export default function Files() {
                 leechers = Number(sp.get("leechers"));
               }
               await addTorrents({
-                name: sp.get("name") || "",
-                provider: sp.get("provider") || "",
+                name: resp?.name || "unknown name",
+                provider: sp.get("provider") || "unknown provider",
                 seeders: seeders,
                 leechers: leechers,
                 infoHash: p.hash,
@@ -137,7 +137,7 @@ export default function Files() {
       {err && (
         <h1 className="text-red-500">An error occurred while getting files</h1>
       )}
-      {resp?.length === 0 && !isLoading && (
+      {resp?.files.length === 0 && !isLoading && (
         <h1>No files found. It could be 0 seeders</h1>
       )}
       {showStreamUrl && (

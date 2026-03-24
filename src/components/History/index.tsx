@@ -6,6 +6,7 @@ import {
   MenuButton,
   MenuItem,
 } from "@mui/joy";
+import pathBrowser from "path-browserify";
 import { useNavigate } from "react-router";
 import { join } from "path-browserify";
 import MoreVert from "@mui/icons-material/MoreVert";
@@ -62,12 +63,14 @@ export function TorrentHistory({
               <Btn
                 onClick={async () => {
                   try {
-                    await window.electron.deleteDH(name);
+                    await window.electron.deleteDH(
+                      pathBrowser.join(path, name),
+                    );
+                    if (onDeleteTorrent) onDeleteTorrent(infoHash);
                   } catch (err: any) {
                     alert(err?.message);
                   }
                   setShowDelete(false);
-                  if (onDeleteTorrent) onDeleteTorrent(infoHash);
                 }}
                 className="glass! bg-red-500/20! hover:bg-red-500/30! duration-300! text-base! ps-6! pr-6!"
               >

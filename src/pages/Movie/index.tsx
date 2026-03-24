@@ -2,7 +2,12 @@ import { useNavigate, useParams } from "react-router";
 import { useGetYTSMovieDetails } from "../../hooks/getMoviesDetails";
 import Button from "../../components/Button/button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faX, faXmark } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronLeft,
+  faPlay,
+  faX,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import { SaveButton } from "../../components/Movie/Movie";
 import { addMovie, getMovieById, removeMovie } from "../../lib/idb";
@@ -122,7 +127,7 @@ export function MovieDetails({
               </p>
               <div
                 className={
-                  "flex gap-5 flex-wrap " +
+                  "flex gap-3 flex-wrap items-center " +
                   (isLoading ? " loading-background w-60 h-5" : "")
                 }
               >
@@ -131,7 +136,7 @@ export function MovieDetails({
                   return (
                     <div
                       key={i}
-                      className="lg:text-base text-sm h-fit border-[1px] border-white ps-2 pr-2 cursor-pointer"
+                      className="lg:text-base text-sm h-fit bg-pop rounded-full bg-white/10 ps-2 pr-2 cursor-pointer"
                       onClick={() => {
                         if (t.quality === "2160p") {
                           location.href = link(i);
@@ -166,14 +171,15 @@ export function MovieDetails({
                   Math.floor((resp?.runtime as number) / 60) * 60}
                 min
               </p>
-              <div className="flex gap-5">
+              <div className="flex gap-3">
                 <Button
-                  className="md:text-xl text-lg"
+                  className="md:text-xl text-[0px]! hover:text-lg! hover:ps-4! hover:pr-4! p-2! ps-5! duration-200 flex gap-3 items-center text-lg bg-pop! bg-white/10! inset-shadow-2xs!"
                   onClick={() => {
                     setShowQ(!showQ);
                   }}
                 >
-                  Watch
+                  <FontAwesomeIcon className="text-base!" icon={faPlay} />
+                  <p>Watch</p>
                 </Button>
                 <a
                   target="_blank"
@@ -181,7 +187,9 @@ export function MovieDetails({
                     "https://www.youtube.com/watch?v=" + resp?.yt_trailer_code
                   }
                 >
-                  <Button className="md:text-xl text-lg">Trailer</Button>
+                  <Button className="md:text-lg text-base ps-6! pr-6! bg-white/10!">
+                    Trailer
+                  </Button>
                 </a>
               </div>
             </div>

@@ -6,7 +6,7 @@ import { addDownload } from "../lib/idb";
 const endPoint = "/api/torrents/:hash/download";
 
 export function useDownloadTorrent() {
-  const [resp, setResp] = useState<AxiosResponse>();
+  const [resp, setResp] = useState<AxiosResponse<Download>>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [err, setErr] = useState<string>();
   const post = async (hash: string, path: string, files?: string[]) => {
@@ -17,13 +17,12 @@ export function useDownloadTorrent() {
         ? config["torrent-streamer-api"].origin
         : location.origin,
     );
-    const resp = await axios.post(url.href, {
+    const resp = await axios.post<any, AxiosResponse<Download>>(url.href, {
       path,
       files,
     });
     if (resp.status === 200) {
       const data: Download = resp.data;
-      console.log(data);
       await addDownload(data);
     }
     return resp;
@@ -37,7 +36,7 @@ export function useDownloadTorrent() {
         setResp(data);
       })
       .catch((err) => {
-        setErr(err.message);
+        setErr(err);
       })
       .finally(() => {
         setIsLoading(false);
@@ -48,5 +47,6 @@ export function useDownloadTorrent() {
     isLoading,
     err,
     run,
+    setResp,
   };
 }

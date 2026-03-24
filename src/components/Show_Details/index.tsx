@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowUpRightFromSquare,
   faChevronLeft,
+  faExclamationCircle,
   faMousePointer,
   faPen,
 } from "@fortawesome/free-solid-svg-icons";
@@ -30,6 +31,7 @@ export function ShowDetails(props: TMDBTVShowDetails) {
   const [query, setQuery] = useState<string>(`${props.name} S01`);
   const [selectedEp, setSelectedEp] = useState<number>();
   const [limit, setLimit] = useState<number>(10);
+  const [showWarning, setShowWarning] = useState<boolean>(false);
   const navigate = useNavigate();
   const [saved, setSaved] = useState<boolean>(false);
   useEffect(() => {
@@ -72,10 +74,10 @@ export function ShowDetails(props: TMDBTVShowDetails) {
   }, [resp]);
   return (
     <>
-      <div className="mb-6">
+      <div className="mb-10 z-20">
         <Back />
       </div>
-      <div className="lg:flex gap-20 relative">
+      <div className="lg:flex gap-20 relative z-50">
         <div className="lg:z-10 left-[50%] lg:top-0 top-[20%] lg:left-0 lg:translate-x-0 translate-x-[-50%] z-[-10] lg:relative w-fit absolute min-w-[300px] min-h-[450px] rounded-md">
           <div className="rounded-md overflow-hidden w-fit">
             <img
@@ -152,7 +154,7 @@ export function ShowDetails(props: TMDBTVShowDetails) {
               className={`absolute h-[100%] w-[50%] top-0 rounded-full duration-200 ease-in-out h-5 ${searchOption === "select" ? "left-0" : "left-full translate-x-[-100%]"} bg-white/30`}
             ></div>
           </div>
-          <div className="flex flex-wrap mt-5">
+          <div className="flex flex-wrap items-center mt-5">
             {searchOption === "select" && (
               <>
                 <div>
@@ -277,6 +279,51 @@ export function ShowDetails(props: TMDBTVShowDetails) {
               >
                 {limitOptions()}
               </Select>
+            </div>
+            <div
+              onMouseOver={(t) => {
+                setShowWarning(true);
+              }}
+              onMouseOut={(t) => {
+                setShowWarning(false);
+              }}
+              className="flex justify-center items-center h-full pt-5 ps-3 cursor-pointer"
+              title={``}
+            >
+              <FontAwesomeIcon
+                icon={faExclamationCircle}
+                color="yellow"
+                className=""
+                size="lg"
+              />
+              {showWarning && (
+                <div className="absolute z-50 bg-[#a6a302] p-3 rounded-2xl select-none">
+                  <p>
+                    Seasons number may be wrong. if you didn't find a season you
+                    can switch to{" "}
+                    <span
+                      onClick={() => {
+                        setSearchOption("text");
+                        setShowWarning(false);
+                      }}
+                      className="ps-2 pr-2 pt-1 pb-1 bg-black/80 bg-pop rounded-md hover:bg-black"
+                    >
+                      text search <FontAwesomeIcon icon={faPen} size="sm" />
+                      <br />
+                    </span>
+                    search example : <br />
+                    Get {props.name} season 2 : <br />
+                    <span className="ps-2 select-all pr-2 pt-1 pb-1 bg-black/80 bg-pop rounded-md">
+                      {props.name} S02
+                    </span>
+                    <br />
+                    Get {props.name} season 3 episode 5 : <br />
+                    <span className="ps-2 pr-2 pt-1  select-all pb-1 bg-black/80 bg-pop rounded-md">
+                      {props.name} S03E05
+                    </span>
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 

@@ -27,6 +27,8 @@ declare global {
       getDHPath(): Promise<string>;
       changeDHDir: (newDir: string) => void;
       getTorrentProps: (infoHash: string) => Promise<null | TorrentProps>;
+      getLibSet: () => Promise<boolean>;
+      setLibSet: (set: boolean) => Promise<boolean>;
     };
   }
 }

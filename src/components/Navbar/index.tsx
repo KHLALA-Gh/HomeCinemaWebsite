@@ -130,7 +130,7 @@ export default function NavBar(props: NavbarProps) {
               <Input
                 value={term}
                 id="searchInp1"
-                className="!w-[150px]"
+                className="!w-[150px] border-none! outline-none!"
                 onKeyUp={(p) => onPressEnter("searchInp1", p.key)}
                 onChange={(e) => {
                   // @ts-ignore

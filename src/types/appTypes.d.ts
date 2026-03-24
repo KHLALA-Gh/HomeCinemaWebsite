@@ -17,6 +17,14 @@ interface DownloadHistory {
   date: number;
 }
 
+interface TorrentMetadata {
+  name: string;
+  path: string;
+  size: number;
+  torrentURL: string;
+  files: TorrentFile[];
+}
+
 interface TorrentFile {
   name: string;
   size: number;

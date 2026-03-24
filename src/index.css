@@ -120,6 +120,16 @@
   height: fit-content;
 }
 
+.alert-title-yellow {
+  position: relative;
+}
+.alert-title-yellow::after {
+  white-space: initial !important;
+  text-wrap: wrap;
+}
+.alert-title-yellow[title]:hover::after {
+  background-color: rgb(109, 109, 0) !important;
+}
 .alert-title[title]:hover::after {
   content: attr(title);
   position: absolute;

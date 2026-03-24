@@ -132,6 +132,7 @@ function isSameDate(unix1: number, unix2: number) {
   );
 }
 function formatUnixDate(unix: number) {
+  if (!unix) return `no date`;
   const date = new Date(unix);
 
   const day = date.getDate();

@@ -1,15 +1,13 @@
 import { FormControlLabel, Switch } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useCreatePreStream } from "../../hooks/useCreatePreStream";
-import { useNavigate } from "react-router";
 import {
   faCopy,
   faDownload,
   faFile,
   faFloppyDisk,
   faPlay,
+  faUpload,
   faVideo,
-  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import pr from "pretty-bytes";
@@ -21,7 +19,8 @@ import { useDownloadTorrent } from "../../hooks/useDownloadTorrent";
 import { SaveButton } from "../Movie/Movie";
 import { FloatingDiv } from "../Utils/floating-div";
 import { SelectFiles } from "../Download";
-import axios from "axios";
+import { useNavigate } from "react-router";
+// import axios from "axios";
 
 function getVideos(files: TorrentFile[]): number {
   let num = 0;
@@ -38,7 +37,7 @@ interface Streams {
 }
 interface TorrentFilesProps {
   hash: string;
-  resp: TorrentFile[];
+  resp?: TorrentMetadata;
   isLoading: boolean;
   err?: string;
   onSave: () => void;
@@ -52,33 +51,25 @@ export function TorrentFiles({
   saved,
   onSave,
 }: TorrentFilesProps) {
-  const [showStreamUrl, setShowStreamUrl] = useState(false);
-  const [downloadDialog, setDownloadDialog] = useState(false);
   const [playing, setPlaying] = useState<Set<string>>(new Set());
-  const {
-    resp: createStreamResp,
-    isLoading: isLoadingPreStream,
-    err: errPreStream,
-    fetch,
-  } = useCreatePreStream();
+  const nav = useNavigate();
   const [easyView, setEasyView] = useState(false);
-  const { run, resp: downloadResp } = useDownloadTorrent();
+  const {
+    run,
+    resp: downloadResp,
+    err: downloadErr,
+    isLoading: downloadLoading,
+    setResp: setDownloadResp,
+  } = useDownloadTorrent();
   const [showOnlyVideo, setShowOnlyVideo] = useState<number>(+localStorage.sov);
-  const navigate = useNavigate();
   const [configs, setConfigs] = useState<ServerConfig>();
-  const createStream = (path: string) => {
-    fetch(hash as string, path);
-    setShowStreamUrl(true);
-  };
-  const [size, setSize] = useState<number>();
+
   const [streams, setStreams] = useState<Streams[]>();
   const [openSelectFiles, setOpenSelectFiles] = useState(false);
   useEffect(() => {
     if (!resp) return;
-    let size = 0;
-    resp?.map((file) => {
+    resp?.files.map((file) => {
       if (file.name.endsWith(".mp4") || file.name.endsWith(".mkv")) {
-        size += file.size;
         setStreams((s) => {
           if (s) {
             return [...s, { streamUrl: file.downloadLink, name: file.name }];
@@ -88,25 +79,66 @@ export function TorrentFiles({
         });
       }
     });
-    setSize(size);
   }, [resp]);
   useEffect(() => {
     fetchConfigs().then((c) => setConfigs(c));
   }, []);
   useEffect(() => {
+    if (downloadErr) alert(downloadErr);
+  }, [downloadErr]);
+  useEffect(() => {
     if (downloadResp?.status === 208) {
+      //@ts-ignore
       alert(downloadResp.data.err);
     }
   }, [downloadResp]);
   return (
     <>
-      {openSelectFiles && (
+      {(downloadLoading || downloadResp) && (
+        <FloatingDiv
+          title={downloadLoading ? "setting download..." : ""}
+          onClose={() => setDownloadResp(undefined)}
+        >
+          {downloadResp && (
+            <div className="flex justify-center items-center flex-col gap-5">
+              <div className="rounded-2xl bg-white/10 bg-pop p-5">
+                <FontAwesomeIcon icon={faDownload} size="lg" />
+              </div>
+              <h1 className="font-bold">{resp?.name}</h1>
+              <div>
+                {pr(+(downloadResp.data.downSpeed || 0))}{" "}
+                <FontAwesomeIcon icon={faDownload} />
+                {pr(+(downloadResp.data.upSpeed || 0))}{" "}
+                <FontAwesomeIcon icon={faUpload} />
+              </div>
+
+              <p className="bg-pop p-2 rounded-full bg-white/10">
+                {pr(+(downloadResp.data.downloadSize || 0))}
+              </p>
+              <Button
+                onClick={() => {
+                  nav(`/home_cinema/downloads`);
+                }}
+                className="text-base! bg-white/10! ps-5! pr-5! mb-3"
+              >
+                Check Downloads
+              </Button>
+            </div>
+          )}
+          {downloadLoading && (
+            <div className="flex justify-center items-center">
+              <h1>loading...</h1>
+            </div>
+          )}
+        </FloatingDiv>
+      )}
+      {openSelectFiles && resp && (
         <FloatingDiv
           title="Select Files"
           onClose={() => setOpenSelectFiles(false)}
         >
           <SelectFiles
-            files={resp.map((f) => {
+            files={resp.files.map((f) => {
               return {
                 selected: true,
                 paused: false,
@@ -120,28 +152,32 @@ export function TorrentFiles({
             onSet={async (files, l) => {
               setOpenSelectFiles(false);
 
-              const configs = await fetchConfigs();
+              // const configs = await fetchConfigs();
 
-              const url = new URL(
-                `/api/torrents/${hash}/download`,
-                configs["torrent-streamer-api"].external
-                  ? configs["torrent-streamer-api"].origin
-                  : location.origin,
-              );
+              // const url = new URL(
+              //   `/api/torrents/${hash}/download`,
+              //   configs["torrent-streamer-api"].external
+              //     ? configs["torrent-streamer-api"].origin
+              //     : location.origin,
+              // );
               let path = l || (await window.electron.getDHPath());
               window.electron.setDH(hash.toLowerCase(), {
                 infoHash: hash,
-                name: resp[0]?.path.split("/")[0],
+                name: resp.name,
                 path: path || "undefined",
-                size: size || 0,
+                size: resp.size || 0,
                 date: Date.now(),
               });
-              const r = await axios.post(url.href, {
-                files: files.map((f) => (f.selected ? f.path : "")),
+              // const r = await axios.post(url.href, {
+              //   files: files.map((f) => (f.selected ? f.path : "")),
+              //   path,
+              // });
+              run(
+                hash,
                 path,
-              });
-
-              throw new Error(r.data);
+                files.map((f) => (f.selected ? f.path : "")),
+              );
+              // throw new Error(r.data);
             }}
             onError={(err) => {
               alert("an error occured");
@@ -154,7 +190,7 @@ export function TorrentFiles({
         <div className="p-5">
           <div className="flex gap-3 items-center mb-3">
             <h1 className="md:text-3xl font-bold">
-              {resp && <h1>{resp[0]?.path.split("/")[0]}</h1>}
+              {resp && <h1>{resp.name}</h1>}
             </h1>
             <SaveButton onClick={onSave} saved={saved} />
           </div>
@@ -191,10 +227,7 @@ export function TorrentFiles({
                       url.searchParams.append("names", s.name);
                     });
                     if (resp) {
-                      url.searchParams.set(
-                        "fileName",
-                        resp[0].path.split("/")[0],
-                      );
+                      url.searchParams.set("fileName", resp.name);
                     }
                     open(url.href);
                   }
@@ -220,7 +253,7 @@ export function TorrentFiles({
 
         <div className="ps-5 mb-1">
           <h1 className="text-xl font-bold">Files</h1>
-          <p className="text-sm mt-1">{pr((size as number) || 0)}</p>
+          <p className="text-sm mt-1">{pr((resp?.size as number) || 0)}</p>
         </div>
 
         <FormControlLabel
@@ -250,8 +283,12 @@ export function TorrentFiles({
           <>
             <div className="ps-5">
               <ul className="flex gap-5" style={{ listStyleType: "circle" }}>
-                <li className="list-none">{resp?.length} files </li>
-                {showOnlyVideo ? <li>{getVideos(resp)} Hidden files</li> : ""}
+                <li className="list-none">{resp?.files.length} files </li>
+                {showOnlyVideo ? (
+                  <li>{getVideos(resp.files)} Hidden files</li>
+                ) : (
+                  ""
+                )}
               </ul>
             </div>
             <Button
@@ -263,7 +300,7 @@ export function TorrentFiles({
               Easy View
             </Button>
             <div className="p-5">
-              {resp?.map((file, i) => {
+              {resp?.files.map((file, i) => {
                 const isVid =
                   file.name.endsWith(".mp4") ||
                   file.name.endsWith(".mkv") ||
@@ -411,58 +448,14 @@ export function TorrentFiles({
       {err && (
         <h1 className="text-red-500">An error occurred while getting files</h1>
       )}
-      {resp?.length === 0 && !isLoading && (
+      {resp?.files.length === 0 && !isLoading && (
         <h1>No files found. It could be 0 seeders</h1>
       )}
-      {showStreamUrl && !isLoading && (
-        <>
-          <div className="fixed w-full h-screen bg-[#0000007b] top-0"></div>
 
-          <div className="w-[700px] fixed flex justify-center items-center p-5 border-2 border-white h-[300px] top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] bg-black">
-            {(createStreamResp || errPreStream) && (
-              <div
-                className="ms-[90%] translate-x-[-90%] absolute top-5 cursor-pointer"
-                onClick={() => setShowStreamUrl(false)}
-              >
-                <FontAwesomeIcon icon={faXmark} />
-              </div>
-            )}
-            {isLoadingPreStream && <h1>loading...</h1>}
-            {createStreamResp && (
-              <div>
-                <h1 className="text-center">
-                  <span className="font-bold text-xl mb-5 block">
-                    {" "}
-                    Stream URL{" "}
-                  </span>{" "}
-                  <a
-                    href={createStreamResp.streamUrl}
-                    className="text-blue-600 hover:underline"
-                  >
-                    {createStreamResp.streamUrl}
-                  </a>
-                </h1>
-                <div>
-                  <Button
-                    onClick={() => {
-                      navigate("/home_cinema/streams");
-                    }}
-                    className="!text-base !ms-[50%] translate-x-[-50%] !mt-10"
-                  >
-                    All Streams
-                  </Button>
-                </div>
-              </div>
-            )}
-            {errPreStream && <h1 className="text-red-600">{errPreStream}</h1>}
-          </div>
-        </>
-      )}
-
-      {easyView && (
+      {easyView && resp && (
         <>
           <FloatingDiv title="Easy View" onClose={() => setEasyView(false)}>
-            <EasyView resp={resp} config={configs} />
+            <EasyView resp={resp.files} config={configs} />
           </FloatingDiv>
         </>
       )}
