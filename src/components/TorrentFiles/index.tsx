@@ -63,7 +63,7 @@ export function TorrentFiles({
   } = useDownloadTorrent();
   const [showOnlyVideo, setShowOnlyVideo] = useState<number>(+localStorage.sov);
   const [configs, setConfigs] = useState<ServerConfig>();
-
+  const [showDownloadNotif, setShowDownloadNotif] = useState(true);
   const [streams, setStreams] = useState<Streams[]>();
   const [openSelectFiles, setOpenSelectFiles] = useState(false);
   useEffect(() => {
@@ -94,10 +94,10 @@ export function TorrentFiles({
   }, [downloadResp]);
   return (
     <>
-      {(downloadLoading || downloadResp) && (
+      {(downloadLoading || downloadResp) && showDownloadNotif && (
         <FloatingDiv
           title={downloadLoading ? "setting download..." : ""}
-          onClose={() => setDownloadResp(undefined)}
+          onClose={() => setShowDownloadNotif(false)}
         >
           {downloadResp && (
             <div className="flex justify-center items-center flex-col gap-5">
@@ -172,6 +172,7 @@ export function TorrentFiles({
               //   files: files.map((f) => (f.selected ? f.path : "")),
               //   path,
               // });
+              setShowDownloadNotif(true);
               run(
                 hash,
                 path,

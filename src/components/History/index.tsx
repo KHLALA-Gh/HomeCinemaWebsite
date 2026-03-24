@@ -20,15 +20,30 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { SmallTorrentSearch } from "../Utils/torrentSearch";
 import { TorrentProps } from "../TorrentProps";
+import { moveTorrent } from "../../lib/utils";
 export function TorrentHistory({
   name,
   infoHash,
   path,
+  size,
+  date,
   onDeleteTorrent,
   unknownTorrent,
+  selectMode,
+  reload,
+  onSelect,
+  onDeselect,
+  selected,
+  onClick,
 }: DownloadHistory & {
   onDeleteTorrent: (infoHash: string) => void;
   unknownTorrent: boolean;
+  reload: () => void;
+  onSelect: () => void;
+  onDeselect: () => void;
+  selectMode: boolean;
+  selected: boolean;
+  onClick: () => void;
 }) {
   let nav = useNavigate();
   const [showDelete, setShowDelete] = useState(false);
@@ -66,6 +81,8 @@ export function TorrentHistory({
                     await window.electron.deleteDH(
                       pathBrowser.join(path, name),
                     );
+                    reload();
+
                     if (onDeleteTorrent) onDeleteTorrent(infoHash);
                   } catch (err: any) {
                     alert(err?.message);
@@ -81,14 +98,33 @@ export function TorrentHistory({
         </FloatingDiv>
       )}
       <div
-        onDoubleClick={() => {
-          if (infoHash.startsWith("unknown:")) return;
-          nav(`/home_cinema/torrents/${infoHash}/files`);
+        onClick={() => {
+          if (selectMode) {
+            if (selected) onDeselect();
+            else onSelect();
+          }
         }}
-        className="p-5 bg-[#ffffff11] bg-pop rounded-md flex flex-col gap-3 cursor-pointer"
+        className="p-5 select-none bg-[#ffffff11] bg-pop rounded-md flex justify-between gap-3 cursor-pointer"
       >
-        <div className="flex justify-between">
+        <div
+          onClick={onClick}
+          className="flex justify-between gap-5 flex-col w-full"
+        >
           <div className="flex gap-2">
+            {selectMode && (
+              <div>
+                <input
+                  type="checkbox"
+                  onChange={(t) => {
+                    if (t.target.checked) onSelect();
+                    else onDeselect();
+                  }}
+                  checked={selected}
+                  name=""
+                  id=""
+                />
+              </div>
+            )}
             {infoHash.startsWith("unknown:") && (
               <div
                 className="alert-title"
@@ -103,70 +139,94 @@ export function TorrentHistory({
             )}
             <h1>{name}</h1>
           </div>
-          <div>
-            <Dropdown>
-              <MenuButton
-                sx={{
-                  ":hover": {
-                    backgroundColor: "#ffffff30",
-                  },
-                }}
-                slots={{ root: IconButton }}
-                slotProps={{ root: { variant: "outlined", color: "neutral" } }}
-              >
-                <MoreVert className="text-white" />
-              </MenuButton>
-              <Menu className="overflow-hidden! p-0! border-0! bg-white/2! inset-shadow-sm/100! shadow-2xl! shadow-white/10! inset-shadow-black/40! backdrop-blur-xs!">
-                <MenuItem
-                  className="inset-shadow-sm/40 text-white! bg-white/0! hover:bg-white/10! shadow-2xl inset-shadow-white/40 backdrop-blur-xs"
-                  onClick={() => {
-                    window.electron.openFolder(join(path, name));
-                  }}
-                >
-                  Open Torrent Folder
-                </MenuItem>
-                <MenuItem
-                  className="inset-shadow-sm/40 text-white! bg-white/0! hover:bg-white/10! shadow-2xl inset-shadow-white/40 backdrop-blur-xs"
-                  onClick={async () => {
-                    let props = await window.electron.getTorrentProps(infoHash);
-                    setTorrentProps(props);
-                    setOpenProps(true);
-                  }}
-                >
-                  Properties
-                </MenuItem>
-                {unknownTorrent && (
-                  <MenuItem
-                    className="inset-shadow-sm/40 text-white! bg-white/0! hover:bg-white/10! shadow-2xl inset-shadow-white/40 backdrop-blur-xs"
-                    onClick={() => {
-                      setTorrentSearchQuery(name);
-                    }}
-                  >
-                    Search torrent
-                    <FontAwesomeIcon
-                      className=""
-                      icon={faExclamationCircle}
-                      color="yellow"
-                    />
-                  </MenuItem>
-                )}
-                <MenuItem
-                  onClick={() => {
-                    setShowDelete(true);
-                  }}
-                  className="bg-red-700/30! border-0 text-white! duration-500 inset-shadow-sm/40 hover:bg-red-700/10! shadow-2xl inset-shadow-white/40 backdrop-blur-xs"
-                >
-                  Delete
-                </MenuItem>
-              </Menu>
-            </Dropdown>
-          </div>
+          <p>
+            <span className="bg-[#ffffff19] p-1 rounded-md">
+              {join(path, name)}
+            </span>
+          </p>
         </div>
-        <p>
-          <span className="bg-[#ffffff19] p-1 rounded-md">
-            {join(path, name)}
-          </span>
-        </p>
+        <div>
+          <Dropdown>
+            <MenuButton
+              sx={{
+                ":hover": {
+                  backgroundColor: "#ffffff30",
+                },
+              }}
+              slots={{ root: IconButton }}
+              slotProps={{ root: { variant: "outlined", color: "neutral" } }}
+            >
+              <MoreVert className="text-white" />
+            </MenuButton>
+            <Menu className="overflow-hidden! p-0! border-0! bg-white/2! inset-shadow-sm/100! shadow-2xl! shadow-white/10! inset-shadow-black/40! backdrop-blur-xs!">
+              <MenuItem
+                className="inset-shadow-sm/40 text-white! bg-white/0! hover:bg-white/10! shadow-2xl inset-shadow-white/40 backdrop-blur-xs"
+                onClick={() => {
+                  window.electron.openFolder(join(path, name));
+                }}
+              >
+                Open Torrent Folder
+              </MenuItem>
+              <MenuItem
+                className="inset-shadow-sm/40 text-white! bg-white/0! hover:bg-white/10! shadow-2xl inset-shadow-white/40 backdrop-blur-xs"
+                onClick={async () => {
+                  let props = await window.electron.getTorrentProps(infoHash);
+                  setTorrentProps(props);
+                  setOpenProps(true);
+                }}
+              >
+                Properties
+              </MenuItem>
+              <MenuItem
+                className="inset-shadow-sm/40 text-white! bg-white/0! hover:bg-white/10! shadow-2xl inset-shadow-white/40 backdrop-blur-xs"
+                onClick={async () => {
+                  try {
+                    const dest = await window.electron.selectFolder();
+                    if (!dest) return;
+                    await moveTorrent(
+                      {
+                        name,
+                        path,
+                        size,
+                        date,
+                        infoHash,
+                      },
+                      dest,
+                    );
+                    reload();
+                  } catch (err: any) {
+                    alert(err.message);
+                  }
+                }}
+              >
+                Move Torrent
+              </MenuItem>
+              {unknownTorrent && (
+                <MenuItem
+                  className="inset-shadow-sm/40 text-white! bg-white/0! hover:bg-white/10! shadow-2xl inset-shadow-white/40 backdrop-blur-xs"
+                  onClick={() => {
+                    setTorrentSearchQuery(name);
+                  }}
+                >
+                  Search torrent
+                  <FontAwesomeIcon
+                    className=""
+                    icon={faExclamationCircle}
+                    color="yellow"
+                  />
+                </MenuItem>
+              )}
+              <MenuItem
+                onClick={() => {
+                  setShowDelete(true);
+                }}
+                className="bg-red-700/30! border-0 text-white! duration-500 inset-shadow-sm/40 hover:bg-red-700/10! shadow-2xl inset-shadow-white/40 backdrop-blur-xs"
+              >
+                Delete
+              </MenuItem>
+            </Menu>
+          </Dropdown>
+        </div>
       </div>
       {torrentSearchQuery && (
         <FloatingDiv

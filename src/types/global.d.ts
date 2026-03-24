@@ -29,6 +29,7 @@ declare global {
       getTorrentProps: (infoHash: string) => Promise<null | TorrentProps>;
       getLibSet: () => Promise<boolean>;
       setLibSet: (set: boolean) => Promise<boolean>;
+      move: (src: string, dest: string) => Promise<void>;
     };
   }
 }

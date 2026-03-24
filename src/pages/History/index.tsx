@@ -6,6 +6,10 @@ import Fuse from "fuse.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFolder, faGear } from "@fortawesome/free-solid-svg-icons";
 import { FloatingDiv } from "../../components/Utils/floating-div";
+import { useNavigate } from "react-router";
+import Button from "../../components/Button/button";
+import { moveTorrent } from "../../lib/utils";
+import path from "path-browserify";
 
 export default function History() {
   let [torrents, setTorrents] = useState<Map<string, DownloadHistory>>(
@@ -13,12 +17,37 @@ export default function History() {
   );
   const [searchTorrents, setSearchTorrents] = useState("");
   const [showSettings, setShowSettings] = useState(false);
-
+  const [selectMode, setSelectMode] = useState<boolean>(false);
+  const [showDeleteWarning, setShowDeleteWarning] = useState<boolean>(false);
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const nav = useNavigate();
   const [fuse, setFuse] = useState<Fuse<DownloadHistory>>();
-  useEffect(() => {
+  const reload = () => {
     window.electron.getAllDH().then((t) => {
       setTorrents(t);
     });
+  };
+  let clickTimeout: NodeJS.Timeout | null = null;
+
+  function handleClick(infoHash: string) {
+    if (clickTimeout || selectMode) return;
+    clickTimeout = setTimeout(() => {
+      if (infoHash.startsWith("unknown:")) return;
+      nav(`/home_cinema/torrents/${infoHash}/files`);
+    }, 250);
+  }
+
+  function handleDoubleClick(infoHash: string) {
+    if (clickTimeout) {
+      clearTimeout(clickTimeout);
+      clickTimeout = null;
+      setSelectMode(true);
+      const set = new Set([infoHash]);
+      setSelectedItems(set);
+    }
+  }
+  useEffect(() => {
+    reload();
   }, []);
   useEffect(() => {
     setFuse(
@@ -40,6 +69,45 @@ export default function History() {
   };
   return (
     <>
+      {showDeleteWarning && (
+        <FloatingDiv blur onClose={() => setShowDeleteWarning(false)}>
+          <div className="flex flex-col gap-3 justify-center items-center">
+            <h1>
+              Are you sure you want to delete {selectedItems.size} torrents.
+            </h1>
+            <p className="text-[#ffffff75]">This action is irreversible.</p>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => {
+                  setShowDeleteWarning(false);
+                }}
+                className="glass! bg-white/10! hover:inset-shadow-white/60! hover:inset-shadow-sm duration-300! text-base! ps-6! pr-6!"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={async () => {
+                  selectedItems.forEach(async (infoHash) => {
+                    let torrent = torrents.get(infoHash);
+                    if (torrent && torrent.name) {
+                      await window.electron.deleteDH(
+                        path.join(torrent.path, torrent.name),
+                      );
+                    }
+                  });
+                  setSelectMode(false);
+                  setSelectedItems(new Set());
+                  setShowDeleteWarning(false);
+                  reload();
+                }}
+                className="glass! bg-red-500/20! hover:bg-red-500/30! duration-300! text-base! ps-6! pr-6!"
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </FloatingDiv>
+      )}
       {showSettings && (
         <FloatingDiv
           blur
@@ -87,6 +155,48 @@ export default function History() {
             }}
           />
         </div>
+        {selectMode && (
+          <div>
+            <h1 className="mt-3">{selectedItems.size} selected items</h1>
+            <div className="mb-3 mt-2 flex gap-3">
+              <Button
+                onClick={() => {
+                  setSelectMode(false);
+                  setSelectedItems(new Set());
+                }}
+                className="bg-pop! ps-5! pr-5! text-base! bg-white/10! inset-shadow-none!"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={async () => {
+                  const dest = await window.electron.selectFolder();
+                  if (!dest) return;
+                  selectedItems.forEach(async (infoHash) => {
+                    let torrent = torrents.get(infoHash);
+                    if (torrent) {
+                      await moveTorrent(torrent, dest);
+                    }
+                  });
+                  setSelectMode(false);
+                  setSelectedItems(new Set());
+                  reload();
+                }}
+                className="bg-pop! ps-5! pr-5! text-base! bg-white/30!"
+              >
+                Move
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowDeleteWarning(true);
+                }}
+                className="bg-pop! ps-5! pr-5! text-base! bg-red-600/30!"
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        )}
         <div className="mt-5 flex flex-col gap-3">
           {torrents &&
             Array.from(search())
@@ -97,16 +207,39 @@ export default function History() {
                     {i === 0 || !isSameDate(arr[i - 1][1].date, t[1].date) ? (
                       <h1>{formatUnixDate(t[1].date)}</h1>
                     ) : null}
-                    <TorrentHistory
-                      unknownTorrent={t[0].startsWith("unknown:")}
-                      onDeleteTorrent={(infoHash: string) => {
-                        let n = new Map(torrents);
-                        n.delete(infoHash);
-                        setTorrents(n);
+
+                    <div
+                      onDoubleClick={() => {
+                        handleDoubleClick(t[1].infoHash);
                       }}
-                      key={i}
-                      {...t[1]}
-                    />
+                    >
+                      <TorrentHistory
+                        onClick={() => {
+                          handleClick(t[1].infoHash);
+                        }}
+                        selected={selectedItems.has(t[1].infoHash)}
+                        selectMode={selectMode}
+                        reload={reload}
+                        onSelect={() => {
+                          const set = new Set(selectedItems);
+                          set.add(t[1].infoHash);
+                          setSelectedItems(set);
+                        }}
+                        onDeselect={() => {
+                          const set = new Set(selectedItems);
+                          set.delete(t[1].infoHash);
+                          setSelectedItems(set);
+                        }}
+                        unknownTorrent={t[0].startsWith("unknown:")}
+                        onDeleteTorrent={(infoHash: string) => {
+                          let n = new Map(torrents);
+                          n.delete(infoHash);
+                          setTorrents(n);
+                        }}
+                        key={i}
+                        {...t[1]}
+                      />
+                    </div>
                   </>
                 );
               })}
