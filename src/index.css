@@ -73,6 +73,36 @@
   }
 }
 
+.glass-light {
+  background: rgba(56, 56, 56, 0.01); /* transparency */
+  backdrop-filter: blur(5px) saturate(180%); /* main blur */
+  -webkit-backdrop-filter: blur(20px); /* Safari support */
+
+  border-radius: 20px;
+
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.glass-light::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0.05)
+  );
+
+  opacity: 0.4;
+  pointer-events: none;
+}
+
 .spin-animation {
   animation: spin-animation 2s infinite ease-in-out;
 }

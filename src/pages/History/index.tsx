@@ -4,7 +4,7 @@ import { Back } from "../../components/Utils/back";
 import Input from "../../components/Input/Input";
 import Fuse from "fuse.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFolder, faGear } from "@fortawesome/free-solid-svg-icons";
+import { faFolder, faGear, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FloatingDiv } from "../../components/Utils/floating-div";
 import { useNavigate } from "react-router";
 import Button from "../../components/Button/button";
@@ -141,7 +141,7 @@ export default function History() {
           <Back />
           <div
             onClick={() => setShowSettings(true)}
-            className="glass-white cursor-pointer flex justify-center w-10 h-10 items-center rounded-full"
+            className="glass-white hover:rotate-45 duration-150 cursor-pointer flex justify-center w-10 h-10 items-center rounded-full"
           >
             <FontAwesomeIcon icon={faGear} color="black" size="lg" />
           </div>
@@ -155,48 +155,13 @@ export default function History() {
             }}
           />
         </div>
-        {selectMode && (
-          <div>
-            <h1 className="mt-3">{selectedItems.size} selected items</h1>
-            <div className="mb-3 mt-2 flex gap-3">
-              <Button
-                onClick={() => {
-                  setSelectMode(false);
-                  setSelectedItems(new Set());
-                }}
-                className="bg-pop! ps-5! pr-5! text-base! bg-white/10! inset-shadow-none!"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={async () => {
-                  const dest = await window.electron.selectFolder();
-                  if (!dest) return;
-                  selectedItems.forEach(async (infoHash) => {
-                    let torrent = torrents.get(infoHash);
-                    if (torrent) {
-                      await moveTorrent(torrent, dest);
-                    }
-                  });
-                  setSelectMode(false);
-                  setSelectedItems(new Set());
-                  reload();
-                }}
-                className="bg-pop! ps-5! pr-5! text-base! bg-white/30!"
-              >
-                Move
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowDeleteWarning(true);
-                }}
-                className="bg-pop! ps-5! pr-5! text-base! bg-red-600/30!"
-              >
-                Delete
-              </Button>
-            </div>
-          </div>
-        )}
+        <div>
+          <h1 className="mt-3 text-white/60">
+            {!selectMode
+              ? `double click the torrent to select multiple torrents`
+              : `${selectedItems.size} selected items`}
+          </h1>
+        </div>
         <div className="mt-5 flex flex-col gap-3">
           {torrents &&
             Array.from(search())
@@ -248,6 +213,56 @@ export default function History() {
               <h1>No torrent in the library</h1>
             </div>
           )}
+        </div>
+      </div>
+      <div
+        className={
+          "fixed w-full flex justify-center ease-in-out" +
+          (selectMode ? " bottom-2 duration-350" : " -bottom-40  duration-700")
+        }
+      >
+        <div
+          className={
+            "mb-3 mt-2 flex gap-3 bg-pop rounded-full duration-700" +
+            (selectMode ? " p-4  bg-white/10" : " p-0  bg-white/30")
+          }
+        >
+          <Button
+            onClick={() => {
+              setSelectMode(false);
+              setSelectedItems(new Set());
+            }}
+            className="bg-pop! ps-5! pr-5! duration-200 text-[0px]! hover:text-base! text-base! bg-white/10! inset-shadow-none!"
+          >
+            <FontAwesomeIcon className="text-base!" icon={faXmark} />
+            Cancel
+          </Button>
+          <Button
+            onClick={async () => {
+              const dest = await window.electron.selectFolder();
+              if (!dest) return;
+              selectedItems.forEach(async (infoHash) => {
+                let torrent = torrents.get(infoHash);
+                if (torrent) {
+                  await moveTorrent(torrent, dest);
+                }
+              });
+              setSelectMode(false);
+              setSelectedItems(new Set());
+              reload();
+            }}
+            className="bg-pop! ps-5! pr-5! text-base! bg-white/30!"
+          >
+            Move
+          </Button>
+          <Button
+            onClick={() => {
+              setShowDeleteWarning(true);
+            }}
+            className="bg-pop! ps-5! pr-5! text-base! bg-red-600/30!"
+          >
+            Delete
+          </Button>
         </div>
       </div>
     </>

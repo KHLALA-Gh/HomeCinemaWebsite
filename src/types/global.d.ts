@@ -28,7 +28,9 @@ declare global {
       changeDHDir: (newDir: string) => void;
       getTorrentProps: (infoHash: string) => Promise<null | TorrentProps>;
       getLibSet: () => Promise<boolean>;
+      getSearchOp: () => Promise<string>;
       setLibSet: (set: boolean) => Promise<boolean>;
+      setSearchOp: (set: string) => Promise<string>;
       move: (src: string, dest: string) => Promise<void>;
     };
   }

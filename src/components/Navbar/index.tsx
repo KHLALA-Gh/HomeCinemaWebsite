@@ -63,7 +63,7 @@ export default function NavBar(props: NavbarProps) {
       <div className="flex z-999  sticky top-8 justify-center items-center">
         <div
           className={
-            " items-center w-[80%] flex justify-between rounded-full p-3 inset-shadow-sm/40 shadow-2xl border border-black/10 inset-shadow-black/70 bg-black/40 backdrop-blur-xs "
+            " items-center w-[80%] flex justify-between rounded-full p-3 glass-light "
           }
         >
           {!openS && (
@@ -103,7 +103,7 @@ export default function NavBar(props: NavbarProps) {
                 "font-bold lg:block hidden " +
                 (location.pathname === "/home_cinema/watch_tv_shows" ||
                 location.pathname === "/home_cinema/watch"
-                  ? "glass-white p-3 bg-white/25 rounded-full"
+                  ? "glass-white text-black p-3 bg-white/25 rounded-full"
                   : "")
               }
             >
@@ -117,7 +117,7 @@ export default function NavBar(props: NavbarProps) {
                   className={
                     "font-bold lg:block hidden " +
                     (location.pathname === l.to
-                      ? "glass-white p-3 bg-white/25 rounded-full"
+                      ? "glass-white p-3 text-black bg-white/25 rounded-full"
                       : "")
                   }
                 >

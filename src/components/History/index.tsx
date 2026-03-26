@@ -104,7 +104,7 @@ export function TorrentHistory({
             else onSelect();
           }
         }}
-        className="p-5 select-none bg-[#ffffff11] bg-pop rounded-md flex justify-between gap-3 cursor-pointer"
+        className="p-5 select-none bg-[#ffffff11] bg-pop rounded-2xl flex justify-between gap-3 cursor-pointer"
       >
         <div
           onClick={onClick}

@@ -8,6 +8,11 @@ interface TorrentSearch {
   uploader?: string;
   infoHash: string;
 }
+interface TorrentSearchResp {
+  name: string;
+  infoHash: string;
+  provider?: string;
+}
 
 interface DownloadHistory {
   infoHash: string;
@@ -66,4 +71,18 @@ interface TorrentProps {
   size: number;
   downloadedSize: number;
   path: string;
+}
+
+interface TorrentioStream {
+  name: string;
+  title: string;
+  infoHash: string;
+  fileIndex: number;
+}
+
+interface TorrentioResp {
+  streams: TorrentioStream[];
+  cacheMaxAge: number;
+  staleRevalidate: number;
+  staleError: number;
 }

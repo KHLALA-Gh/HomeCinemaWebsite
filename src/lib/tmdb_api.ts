@@ -29,6 +29,7 @@ export class TMDBError extends Error {
 }
 export class TMDBApi {
   static tvShowsendPoint = "https://api.themoviedb.org/3/trending/tv/week";
+  static tvShowIMDBID = "https://api.themoviedb.org/3/tv/:id/external_ids";
   static tvShowDetailsEndPoint = "https://api.themoviedb.org/3/tv/:id";
   static tvShowSeasonDetails =
     "https://api.themoviedb.org/3/tv/:series_id/season/:season_number";
@@ -119,6 +120,15 @@ export class TMDBApi {
       }
       throw err;
     }
+  }
+  async getTVShowIMDB_ID(id: string) {
+    let url = TMDBApi.tvShowIMDBID.replace(":id", id);
+    const resp = await axios.get(url, {
+      headers: {
+        Authorization: this.authHeader(),
+      },
+    });
+    return resp.data;
   }
 
   async searchTvShows(query: string, page: string): Promise<TVShowsResp> {

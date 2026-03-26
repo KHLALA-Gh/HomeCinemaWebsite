@@ -42,6 +42,7 @@ interface TMDBTVShowDetails {
   first_air_date: string;
   seasons: Season[];
   overview: string;
+  imdb_id: string;
 }
 
 interface Genre {

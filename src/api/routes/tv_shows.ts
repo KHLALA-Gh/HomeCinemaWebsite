@@ -62,6 +62,25 @@ export function TVShowsSearch(router: Router, config: ServerConfig) {
   });
 }
 
+export function TVShowExtIDS(router: Router, config: ServerConfig) {
+  router.get("/api/tv_shows/:id/ext_id", async (req, res) => {
+    try {
+      const id = req.params.id;
+
+      const api = new TMDBApi(process.env.TMDB_KEY as string);
+      const data = await api.getTVShowIMDB_ID(id);
+      res.status(200).json(data);
+    } catch (err) {
+      if (err instanceof TMDBError) {
+        return HandlerTMDBApiErr(res, err);
+      }
+      res.status(500).json({
+        error: "Internal Server Error",
+      });
+    }
+  });
+}
+
 export function TVShowsDetails(router: Router, config: ServerConfig) {
   router.get("/api/tv_shows/:id", async (req, res) => {
     try {
