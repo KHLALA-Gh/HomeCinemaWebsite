@@ -27,7 +27,7 @@ import { Back } from "../Utils/back";
 import axios from "axios";
 
 export function ShowDetails(props: TMDBTVShowDetails) {
-  const { resp, err, isLoading, fetch } = useTorrentSearch();
+  const { resp, err, isLoading, fetch, setIsLoading } = useTorrentSearch();
   const [selectedSeason, setSelectedSeason] = useState<number>();
   const [showSearchOp, setShowSearchOp] = useState<boolean>(false);
   const [searchOp, setSearchOp] = useState<"torrent-agent" | "torrentio">();
@@ -79,8 +79,9 @@ export function ShowDetails(props: TMDBTVShowDetails) {
         limit,
       });
     } else {
+      setIsLoading(true);
+
       axios.get(`/api/tv_shows/${props.id}/ext_id`).then((ids) => {
-        console.log(selectedEp, selectedSeason);
         fetch({
           op: "torrentio",
           type: "tv",

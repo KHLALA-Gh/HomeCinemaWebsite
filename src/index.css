@@ -74,9 +74,9 @@
 }
 
 .glass-light {
-  background: rgba(56, 56, 56, 0.01); /* transparency */
-  backdrop-filter: blur(5px) saturate(180%); /* main blur */
-  -webkit-backdrop-filter: blur(20px); /* Safari support */
+  background: rgba(56, 56, 56, 0.1);
+  -webkit-backdrop-filter: blur(20px) saturate(200%);
+  backdrop-filter: blur(5px) saturate(200%);
 
   border-radius: 20px;
 

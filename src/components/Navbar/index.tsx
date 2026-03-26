@@ -63,7 +63,7 @@ export default function NavBar(props: NavbarProps) {
       <div className="flex z-999  sticky top-8 justify-center items-center">
         <div
           className={
-            " items-center w-[80%] flex justify-between rounded-full p-3 glass-light "
+            " items-center relative w-[80%] flex justify-between rounded-full p-3 glass-light "
           }
         >
           {!openS && (

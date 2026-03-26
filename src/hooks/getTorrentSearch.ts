@@ -94,6 +94,7 @@ export function useTorrentSearch() {
     resp,
     isLoading,
     err,
+    setIsLoading,
     fetch,
   };
 }
