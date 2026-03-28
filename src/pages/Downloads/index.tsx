@@ -42,10 +42,20 @@ export default function PreStreams() {
   const [openAddTorrent, setOpenAddTorrent] = useState(false);
   const nav = useNavigate();
   useEffect(() => {
-    fetch();
-    setInterval(() => {
-      fetch();
-    }, 2000);
+    let isMounted = true;
+
+    const loop = async () => {
+      if (!isMounted) return;
+
+      await fetch();
+      setTimeout(loop, 2000);
+    };
+
+    loop();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
   useEffect(() => {
     let found = false;

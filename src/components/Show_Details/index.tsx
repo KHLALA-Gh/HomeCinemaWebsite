@@ -36,7 +36,6 @@ export function ShowDetails(props: TMDBTVShowDetails) {
   const [selectedEp, setSelectedEp] = useState<number>();
   const [limit, setLimit] = useState<number>(10);
   const [showWarning, setShowWarning] = useState<boolean>(false);
-  const navigate = useNavigate();
   const [saved, setSaved] = useState<boolean>(false);
   useEffect(() => {
     getTVShowById(props.id).then((t) => {
@@ -48,13 +47,7 @@ export function ShowDetails(props: TMDBTVShowDetails) {
       setSearchOp(v as any);
     });
   }, []);
-  useEffect(() => {
-    if (showSearchOp) {
-      addEventListener("click", (e) => {
-        // if (showSearchOp) setShowSearchOp(false);
-      });
-    }
-  }, [showSearchOp]);
+
   const search = () => {
     if (searchOp === "torrent-agent") {
       if (searchOption === "text") {
@@ -74,21 +67,17 @@ export function ShowDetails(props: TMDBTVShowDetails) {
         req += `E0${selectedEp}`;
       }
       fetch({
-        op: searchOp,
+        op: "torrent-agent",
         query: req,
         limit,
       });
     } else {
-      setIsLoading(true);
-
-      axios.get(`/api/tv_shows/${props.id}/ext_id`).then((ids) => {
-        fetch({
-          op: "torrentio",
-          type: "tv",
-          episode: selectedEp || 1,
-          season: selectedSeason || 1,
-          imdb_id: ids.data.imdb_id,
-        });
+      fetch({
+        op: "torrentio",
+        type: "tv",
+        episode: selectedEp || 1,
+        season: selectedSeason || 1,
+        imdb_id: props.imdb_id,
       });
     }
   };

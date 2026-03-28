@@ -2,7 +2,7 @@ import axios, { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 
 export async function getTVShowDetails(
-  showID: number
+  showID: number,
 ): Promise<TMDBTVShowDetails> {
   const url = new URL("/api/tv_shows/" + showID, location.origin);
   const resp = await axios.get(url.href);
