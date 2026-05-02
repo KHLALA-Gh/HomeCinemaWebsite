@@ -68,7 +68,7 @@ export function TVShowExtIDS(router: Router, config: ServerConfig) {
       const id = req.params.id;
 
       const api = new TMDBApi(process.env.TMDB_KEY as string);
-      const data = await api.getTVShowIMDB_ID(id);
+      const data = await api.getTVExternalIDs(id);
       res.status(200).json(data);
     } catch (err) {
       if (err instanceof TMDBError) {
@@ -87,8 +87,8 @@ export function TVShowsDetails(router: Router, config: ServerConfig) {
       const id = req.params.id;
       const api = new TMDBApi(process.env.TMDB_KEY as string);
       const data = await api.getTVShowDetails(id);
-      const ext_ids = await api.getTVShowIMDB_ID(id);
-      data.imdb_id = ext_ids.imdb_id;
+      const ext_ids = await api.getTVExternalIDs(id);
+      data.imdb_id = ext_ids.imdb_id || "";
       res.status(200).json(data);
     } catch (err) {
       if (err instanceof TMDBError) {

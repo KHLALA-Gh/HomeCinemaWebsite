@@ -342,6 +342,7 @@ export function TorrentFiles({
                       <JoyButton
                         loading={playing.has(file.path)}
                         onClick={async () => {
+                          if (!configs.desktopMode) return;
                           if (!isVid) return;
                           const history = await window.electron.getDH(hash);
                           const streamUrl = new URL(file.downloadLink);

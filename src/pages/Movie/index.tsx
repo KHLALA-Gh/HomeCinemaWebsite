@@ -14,10 +14,14 @@ import { addMovie, getMovieById, removeMovie } from "../../lib/idb";
 import NavBar from "../../components/Navbar";
 import { FloatingDiv } from "../../components/Utils/floating-div";
 import { Back } from "../../components/Utils/back";
+import { useTMDBMovieDetails } from "../../hooks/useTMDBMovieDetails";
+import { useTorrentioMovies } from "../../hooks/useTorrentioMovies";
+import { Torrent } from "../../components/Show_Details";
 
 export default function MoviePage() {
   const params = useParams();
-  const { resp, isLoading } = useGetYTSMovieDetails(params.id as string);
+  const { resp, isLoading } = useTMDBMovieDetails(params.id as string);
+
   return <MovieDetails resp={resp} isLoading={isLoading} />;
 }
 
@@ -25,20 +29,32 @@ export function MovieDetails({
   resp,
   isLoading,
 }: {
-  resp?: MovieDetails;
+  resp?: TMDBMovieDetails;
   isLoading: boolean;
 }) {
+  const {
+    resp: ytsMovie,
+    isLoading: ytsLoading,
+    fetch,
+  } = useGetYTSMovieDetails(resp?.imdb_id as string);
+  const {
+    resp: torrentioTorrents,
+    isLoading: torrentioLoading,
+    err: torrentioErr,
+    fetch: torrentioFetch,
+  } = useTorrentioMovies();
   const [showQ, setShowQ] = useState(false);
   const link = (index: number) => {
+    if (!ytsMovie?.torrents) return;
     const url = new URL(
-      `/home_cinema/torrents/${resp?.torrents[index].hash}/files`,
+      `/home_cinema/torrents/${ytsMovie?.torrents[index].hash}/files`,
       location.origin,
     );
-    url.searchParams.set("seeds", `${resp?.torrents[index].seeds}`);
-    url.searchParams.set("about", `${resp?.torrents[index].url}`);
+    url.searchParams.set("seeds", `${ytsMovie?.torrents[index].seeds}`);
+    url.searchParams.set("about", `${ytsMovie?.torrents[index].url}`);
     url.searchParams.set(
       "name",
-      `${resp?.title} (${resp?.year}) [${resp?.torrents[index].quality}] [YTS]`,
+      `${resp?.title} (${resp?.release_date}) [${ytsMovie?.torrents[index].quality}] [YTS]`,
     );
     url.searchParams.set("provider", `YTS`);
     return url.href;
@@ -52,7 +68,93 @@ export function MovieDetails({
         }
       });
     }
+    if (resp?.imdb_id) {
+      fetch();
+      torrentioFetch(resp.imdb_id);
+    }
   }, [resp]);
+  const filterTorrents = (torrents?: TorrentioResp) => {
+    console.log(torrents);
+    if (!torrents) return;
+    const q720 = torrents?.streams.filter((t) => t.name.includes("720p"));
+    const q1080 = torrents?.streams.filter((t) => t.name.includes("1080p"));
+    const q4k = torrents?.streams.filter((t) => t.name.includes("4k"));
+    const others = torrents?.streams.filter(
+      (t) =>
+        !t.name.includes("4k") &&
+        !t.name.includes("1080p") &&
+        !t.name.includes("720p"),
+    );
+    return (
+      <div>
+        {torrentioLoading && <h1>Loading...</h1>}
+        {q720?.length > 0 && (
+          <>
+            <h1 className="font-bold text-lg mb-2">720p</h1>
+            {q720?.map((t, i) => {
+              return (
+                <Torrent
+                  key={i}
+                  t={{
+                    name: t.title,
+                    infoHash: t.infoHash,
+                  }}
+                />
+              );
+            })}
+          </>
+        )}
+        {q1080.length > 0 && (
+          <>
+            <h1 className="font-bold text-lg mb-2">1080p</h1>
+            {q1080?.map((t, i) => {
+              return (
+                <Torrent
+                  key={i}
+                  t={{
+                    name: t.title,
+                    infoHash: t.infoHash,
+                  }}
+                />
+              );
+            })}
+          </>
+        )}
+        {q4k.length > 0 && (
+          <>
+            <h1 className="font-bold text-lg mb-2">4K</h1>
+            {q4k?.map((t, i) => {
+              return (
+                <Torrent
+                  key={i}
+                  t={{
+                    name: t.title,
+                    infoHash: t.infoHash,
+                  }}
+                />
+              );
+            })}
+          </>
+        )}
+        {others.length > 10 && (
+          <>
+            <h1 className="font-bold text-lg mb-2">Others</h1>
+            {others?.map((t, i) => {
+              return (
+                <Torrent
+                  key={i}
+                  t={{
+                    name: t.title,
+                    infoHash: t.infoHash,
+                  }}
+                />
+              );
+            })}
+          </>
+        )}
+      </div>
+    );
+  };
   const nav = useNavigate();
   return (
     <>
@@ -64,7 +166,10 @@ export function MovieDetails({
 
         <div className="flex items-center md:items-start flex-col-reverse md:flex-row md:gap-10 flex-wrap md:justify-start justify-center md:flex-nowrap">
           <div className={"blur-[100px] absolute z-0"}>
-            <img src={resp?.medium_cover_image} alt="" />
+            <img
+              src={"https://image.tmdb.org/t/p/original" + resp?.poster_path}
+              alt=""
+            />
           </div>
           <div
             className={
@@ -74,7 +179,7 @@ export function MovieDetails({
             style={
               !isLoading
                 ? {
-                    backgroundImage: `url(${resp?.medium_cover_image})`,
+                    backgroundImage: `url(https://image.tmdb.org/t/p/original${resp?.poster_path})`,
                     backgroundSize: "cover",
                   }
                 : {}
@@ -91,7 +196,8 @@ export function MovieDetails({
                     (isLoading ? " loading-background w-80 h-5" : "")
                   }
                 >
-                  {resp?.title} {resp?.year ? `(${resp.year})` : ""}
+                  {resp?.title}{" "}
+                  {resp?.release_date ? `(${resp.release_date})` : ""}
                 </h1>
                 <SaveButton
                   onClick={async () => {
@@ -99,10 +205,9 @@ export function MovieDetails({
                       await addMovie({
                         id: resp?.id,
                         title: resp?.title,
-                        year: resp.year,
-                        rating: resp.rating,
-                        medium_cover_image: resp.medium_cover_image,
-                        runtime: resp.runtime?.toString(),
+                        vote_average: resp.vote_average,
+                        poster_path: resp.poster_path,
+                        release_date: resp.release_date,
                       });
                       setSaved(true);
                     } else {
@@ -115,7 +220,7 @@ export function MovieDetails({
                 />
               </div>
               <p className="xl:max-w-[1000px] lg:max-w-[700px] max-w-[500px] xl:text-[16px] text-sm">
-                {resp?.description_intro}
+                {resp?.overview}
               </p>
 
               <p
@@ -123,7 +228,8 @@ export function MovieDetails({
                   "" + (isLoading ? " loading-background w-50 h-5" : "")
                 }
               >
-                {isLoading ? "" : "Genres :"} {resp?.genres?.join(" / ")}
+                {isLoading ? "" : "Genres :"}{" "}
+                {resp?.genres?.map((g) => g.name).join(" / ")}
               </p>
               <div
                 className={
@@ -132,16 +238,18 @@ export function MovieDetails({
                 }
               >
                 <p>Available in : </p>
-                {resp?.torrents.map((t, i) => {
+                {ytsMovie?.torrents?.map((t, i) => {
                   return (
                     <div
                       key={i}
                       className="lg:text-base text-sm h-fit bg-pop rounded-full bg-white/10 ps-2 pr-2 cursor-pointer"
                       onClick={() => {
+                        let url = link(i);
+                        if (!url) return;
                         if (t.quality === "2160p") {
-                          location.href = link(i);
+                          location.href = url;
                         }
-                        location.href = link(i);
+                        location.href = url;
                       }}
                     >
                       <p
@@ -164,7 +272,7 @@ export function MovieDetails({
                   );
                 })}
               </div>
-              <p>Rating : {resp?.rating}</p>
+              <p>Rating : {resp?.vote_average}</p>
               <p>
                 Duration : {Math.floor((resp?.runtime as number) / 60)}h{" "}
                 {(resp?.runtime as number) -
@@ -184,7 +292,8 @@ export function MovieDetails({
                 <a
                   target="_blank"
                   href={
-                    "https://www.youtube.com/watch?v=" + resp?.yt_trailer_code
+                    "https://www.youtube.com/watch?v=" +
+                    ytsMovie?.yt_trailer_code
                   }
                 >
                   <Button className="md:text-lg text-base ps-6! pr-6! bg-white/10!">
@@ -212,38 +321,51 @@ export function MovieDetails({
             onClose={() => setShowQ(false)}
             title="Choose quality"
           >
-            <div className="h-[80vh] mt-3 hide-scrollbar h-fit text-white xl:w-auto overflow-y-scroll z-1001 rounded-2xl">
-              {resp?.torrents.map((t, i) => {
-                return (
-                  <div
-                    key={i}
-                    className="grid pop grid-cols-12 items-center mb-5 gap-3 hover:bg-[#b4b4b43e] p-3 duration-100 rounded-2xl cursor-pointer"
-                  >
+            <div className="h-[70vh] max-h-[70vh] overflow-y-scroll mt-3 h-fit text-white xl:w-auto overflow-y-scroll z-1001">
+              {ytsMovie?.torrents?.length !== 0 &&
+                ytsMovie?.torrents?.map((t, i) => {
+                  return (
                     <div
-                      className="col-span-9"
-                      onClick={() => {
-                        location.href = link(i);
-                      }}
+                      key={i}
+                      className="grid pop grid-cols-12 items-center mb-5 gap-3 hover:bg-[#b4b4b43e] p-3 duration-100 rounded-2xl cursor-pointer"
                     >
-                      <h1 className="text-2xl col-span-6">{t.quality}</h1>
-                      <h3 className="col-span-3">
-                        {t.type}
-                        {""}
-                        {t.video_codec === "x265" ? (
-                          <span className="text-green-600">
-                            .{t.video_codec}
-                          </span>
-                        ) : (
-                          ""
-                        )}
-                      </h3>
+                      <div
+                        className="col-span-9"
+                        onClick={() => {
+                          let url = link(i);
+                          if (!url) return;
+                          location.href = url;
+                        }}
+                      >
+                        <h1 className="text-2xl col-span-6">{t.quality}</h1>
+                        <h3 className="col-span-3">
+                          {t.type}
+                          {""}
+                          {t.video_codec === "x265" ? (
+                            <span className="text-green-600">
+                              .{t.video_codec}
+                            </span>
+                          ) : (
+                            ""
+                          )}
+                        </h3>
+                      </div>
+                      <div className="flex gap-3 items-center justify-center col-span-3 bg-[#202020] p-2 rounded-md">
+                        <h6 className="col-span-1 text-sm">{t.size}</h6>
+                      </div>
                     </div>
-                    <div className="flex gap-3 items-center justify-center col-span-3 bg-[#202020] p-2 rounded-md">
-                      <h6 className="col-span-1 text-sm">{t.size}</h6>
+                  );
+                })}
+              {(!ytsMovie?.torrents || ytsMovie.torrents?.length === 0) &&
+                (torrentioLoading ? (
+                  <>
+                    <div>
+                      <h1>Loading...</h1>
                     </div>
-                  </div>
-                );
-              })}
+                  </>
+                ) : (
+                  filterTorrents(torrentioTorrents)
+                ))}
             </div>
           </FloatingDiv>
         </>

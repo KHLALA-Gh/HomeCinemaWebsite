@@ -11,7 +11,7 @@ export default function Movie({
   loading,
   to,
 }: {
-  m?: MovieMetaData;
+  m?: TMDBMovie;
   loading?: boolean;
   to?: string;
 }) {
@@ -32,7 +32,7 @@ export default function Movie({
         <div
           className="lg:w-[230px] rounded-xl overflow-hidden w-[115px] h-[172px] relative lg:h-[345px] shrink-0 cursor-pointer"
           style={{
-            backgroundImage: `url("${m.medium_cover_image}")`,
+            backgroundImage: `url("https://image.tmdb.org/t/p/original${m.poster_path}")`,
             backgroundSize: "cover",
           }}
         >
@@ -60,16 +60,16 @@ export default function Movie({
               </h1>
               <div className="flex flex-col-reverse gap-2 md:mt-5 justify-center items-center">
                 <h1 className="font-extrabold text-center text-sm lg:text-lg">
-                  {m.rating} / 10{" "}
+                  {m.vote_average?.toFixed(1)} / 10{" "}
                 </h1>{" "}
                 <div>
                   <FontAwesomeIcon icon={faStar} className="h-3 lg:h-5" />
                 </div>
               </div>
-              <div className="flex justify-center items-center gap-1 mt-5">
+              {/* <div className="flex justify-center items-center gap-1 mt-5">
                 <FontAwesomeIcon icon={faStopwatch} className="h-3 lg:h-5" />
                 <h1 className="text-sm lg:text-lg">{m.runtime} min</h1>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

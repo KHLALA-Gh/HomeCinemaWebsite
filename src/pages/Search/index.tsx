@@ -4,21 +4,15 @@ import NavBar from "../../components/Navbar";
 import { returnLoadingMovies } from "../../components/List";
 import { useEffect, useState } from "react";
 import Movie from "../../components/Movie/Movie";
+import { useSearchMovies } from "../../hooks/useTMDBMovieSearch";
 
 export default function Search() {
   const [searchP] = useSearchParams();
-  const [term] = useState("");
-  const { resp, err, isLoading, fetch } = useGetYTSList({
-    queries: [["query_term", term]],
-    fetchWhenCall: false,
-  });
+  const { resp, err, isLoading, fetch } = useSearchMovies();
   useEffect(() => {
     let t = searchP.get("term");
     if (!t) t = "";
-    fetch([
-      ["query_term", t],
-      ["sort_by", "like_count"],
-    ]);
+    fetch(searchP.get("term") as string, "1");
   }, [searchP]);
   return (
     <>
@@ -39,7 +33,7 @@ export default function Search() {
         {!isLoading && !err && (
           <>
             <div className="flex gap-4 md:gap-16 flex-wrap justify-center">
-              {resp?.map((m, i) => {
+              {resp?.results?.map((m, i) => {
                 return <Movie key={i} m={m} />;
               })}
             </div>

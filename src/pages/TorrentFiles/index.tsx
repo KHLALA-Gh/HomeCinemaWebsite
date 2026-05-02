@@ -14,6 +14,7 @@ import {
   removeTorrent,
 } from "../../lib/idb";
 import { Back } from "../../components/Utils/back";
+import { fetchConfigs } from "../../hooks/getMagnetURI";
 
 interface Streams {
   streamUrl: string;
@@ -65,8 +66,14 @@ export default function Files() {
   }, [resp]);
   useEffect(() => {
     (async () => {
-      let history = await window.electron.getDH(p.hash as string);
-      fetchFiles(p.hash as string, history?.path);
+      const configs = await fetchConfigs();
+
+      let path;
+      if (configs.desktopMode) {
+        let history = await window.electron.getDH(p.hash as string);
+        path = history?.path;
+      }
+      fetchFiles(p.hash as string, path);
     })();
   }, []);
 

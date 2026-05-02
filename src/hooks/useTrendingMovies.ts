@@ -1,23 +1,25 @@
 import axios, { AxiosError } from "axios";
 import { useState } from "react";
 
-interface GetTVShowsProps {
+interface GetTrendingMoviesProps {
   page: string;
+  time: "day" | "week";
 }
 
-export function useGetTVShows(props: GetTVShowsProps) {
-  const [resp, setResp] = useState<TVShowsResp>();
+export function useTrendingMovies() {
+  const [resp, setResp] = useState<MoviesResp>();
   const [err, setErr] = useState<string>();
   const [isLoading, setIsloading] = useState(false);
-  const get = async (page: string) => {
-    const url = new URL("/api/tv_shows", location.origin);
+  const get = async (time: "day" | "week", page: string) => {
+    const url = new URL("/api/movies/trending", location.origin);
     url.searchParams.set("page", page);
+    url.searchParams.set("time", time);
     const resp = await axios.get(url.href);
-    return resp.data as TVShowsResp;
+    return resp.data as MoviesResp;
   };
-  const fetch = () => {
+  const fetch = (props: GetTrendingMoviesProps) => {
     setIsloading(true);
-    get(props.page)
+    get(props.time, props.page)
       .then((data) => {
         setResp(data);
       })
