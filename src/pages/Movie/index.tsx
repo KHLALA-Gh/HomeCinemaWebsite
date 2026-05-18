@@ -60,6 +60,7 @@ export function MovieDetails({
     return url.href;
   };
   const [saved, setSaved] = useState<boolean>(false);
+  const [source, setSource] = useState<"yts" | "torrentio">("yts");
   useEffect(() => {
     if (resp?.id) {
       getMovieById(resp.id).then((mov) => {
@@ -74,7 +75,6 @@ export function MovieDetails({
     }
   }, [resp]);
   const filterTorrents = (torrents?: TorrentioResp) => {
-    console.log(torrents);
     if (!torrents) return;
     const q720 = torrents?.streams.filter((t) => t.name.includes("720p"));
     const q1080 = torrents?.streams.filter((t) => t.name.includes("1080p"));
@@ -85,6 +85,7 @@ export function MovieDetails({
         !t.name.includes("1080p") &&
         !t.name.includes("720p"),
     );
+
     return (
       <div>
         {torrentioLoading && <h1>Loading...</h1>}
@@ -136,7 +137,7 @@ export function MovieDetails({
             })}
           </>
         )}
-        {others.length > 10 && (
+        {others.length > 0 && (
           <>
             <h1 className="font-bold text-lg mb-2">Others</h1>
             {others?.map((t, i) => {
@@ -165,10 +166,11 @@ export function MovieDetails({
         </div>
 
         <div className="flex items-center md:items-start flex-col-reverse md:flex-row md:gap-10 flex-wrap md:justify-start justify-center md:flex-nowrap">
-          <div className={"blur-[100px] absolute z-0"}>
+          <div className={"blur-[300px] left-50 absolute z-0 opacity_anim"}>
             <img
               src={"https://image.tmdb.org/t/p/original" + resp?.poster_path}
               alt=""
+              className="w-[400px] h-[400px] rounded-full"
             />
           </div>
           <div
@@ -319,10 +321,42 @@ export function MovieDetails({
           <FloatingDiv
             blur
             onClose={() => setShowQ(false)}
-            title="Choose quality"
+            title="Choose source"
           >
             <div className="h-[70vh] max-h-[70vh] overflow-y-scroll mt-3 h-fit text-white xl:w-auto overflow-y-scroll z-1001">
+              <div className="flex gap-3 mb-2">
+                {ytsMovie?.torrents?.length && (
+                  <h1
+                    onClick={() => setSource("yts")}
+                    className={
+                      "hover:bg-[#292929] rounded-lg p-2 cursor-pointer" +
+                      (source === "yts" ? " bg-[#2a2a2a]" : "")
+                    }
+                  >
+                    YTS
+                  </h1>
+                )}
+                {torrentioLoading && (
+                  <h1 className="p-2">Torrentio loading...</h1>
+                )}
+                {/*@ts-ignore */}
+                {torrentioTorrents?.streams.length > 0 && (
+                  <h1
+                    onClick={() => setSource("torrentio")}
+                    className={
+                      "hover:bg-[#292929] rounded-lg p-2 cursor-pointer" +
+                      (source === "torrentio" ? " bg-[#2a2a2a]" : "")
+                    }
+                  >
+                    Torrentio
+                  </h1>
+                )}
+                {!torrentioTorrents?.streams.length &&
+                  !ytsMovie?.torrents?.length &&
+                  !torrentioLoading && <h1>No torrent source available :(</h1>}
+              </div>
               {ytsMovie?.torrents?.length !== 0 &&
+                source === "yts" &&
                 ytsMovie?.torrents?.map((t, i) => {
                   return (
                     <div
@@ -356,7 +390,9 @@ export function MovieDetails({
                     </div>
                   );
                 })}
-              {(!ytsMovie?.torrents || ytsMovie.torrents?.length === 0) &&
+              {(!ytsMovie?.torrents ||
+                ytsMovie.torrents?.length === 0 ||
+                source === "torrentio") &&
                 (torrentioLoading ? (
                   <>
                     <div>

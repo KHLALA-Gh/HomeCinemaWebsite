@@ -51,6 +51,7 @@ export default function Movie({
               }}
             />
             <div
+              className="h-full"
               onClick={() => {
                 location.href = to || "/home_cinema/watch/" + m.id;
               }}
