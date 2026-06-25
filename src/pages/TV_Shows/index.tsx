@@ -1,7 +1,6 @@
 import { SetURLSearchParams, useSearchParams } from "react-router";
 import { useGetTVShows } from "../../hooks/getTVShows";
 import Show from "../../components/Show";
-import NavBar from "../../components/Navbar";
 import { useEffect } from "react";
 import { returnLoadingMovies } from "../../components/List";
 import { useSearchTVShows } from "../../hooks/useSearchTVShows";
@@ -185,7 +184,6 @@ export default function TVShows() {
   }, [sp]);
   return (
     <>
-      <NavBar mode="TV" />
       <div className="md:ps-28 md:pe-28 ps-5 pr-5">
         <h1 className="md:text-3xl text-xl font-extrabold mt-10 mb-10">
           TV Shows

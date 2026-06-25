@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { TMDBApi, TMDBError } from "../../lib/tmdb_api";
-import { HandlerTMDBApiErr } from "./tv_shows";
+import { TMDBApi, TMDBError } from "../../lib/tmdb_api.js";
+import { HandlerTMDBApiErr } from "./tv_shows.js";
 
 export function trendingMovies(router: Router) {
   router.get("/api/movies/trending", async (req, res) => {

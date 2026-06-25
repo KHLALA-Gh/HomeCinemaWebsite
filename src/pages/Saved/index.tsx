@@ -3,7 +3,6 @@ import { getTorrents, getTVShows } from "../../lib/idb";
 import Movie from "../../components/Movie/Movie";
 import Show from "../../components/Show";
 import { useSavedMovies } from "../../hooks/useSavedMovies";
-import NavBar from "../../components/Navbar";
 import { Torrent } from "../../components/Show_Details";
 import Input from "../../components/Input/Input";
 import Fuse from "fuse.js";
@@ -61,7 +60,6 @@ export default function Saved() {
   }, [selectedData]);
   return (
     <>
-      <NavBar />
       <div className="p-10">
         <h1 className="text-2xl font-bold">Offline Saved Data</h1>
         <div className="flex gap-5 text-sm mt-5 mb-5">
@@ -89,12 +87,7 @@ export default function Saved() {
                 <Movie
                   key={i}
                   m={{
-                    id: m.id,
-                    title: m.title,
-                    year: m.year,
-                    rating: m.rating,
-                    medium_cover_image: m.medium_cover_image,
-                    runtime: m.runtime?.toString(),
+                    ...m,
                   }}
                 />
               );

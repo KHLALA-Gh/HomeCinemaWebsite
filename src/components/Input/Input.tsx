@@ -14,7 +14,7 @@ export default function Input(props: InputProps) {
     <>
       <div
         className={
-          "rounded-full glass-white bg-white/10 bg-pop flex items-center gap-3 p-2 w-fit "
+          "rounded-full glass-light bg-white/10 bg-pop flex items-center gap-3 p-2 w-fit "
         }
       >
         <div onClick={props.onClickIcon}>

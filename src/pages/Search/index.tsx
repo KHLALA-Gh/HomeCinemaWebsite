@@ -1,8 +1,6 @@
 import { useSearchParams } from "react-router";
-import { useGetYTSList } from "../../hooks/getYTSList";
-import NavBar from "../../components/Navbar";
 import { returnLoadingMovies } from "../../components/List";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Movie from "../../components/Movie/Movie";
 import { useSearchMovies } from "../../hooks/useTMDBMovieSearch";
 
@@ -16,7 +14,6 @@ export default function Search() {
   }, [searchP]);
   return (
     <>
-      <NavBar mode="Movies" />
       <div className="md:ps-28 md:pe-28 ps-3 pr-3 mt-10 md:mt-20 mb-20">
         <h1 className="md:text-4xl text-xl mb-10 md:mb-20 font-extrabold">
           Search results

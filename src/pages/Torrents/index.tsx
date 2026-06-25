@@ -1,17 +1,24 @@
 import Input from "@mui/joy/Input";
 import Button from "@mui/joy/Button";
-import NavBar from "../../components/Navbar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert } from "@mui/material";
 import { useTorrentSearch } from "../../hooks/getTorrentSearch";
 import { Torrent } from "../../components/Show_Details";
 export default function Torrents() {
-  const [query, setQuery] = useState<string>();
+  const [query, setQuery] = useState<string>("");
   const { resp, isLoading, err, fetch } = useTorrentSearch();
-
+  useEffect(() => {
+    console.log(resp, "aaaaaaaaaaaaaaa");
+  }, [resp]);
+  const search = () => {
+    if (!query) return;
+    fetch({
+      op: "torrent-agent",
+      query: query,
+    });
+  };
   return (
     <>
-      <NavBar />
       <div className="lg:ms-32 ms-8 mt-24">
         <h1 className="text-2xl font-bold mb-5">Search torrents</h1>
         <Input
@@ -21,7 +28,7 @@ export default function Torrents() {
           }}
           onKeyUp={(e) => {
             if (e.key === "Enter" && !isLoading) {
-              fetch(query as string);
+              search();
             }
           }}
           value={query}
@@ -42,9 +49,7 @@ export default function Torrents() {
             }
             color="neutral"
             loading={isLoading}
-            onClick={function () {
-              fetch(query as string);
-            }}
+            onClick={search}
             variant="soft"
             size="lg"
           >
@@ -58,7 +63,7 @@ export default function Torrents() {
             className="w-fit! mt-5! text-red-500!"
             color="error"
           >
-            An error occurred : {err}
+            An error occurred while searching
           </Alert>
         )}
       </div>
@@ -68,11 +73,13 @@ export default function Torrents() {
             <p>found {resp?.length || 0} torrents</p>
           )}
         </div>
-        {resp
-          ?.sort((a, b) => (b.seeders || 0) - (a.seeders || 0))
-          .map((t, i) => {
-            return <Torrent key={i} t={t} />;
-          })}
+        {resp &&
+          resp
+            //@ts-ignore
+            ?.sort((a, b) => (b.seeders || 0) - (a.seeders || 0))
+            .map((t, i) => {
+              return <Torrent key={i} t={t} />;
+            })}
       </div>
     </>
   );

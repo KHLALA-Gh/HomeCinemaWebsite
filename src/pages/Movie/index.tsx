@@ -2,16 +2,10 @@ import { useNavigate, useParams } from "react-router";
 import { useGetYTSMovieDetails } from "../../hooks/getMoviesDetails";
 import Button from "../../components/Button/button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faChevronLeft,
-  faPlay,
-  faX,
-  faXmark,
-} from "@fortawesome/free-solid-svg-icons";
+import { faPlay } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import { SaveButton } from "../../components/Movie/Movie";
 import { addMovie, getMovieById, removeMovie } from "../../lib/idb";
-import NavBar from "../../components/Navbar";
 import { FloatingDiv } from "../../components/Utils/floating-div";
 import { Back } from "../../components/Utils/back";
 import { useTMDBMovieDetails } from "../../hooks/useTMDBMovieDetails";
@@ -159,14 +153,13 @@ export function MovieDetails({
   const nav = useNavigate();
   return (
     <>
-      <NavBar />
       <div className="xl:ps-28 xl:pr-28 md:ps-8 md:pr-8 sm:ps-0 sm:pr-0 ps-3 pr-3 md:mt-20 mt-10">
         <div className="mb-6">
           <Back />
         </div>
 
         <div className="flex items-center md:items-start flex-col-reverse md:flex-row md:gap-10 flex-wrap md:justify-start justify-center md:flex-nowrap">
-          <div className={"blur-[300px] left-50 absolute z-0 opacity_anim"}>
+          <div className={"blur-[85px] left-50 absolute z-0 opacity_anim"}>
             <img
               src={"https://image.tmdb.org/t/p/original" + resp?.poster_path}
               alt=""
@@ -207,9 +200,10 @@ export function MovieDetails({
                       await addMovie({
                         id: resp?.id,
                         title: resp?.title,
-                        vote_average: resp.vote_average,
-                        poster_path: resp.poster_path,
-                        release_date: resp.release_date,
+                        rating: resp.vote_average,
+                        medium_cover_image: resp.poster_path,
+                        year: resp.release_date,
+                        runtime: "",
                       });
                       setSaved(true);
                     } else {

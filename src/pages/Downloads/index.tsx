@@ -18,7 +18,6 @@ import {
   faVideo,
 } from "@fortawesome/free-solid-svg-icons";
 import { useDeleteDownload } from "../../hooks/deleteStream";
-import NavBar from "../../components/Navbar";
 import { Alert } from "@mui/material";
 import { usePauseDownload } from "../../hooks/usePauseDownload";
 import pr from "pretty-bytes";
@@ -77,8 +76,6 @@ export default function PreStreams() {
   };
   return (
     <>
-      <NavBar />
-
       {openSelectMenu && (
         <>
           <FloatingDiv
@@ -122,7 +119,7 @@ export default function PreStreams() {
           </FloatingDiv>
         </>
       )}
-      <div className="ms-5 mr-5 mt-20">
+      <div className="ms-5 mr-5">
         <Btn
           onClick={() => {
             nav("/home_cinema/download-history");

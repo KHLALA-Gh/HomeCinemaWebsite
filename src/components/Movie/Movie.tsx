@@ -11,7 +11,7 @@ export default function Movie({
   loading,
   to,
 }: {
-  m?: TMDBMovie;
+  m?: MovieMetaData;
   loading?: boolean;
   to?: string;
 }) {
@@ -42,7 +42,13 @@ export default function Movie({
               className="!absolute top-2 left-2"
               onClick={async () => {
                 if (!saved) {
-                  await addMovie(m);
+                  await addMovie({
+                    ...m,
+                    medium_cover_image: m.poster_path,
+                    runtime: "",
+                    rating: m.vote_average,
+                    year: m.release_date,
+                  });
                   setSaved(true);
                 } else {
                   await removeMovie(m.id);

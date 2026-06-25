@@ -29,7 +29,7 @@ export class TMDBError extends Error {
 }
 export class TMDBApi {
   static trendingMoviesEndPoint =
-    "https://api.themoviedb.org/3/trending/movie/";
+    "https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc";
   static movieDetailsEndPoint = "https://api.themoviedb.org/3/movie/:id";
   static tvShowsendPoint = "https://api.themoviedb.org/3/trending/tv/week";
   static externalTVIDsEndPoint =
@@ -152,7 +152,6 @@ export class TMDBApi {
           Authorization: this.authHeader(),
         },
       });
-      console.log(resp.data);
       return resp.data;
     } catch (err) {
       if (err instanceof AxiosError) {
@@ -169,7 +168,6 @@ export class TMDBApi {
           Authorization: this.authHeader(),
         },
       });
-      console.log(resp.data);
       return resp.data;
     } catch (err) {
       if (err instanceof AxiosError) {
@@ -219,10 +217,9 @@ export class TMDBApi {
     time: "day" | "week",
     page: string,
   ): Promise<MoviesResp> {
-    let url = new URL(time, TMDBApi.trendingMoviesEndPoint);
+    let url = new URL(TMDBApi.trendingMoviesEndPoint);
 
     url.searchParams.set("page", page);
-    console.log(url.href);
     try {
       const resp = await axios.get(url.href, {
         headers: {

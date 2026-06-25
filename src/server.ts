@@ -8,8 +8,8 @@ if (process.env.NODE_ENV === "production") {
 }
 bootServer(PORT, {
   version: {
-    name: "Alpha 6",
-    semVer: "0.0.6",
+    name: "Alpha 7",
+    semVer: "0.0.7",
   },
   desktopMode: false,
 });

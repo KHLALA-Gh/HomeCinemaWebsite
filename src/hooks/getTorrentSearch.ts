@@ -40,7 +40,7 @@ export function useTorrentSearch() {
         : location.origin,
     );
     url.searchParams.set("query", query);
-    url.searchParams.set("limit", `${limit}`);
+    url.searchParams.set("limit", `${limit || 20}`);
 
     await new Promise<void>((res, rej) => {
       const source = new EventSource(url.href);

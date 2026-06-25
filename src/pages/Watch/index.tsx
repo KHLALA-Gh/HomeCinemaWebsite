@@ -1,17 +1,10 @@
-import { useGetYTSList } from "../../hooks/getYTSList";
 import Movie, { SaveCard } from "../../components/Movie/Movie";
-import NavBar from "../../components/Navbar";
 import "./style.css";
-import {
-  LimitedList,
-  MoviesListCategory,
-  returnLoadingMovies,
-} from "../../components/List";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
+import { LimitedList, returnLoadingMovies } from "../../components/List";
 import { useSavedMovies } from "../../hooks/useSavedMovies";
 import { useTrendingMovies } from "../../hooks/useTrendingMovies";
 import { useEffect } from "react";
+import { Search } from "../../components/Navbar";
 
 export default function Watch() {
   const savedMv = useSavedMovies();
@@ -26,11 +19,16 @@ export default function Watch() {
   }, []);
   return (
     <>
-      <NavBar mode="Movies" />
-
       {savedMv && savedMv.length > 0 && (
         <LimitedList
-          resp={savedMv}
+          resp={savedMv.map((m) => {
+            return {
+              ...m,
+              poster_path: m.medium_cover_image,
+              vote_average: m.rating,
+              release_date: m.year,
+            };
+          })}
           err=""
           isLoading={false}
           listID="saved-mv"

@@ -58,17 +58,17 @@ const dbPromise = (async () => {
   return new ElectronStore();
 })();
 
-export async function addMovie(movie: MovieMetaData) {
+export async function addMovie(movie: MovieSavedData) {
   const db = await dbPromise;
   db.put(ObjectStores.MOVIES, movie);
 }
 
-export async function getMovies(): Promise<MovieMetaData[]> {
+export async function getMovies(): Promise<MovieSavedData[]> {
   const db = await dbPromise;
   return await db.getAll(ObjectStores.MOVIES);
 }
 
-export async function getMovieById(id: number): Promise<MovieMetaData> {
+export async function getMovieById(id: number): Promise<MovieSavedData> {
   const db = await dbPromise;
   return await db.get(ObjectStores.MOVIES, id);
 }

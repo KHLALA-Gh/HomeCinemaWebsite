@@ -86,3 +86,12 @@ interface TorrentioResp {
   staleRevalidate: number;
   staleError: number;
 }
+
+interface MovieSavedData {
+  id: number;
+  title: string;
+  year: string;
+  rating: number;
+  medium_cover_image: string;
+  runtime: string;
+}

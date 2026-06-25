@@ -20,6 +20,37 @@ const links = [
   { to: "/home_cinema/saved", name: "Saved" },
 ];
 
+export function Search(props: { mode: string }) {
+  const navigate = useNavigate();
+  const [term, setTerm] = useState("");
+
+  const onPressEnter = (term: string, key: string) => {
+    if (key === "Enter") {
+      if (props.mode === "TV") {
+        navigate(`/home_cinema/watch_tv_shows?query=${term}`);
+      } else {
+        location.href = `/home_cinema/search?term=${term}`;
+      }
+    }
+  };
+  return (
+    <>
+      <div>
+        <Input
+          value={term}
+          className="!w-[300px] h-10! border-none! outline-none!"
+          onKeyUp={(p) => onPressEnter(term, p.key)}
+          onChange={(e) => {
+            setTerm(e.target.value);
+          }}
+          Icon={faSearch}
+          placeholder="Search"
+        />
+      </div>
+    </>
+  );
+}
+
 export default function NavBar(props: NavbarProps) {
   const [openS, setOpenS] = useState(false);
   const [changeW, setChangeW] = useState(false);
