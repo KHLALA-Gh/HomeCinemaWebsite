@@ -168,7 +168,6 @@ export default function TVShows() {
   } = useSearchTVShows();
   useEffect(() => {
     if (!sp.get("page")) {
-      //setSearchParams({ page: "1" });
     }
   }, [sp]);
   useEffect(() => {

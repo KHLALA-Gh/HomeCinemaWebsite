@@ -87,7 +87,11 @@ export default function Saved() {
                 <Movie
                   key={i}
                   m={{
-                    ...m,
+                    id: m.id,
+                    title: m.title,
+                    release_date: m.year,
+                    vote_average: m.rating,
+                    poster_path: m.medium_cover_image,
                   }}
                 />
               );

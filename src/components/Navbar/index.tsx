@@ -2,7 +2,7 @@ import { faFilm, faSearch, faX } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Input from "../Input/Input";
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 import DrawerMobileNavigation from "./drawer";
 import img from "../../assets/imgs/icon.png";
 import { fetchConfigs } from "../../hooks/getMagnetURI";
@@ -20,19 +20,33 @@ const links = [
   { to: "/home_cinema/saved", name: "Saved" },
 ];
 
-export function Search(props: { mode: string }) {
+const TVShowsSearchPaths = [
+  "/home_cinema/watch_tv_shows",
+  "/home_cinema/tv_shows",
+];
+
+export function Search() {
   const navigate = useNavigate();
   const [term, setTerm] = useState("");
-
+  const loc = useLocation();
+  const startsWith = (paths: string[]): boolean => {
+    for (let p of paths) {
+      if (loc.pathname.startsWith(p)) return true;
+    }
+    return false;
+  };
   const onPressEnter = (term: string, key: string) => {
     if (key === "Enter") {
-      if (props.mode === "TV") {
+      if (startsWith(TVShowsSearchPaths)) {
         navigate(`/home_cinema/watch_tv_shows?query=${term}`);
       } else {
         location.href = `/home_cinema/search?term=${term}`;
       }
     }
   };
+  useEffect(() => {
+    console.log(loc.pathname);
+  }, []);
   return (
     <>
       <div>

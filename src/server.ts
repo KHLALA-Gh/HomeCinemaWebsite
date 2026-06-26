@@ -11,5 +11,5 @@ bootServer(PORT, {
     name: "Alpha 7",
     semVer: "0.0.7",
   },
-  desktopMode: false,
+  desktopMode: true,
 });

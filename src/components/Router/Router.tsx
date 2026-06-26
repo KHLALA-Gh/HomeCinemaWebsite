@@ -13,7 +13,7 @@ import Play from "../../pages/Play";
 import TVShows from "../../pages/TV_Shows";
 import Show from "../../pages/Show";
 import TorrentFiles from "../../pages/TorrentFiles";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Downloads from "../../pages/Downloads";
 import Torrents from "../../pages/Torrents";
 import Saved from "../../pages/Saved";
@@ -31,15 +31,26 @@ function Root() {
   return <></>;
 }
 function Layout() {
+  const [showSearch, setShowSearch] = useState(true);
   return (
     <>
-      <Nav />
+      <Nav
+        onHover={() => setShowSearch(false)}
+        onMouseLeave={() => setShowSearch(true)}
+        onExtend={() => setShowSearch(false)}
+        onMinimize={() => setShowSearch(true)}
+      />
 
       <div className="mt-25">
         <Outlet />
       </div>
-      <div className="fixed top-6 left-30 z-9999">
-        <SearchInp mode="movie" />
+      <div
+        className={
+          "fixed top-6 left-30 z-9999 duration-300 " +
+          (showSearch ? "opacity-100" : "opacity-0")
+        }
+      >
+        <SearchInp />
       </div>
     </>
   );
