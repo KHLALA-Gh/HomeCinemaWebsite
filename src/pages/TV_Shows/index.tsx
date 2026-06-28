@@ -157,19 +157,13 @@ function Pages({
 
 export default function TVShows() {
   const [sp, setSearchParams] = useSearchParams();
-  const { resp, isLoading, err, fetch } = useGetTVShows({
-    page: sp.get("page") as string,
-  });
+
   const {
     resp: respQuery,
     isLoading: isLoadingQuery,
     err: errQuery,
     fetch: fetchQuery,
   } = useSearchTVShows();
-  useEffect(() => {
-    if (!sp.get("page")) {
-    }
-  }, [sp]);
   useEffect(() => {
     let q = sp.get("query");
     if (q) {
@@ -178,7 +172,9 @@ export default function TVShows() {
       let p = sp.get("page");
       fetchQuery(q, p || "1");
     } else {
-      fetch();
+      let p = sp.get("page") || "1";
+
+      fetchQuery("", p);
     }
   }, [sp]);
   return (
@@ -188,10 +184,6 @@ export default function TVShows() {
           TV Shows
         </h1>
         <div className="flex justify-center gap-10 flex-wrap">
-          {!respQuery &&
-            resp?.results.map((show, i) => {
-              return <Show show={show} key={i} />;
-            })}
           {respQuery &&
             respQuery?.results.map((show, i) => {
               return <Show show={show} key={i} />;
@@ -208,26 +200,26 @@ export default function TVShows() {
               setSearchParams(n);
             }}
             page={sp.get("page") || ("1" as string)}
-            pageCount={resp ? resp.total_pages : respQuery?.total_pages}
+            pageCount={respQuery?.total_pages}
             query={sp.get("query") || ""}
           />
         </div>
-        {(isLoading || isLoadingQuery) && !err && (
+        {isLoadingQuery && !errQuery && (
           <div className="flex justify-center gap-10 flex-wrap">
             {returnLoadingMovies()}
           </div>
         )}
-        {err && (
+        {errQuery && (
           <div className="w-full h-screen">
             <div className="bg-red-600 p-5 border-2 border-red-700">
-              <h1>{err}</h1>
+              <h1>{errQuery}</h1>
             </div>
           </div>
         )}
         {errQuery && (
           <div className="w-full h-screen">
             <div className="bg-red-600 p-5 border-2 border-red-700">
-              <h1>error when searching : {err}</h1>
+              <h1>error when searching : {errQuery}</h1>
             </div>
           </div>
         )}

@@ -40,7 +40,7 @@ export function Search() {
       if (startsWith(TVShowsSearchPaths)) {
         navigate(`/home_cinema/watch_tv_shows?query=${term}`);
       } else {
-        location.href = `/home_cinema/search?term=${term}`;
+        navigate(`/home_cinema/search?term=${term}`);
       }
     }
   };

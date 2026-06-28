@@ -15,12 +15,14 @@ interface NavOps {
   onMouseLeave?: () => void;
   onExtend?: () => void;
   onMinimize?: () => void;
+  onClickOutside?: () => void;
 }
 export default function Nav({
   onHover,
   onMouseLeave,
   onExtend,
   onMinimize,
+  onClickOutside,
 }: NavOps) {
   const [showBigNav, setShowBigNav] = useState(false);
   return (
@@ -29,13 +31,13 @@ export default function Nav({
         <div
           className="w-full top-0 h-screen fixed z-9998"
           onClick={() => {
-            if (onMinimize) onMinimize();
+            if (onClickOutside) onClickOutside();
             setShowBigNav(false);
           }}
         ></div>
       )}
       <div
-        className={`p-5 fixed hover:z-10000 z-9999 top-0 duration-200  ${showBigNav ? "w-[350px] h-screen z-10000" : "w-49 h-16 hover:w-[350px]"}`}
+        className={`p-5 fixed  z-9999 top-0 duration-200  ${showBigNav ? "w-[350px] h-screen z-10000" : "w-49 h-16 hover:w-[350px]"}`}
       >
         <div
           onMouseEnter={showBigNav ? () => null : onHover}

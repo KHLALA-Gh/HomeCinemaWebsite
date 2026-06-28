@@ -4,7 +4,6 @@ import { LimitedList, returnLoadingMovies } from "../../components/List";
 import { useSavedMovies } from "../../hooks/useSavedMovies";
 import { useTrendingMovies } from "../../hooks/useTrendingMovies";
 import { useEffect } from "react";
-import { Search } from "../../components/Navbar";
 
 export default function Watch() {
   const savedMv = useSavedMovies();

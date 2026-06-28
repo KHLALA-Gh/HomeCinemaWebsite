@@ -35,10 +35,15 @@ function Layout() {
   return (
     <>
       <Nav
-        onHover={() => setShowSearch(false)}
-        onMouseLeave={() => setShowSearch(true)}
+        onHover={() => {
+          setShowSearch(false);
+        }}
+        onMouseLeave={() => {
+          setShowSearch(true);
+        }}
         onExtend={() => setShowSearch(false)}
-        onMinimize={() => setShowSearch(true)}
+        // onMinimize={() => setShowSearch(true)}
+        onClickOutside={() => setShowSearch(true)}
       />
 
       <div className="mt-25">
@@ -47,7 +52,7 @@ function Layout() {
       <div
         className={
           "fixed top-6 left-30 z-9999 duration-300 " +
-          (showSearch ? "opacity-100" : "opacity-0")
+          (showSearch ? "opacity-100 z-10000!" : "opacity-0 z-9998!")
         }
       >
         <SearchInp />
