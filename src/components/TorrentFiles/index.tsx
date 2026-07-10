@@ -66,6 +66,7 @@ export function TorrentFiles({
   const [showDownloadNotif, setShowDownloadNotif] = useState(true);
   const [streams, setStreams] = useState<Streams[]>();
   const [openSelectFiles, setOpenSelectFiles] = useState(false);
+  const [showVLCErr, setShowVLCErr] = useState(false);
   useEffect(() => {
     if (!resp) return;
     resp?.files.map((file) => {
@@ -220,7 +221,11 @@ export function TorrentFiles({
                 className="glass-white flex  justify-center items-center h-10 text-center text-[0px]! duration-200 hover:text-[16px]! bg-white/10! ps-6! pr-6! pt-3! pb-3! text-base!"
                 onClick={() => {
                   if (configs?.desktopMode) {
-                    window.electron.openVLC(streams.map((s) => s.streamUrl));
+                    window.electron
+                      .openVLC(streams.map((s) => s.streamUrl))
+                      .catch(() => {
+                        setShowVLCErr(true);
+                      });
                   } else {
                     const url = new URL("/api/playlist", location.origin);
                     streams.map((s) => {
@@ -328,7 +333,11 @@ export function TorrentFiles({
                       }
                       onDoubleClick={() => {
                         if (configs?.desktopMode && isVid) {
-                          window.electron.openVLC([file.downloadLink]);
+                          window.electron
+                            .openVLC([file.downloadLink])
+                            .catch(() => {
+                              setShowVLCErr(true);
+                            });
                         }
                       }}
                       target={configs?.desktopMode ? "" : "_blank"}
@@ -354,7 +363,7 @@ export function TorrentFiles({
                             console.log(streamUrl.href);
                             await window.electron.openVLC([streamUrl.href]);
                           } catch {
-                            alert("error when starting vlc.");
+                            setShowVLCErr(true);
                           } finally {
                             const newSet = new Set(playing);
                             newSet.delete(file.path);
@@ -375,7 +384,16 @@ export function TorrentFiles({
                     <button
                       className="lg:col-span-3 col-span-1 xl:block hidden cursor-pointer"
                       onClick={() => {
-                        navigator.clipboard.writeText(file.downloadLink);
+                        window.electron
+                          .fetchPrivateIp()
+                          .then((ip) => {
+                            navigator.clipboard.writeText(
+                              file.downloadLink.replace("localhost", ip),
+                            );
+                          })
+                          .catch(() => {
+                            navigator.clipboard.writeText(file.downloadLink);
+                          });
                       }}
                     >
                       <FontAwesomeIcon icon={faCopy} />{" "}
@@ -393,7 +411,16 @@ export function TorrentFiles({
                       <div
                         className=" col-span-1 cursor-pointer"
                         onClick={() => {
-                          navigator.clipboard.writeText(file.downloadLink);
+                          window.electron
+                            .fetchPrivateIp()
+                            .then((ip) => {
+                              navigator.clipboard.writeText(
+                                file.downloadLink.replace("localhost", ip),
+                              );
+                            })
+                            .catch(() => {
+                              navigator.clipboard.writeText(file.downloadLink);
+                            });
                         }}
                       >
                         <FontAwesomeIcon icon={faFile} />
@@ -418,7 +445,18 @@ export function TorrentFiles({
                         <div
                           className=" col-span-1 cursor-pointer"
                           onClick={() => {
-                            navigator.clipboard.writeText(file.downloadLink);
+                            window.electron
+                              .fetchPrivateIp()
+                              .then((ip) => {
+                                navigator.clipboard.writeText(
+                                  file.downloadLink.replace("localhost", ip),
+                                );
+                              })
+                              .catch(() => {
+                                navigator.clipboard.writeText(
+                                  file.downloadLink,
+                                );
+                              });
                           }}
                         >
                           <FontAwesomeIcon icon={faFile} />
@@ -457,9 +495,46 @@ export function TorrentFiles({
       {easyView && resp && (
         <>
           <FloatingDiv title="Easy View" onClose={() => setEasyView(false)}>
-            <EasyView resp={resp.files} config={configs} />
+            <EasyView
+              onErrorPlay={() => setShowVLCErr(true)}
+              resp={resp.files}
+              config={configs}
+            />
           </FloatingDiv>
         </>
+      )}
+      {showVLCErr && (
+        <FloatingDiv onClose={() => setShowVLCErr(false)}>
+          <div className="p-5 flex justify-center flex-col items-center max-w-[600px]">
+            <div>
+              <img
+                width={86}
+                src="https://images.icon-icons.com/3053/PNG/512/vlc_macos_bigsur_icon_189584.png"
+              />
+            </div>
+            <div className="text-center">
+              <h1 className="font-bold text-lg">Unable to open VLC</h1>
+              <p className="mt-2">
+                If you are having trouble playing videos with VLC please make
+                sure VLC is installed in your device, if not you can download it
+                from{" "}
+                <a
+                  className="text-blue-600"
+                  target="_blank"
+                  href="https://videolan.org"
+                >
+                  videolan.org
+                </a>
+              </p>
+              <p className="mt-2">
+                If you are unable to play the stream with VLC, you can copy the
+                file URL and play it with your preferred video player on any
+                device in your local network, or simply download the file and
+                play it directly.
+              </p>
+            </div>
+          </div>
+        </FloatingDiv>
       )}
     </>
   );
@@ -468,9 +543,11 @@ export function TorrentFiles({
 function EasyView({
   resp,
   config,
+  onErrorPlay,
 }: {
   resp: TorrentFile[];
   config?: ServerConfig;
+  onErrorPlay: () => void;
 }) {
   let elements = resp.map((f, i) => {
     if (!f.name.endsWith(".mp4") && !f.name.endsWith(".mkv")) return;
@@ -500,7 +577,16 @@ function EasyView({
           <div
             className=" col-span-1 cursor-pointer"
             onClick={() => {
-              navigator.clipboard.writeText(f.downloadLink);
+              window.electron
+                .fetchPrivateIp()
+                .then((ip) => {
+                  navigator.clipboard.writeText(
+                    f.downloadLink.replace("localhost", ip),
+                  );
+                })
+                .catch(() => {
+                  navigator.clipboard.writeText(f.downloadLink);
+                });
             }}
           >
             <FontAwesomeIcon icon={faFile} />
@@ -509,7 +595,9 @@ function EasyView({
             className="w-fit cursor-pointer"
             onClick={() => {
               if (config?.desktopMode) {
-                window.electron.openVLC([f.downloadLink]);
+                window.electron.openVLC([f.downloadLink]).catch(() => {
+                  if (onErrorPlay) onErrorPlay();
+                });
                 return;
               }
               open(f.downloadLink, "_blank");

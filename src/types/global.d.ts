@@ -32,6 +32,7 @@ declare global {
       setLibSet: (set: boolean) => Promise<boolean>;
       setSearchOp: (set: string) => Promise<string>;
       move: (src: string, dest: string) => Promise<void>;
+      fetchPrivateIp: () => Promise<string>;
     };
   }
 }
