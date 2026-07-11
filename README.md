@@ -1,51 +1,35 @@
 ## Home Cinema
 
-A website for browsing movie lists and information. it uses [YTS](https://yts.mx/) API and [Torrent Streamer Api](https://github.com/KHLALA-Gh/torrent-streamer-api), built with [Vite](https://vite.dev/) and [React](https://react.dev/)
+The website server for [HomeCinema desktop app](https://github.com/KHLALA-Gh/HomeCinema-Desktop).
+
+A website for browsing movies and TV series. it uses [YTS](https://yts.mx/) and [Torrentio](https://torrentio.org/) APIs for finding torrents and [Torrent Streamer Api](https://github.com/KHLALA-Gh/torrent-streamer-api) for torrent streaming, built with [Vite](https://vite.dev/) and [React](https://react.dev/).
 
 ![](./imgs/home_page.png)
 
 ### Setup
 
-#### Docker (Recommended) :
+#### Install package
 
-You can use Home Cinema Docker images to run the application with Docker Compose.
-First create `docker-compose.yml` file in the location you want and add the content below.
-
-```yml
-services:
-  home-cinema-website:
-    image: khlala/home-cinema-web:alpha5
-    # image: khlala/home-cinema-web:alpha5-arm64  ## use this image if you are running on arm64 arch
-    ports:
-      - "8000:4173"
-    environment:
-      - TMDB_KEY=<your_TMDB_api_key> ## Set your TMDB api key here
-    restart: always
+```bash
+npm i @home-cinema/app
 ```
 
-To get TV Shows information you need to get TMDB api key from [TMDB](https://www.themoviedb.org/).
+#### Run the server
 
-> **Note** : Home cinema is still in alpha versions, you may encounter difficulties when installing it.
+```js
+import { bootServer } from "@home-cinema/app";
 
-To run the application execute this command :
+const PORT = 8080;
 
-```shell
-docker compose up
+// starts the app server
+bootServer(PORT, {
+  desktopMode: true,
+});
 ```
 
-The website should be accessible from : http://localhost:8000/home_cinema
-
-### Configs
-
-Create `./config` directory where you created `docker-compose.yml`. Then create your config file `home_cinema_config.json` inside the new directory.
-If you want to know about configurations go [here](./docs/configurations.md).
-
-To pass configs through docker compose add your config file in the container volumes.
-
-```yml
-volumes:
-  - ./config/home_cinema_config.json:/app/dist/home_cinema_config.json
-```
+> note : The website is designed to work with Electron so that all functionalities are operational without problems.<br>
+> The application requires IPC handlers to perform certain actions.<br>
+> For more info see [HomeCinema-Desktop](https://github.com/KHLALA-Gh/HomeCinema-Desktop) source code.
 
 ### Issues
 
