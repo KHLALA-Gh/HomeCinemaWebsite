@@ -67,6 +67,7 @@ export function TorrentFiles({
   const [streams, setStreams] = useState<Streams[]>();
   const [openSelectFiles, setOpenSelectFiles] = useState(false);
   const [showVLCErr, setShowVLCErr] = useState(false);
+  const [playAllFiles, setPlayAllDFiles] = useState(false);
   useEffect(() => {
     if (!resp) return;
     resp?.files.map((file) => {
@@ -217,14 +218,18 @@ export function TorrentFiles({
 
           <div className="flex gap-3 items-center">
             {streams && streams?.length > 0 && (
-              <Button
-                className="glass-white flex  justify-center items-center h-10 text-center text-[0px]! duration-200 hover:text-[16px]! bg-white/10! ps-6! pr-6! pt-3! pb-3! text-base!"
+              <JoyButton
+                className="glass-white rounded-full! flex  justify-center items-center h-10 text-center text-[0px]! duration-200 hover:text-[16px]! bg-white/10! ps-6! pr-6! pt-3! pb-3! text-base!"
+                  loading={playAllFiles ||playing.size !== 0}
                 onClick={() => {
-                  if (configs?.desktopMode) {
+                  if (configs?.desktopMode && !playAllFiles && playing.size === 0) {
+                    setPlayAllDFiles(true)
                     window.electron
                       .openVLC(streams.map((s) => s.streamUrl))
                       .catch(() => {
                         setShowVLCErr(true);
+                      }).finally(()=>{
+                        setPlayAllDFiles(false)
                       });
                   } else {
                     const url = new URL("/api/playlist", location.origin);
@@ -241,7 +246,7 @@ export function TorrentFiles({
               >
                 <FontAwesomeIcon icon={faPlay} className=" text-base!" />
                 <p> Play</p>
-              </Button>
+              </JoyButton>
             )}
             {configs?.desktopMode && !isLoading && (
               <button
@@ -332,11 +337,16 @@ export function TorrentFiles({
                           : ""
                       }
                       onDoubleClick={() => {
-                        if (configs?.desktopMode && isVid) {
+                        if (configs?.desktopMode && isVid && !playing.has(file.path)) {
+                           setPlaying(new Set([...playing, file.path]));
                           window.electron
                             .openVLC([file.downloadLink])
                             .catch(() => {
                               setShowVLCErr(true);
+                            }).finally(()=>{
+                              const newSet = new Set(playing)
+                              newSet.delete(file.path)
+                              setPlaying(newSet)
                             });
                         }
                       }}
@@ -351,6 +361,7 @@ export function TorrentFiles({
                       <JoyButton
                         loading={playing.has(file.path)}
                         onClick={async () => {
+                          if(playing.has(file.path) || playAllFiles)return
                           if (!configs.desktopMode) return;
                           if (!isVid) return;
                           const history = await window.electron.getDH(hash);
@@ -362,6 +373,7 @@ export function TorrentFiles({
                             setPlaying(new Set([...playing, file.path]));
                             console.log(streamUrl.href);
                             await window.electron.openVLC([streamUrl.href]);
+
                           } catch {
                             setShowVLCErr(true);
                           } finally {
@@ -499,6 +511,9 @@ export function TorrentFiles({
               onErrorPlay={() => setShowVLCErr(true)}
               resp={resp.files}
               config={configs}
+              playing={playing}
+              playingAll={playAllFiles}
+              setPlaying={setPlaying}
             />
           </FloatingDiv>
         </>
@@ -544,10 +559,16 @@ function EasyView({
   resp,
   config,
   onErrorPlay,
+  playing,
+  playingAll,
+  setPlaying
 }: {
   resp: TorrentFile[];
   config?: ServerConfig;
   onErrorPlay: () => void;
+  playing : Set<string>
+  playingAll : boolean
+  setPlaying : React.Dispatch<React.SetStateAction<Set<string>>>
 }) {
   let elements = resp.map((f, i) => {
     if (!f.name.endsWith(".mp4") && !f.name.endsWith(".mkv")) return;
@@ -591,12 +612,18 @@ function EasyView({
           >
             <FontAwesomeIcon icon={faFile} />
           </div>
-          <div
-            className="w-fit cursor-pointer"
+          <JoyButton
+            className="w-fit cursor-pointer p-0! bg-transparent!"
+            loading={playing.has(f.path)}
             onClick={() => {
-              if (config?.desktopMode) {
+              if (config?.desktopMode && !playing.has(f.path) && !playingAll) {
+                 setPlaying(new Set([...playing, f.path]));
                 window.electron.openVLC([f.downloadLink]).catch(() => {
                   if (onErrorPlay) onErrorPlay();
+                }).finally(()=>{
+                  const newSet = new Set(playing)
+                  newSet.delete(f.path)
+                  setPlaying(newSet)
                 });
                 return;
               }
@@ -604,7 +631,7 @@ function EasyView({
             }}
           >
             <FontAwesomeIcon icon={config?.desktopMode ? faPlay : faDownload} />
-          </div>
+          </JoyButton>
         </div>
       </div>
     );
