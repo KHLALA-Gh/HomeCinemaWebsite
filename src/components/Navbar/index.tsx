@@ -52,7 +52,7 @@ export function Search() {
       <div>
         <Input
           value={term}
-          className="!w-[300px] h-10! border-none! outline-none!"
+          className="!w-[300px]  h-10! border-none! outline-none!"
           onKeyUp={(p) => onPressEnter(term, p.key)}
           onChange={(e) => {
             setTerm(e.target.value);

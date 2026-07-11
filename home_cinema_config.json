@@ -1,6 +1,0 @@
-{
-  "torrent-streamer-api": {
-    "external": true,
-    "origin": "http://localhost:8081"
-  }
-}

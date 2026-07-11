@@ -45,7 +45,7 @@ export default function Nav({
           className={`
   ${showBigNav ? "max-w-full h-full " : "max-w-16 h-16"}
   overflow-hidden p-5 
-   glass-light rounded-2xl
+   glass-light bg-black/50! rounded-2xl
   transition-all duration-200 relative
   hover:max-w-[350px]
 `}
