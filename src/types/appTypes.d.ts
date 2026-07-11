@@ -1,10 +1,3 @@
-interface Configs {
-  "torrent-streamer-api": {
-    origin: string;
-    external: boolean;
-  };
-}
-
 interface TorrentSearch {
   name: string;
   magnetURI: string;
@@ -15,6 +8,27 @@ interface TorrentSearch {
   uploader?: string;
   infoHash: string;
 }
+interface TorrentSearchResp {
+  name: string;
+  infoHash: string;
+  provider?: string;
+}
+
+interface DownloadHistory {
+  infoHash: string;
+  name: string;
+  path: string;
+  size: number;
+  date: number;
+}
+
+interface TorrentMetadata {
+  name: string;
+  path: string;
+  size: number;
+  torrentURL: string;
+  files: TorrentFile[];
+}
 
 interface TorrentFile {
   name: string;
@@ -22,4 +36,62 @@ interface TorrentFile {
   path: string;
   path64: string;
   downloadLink: string;
+  playing?: boolean;
+}
+interface DownloadFile {
+  path: string;
+  streamed: boolean;
+  paused: boolean;
+  selected: boolean;
+  size: number;
+  downloaded: number;
+}
+interface Download {
+  name: string;
+  infoHash: string;
+  path?: string;
+  progress?: number;
+  upSpeed?: string;
+  downSpeed?: string;
+  paused: boolean;
+  files: DownloadFile[];
+  downloadSize?: number;
+  totalSize?: number;
+  downloaded?: number;
+  stopped: boolean;
+  status: string;
+  idling: boolean;
+  isComplete: boolean;
+}
+
+interface TorrentProps {
+  name: string;
+  infoHash: string;
+  date: number;
+  size: number;
+  downloadedSize: number;
+  path: string;
+}
+
+interface TorrentioStream {
+  name: string;
+  title: string;
+  infoHash: string;
+  fileIndex: number;
+}
+
+interface TorrentioResp {
+  streams: TorrentioStream[];
+  cacheMaxAge: number;
+  staleRevalidate: number;
+  staleError: number;
+}
+
+interface MovieSavedData {
+  id: number;
+  title: string;
+  year: string;
+  rating: number;
+  medium_cover_image: string;
+  runtime: string;
 }

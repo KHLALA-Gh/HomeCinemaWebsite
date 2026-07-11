@@ -13,6 +13,8 @@ import {
   getTorrentByInfoHash,
   removeTorrent,
 } from "../../lib/idb";
+import { Back } from "../../components/Utils/back";
+import { fetchConfigs } from "../../hooks/getMagnetURI";
 
 interface Streams {
   streamUrl: string;
@@ -30,8 +32,8 @@ export default function Files() {
     err: errPreStream,
   } = useCreatePreStream();
   const [streams, setStreams] = useState<Streams[]>();
-  const [size, setSize] = useState<number>();
   const [saved, setSaved] = useState<boolean>(false);
+  const [size, setSize] = useState<number>();
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -48,7 +50,7 @@ export default function Files() {
   useEffect(() => {
     if (!resp) return;
     let size = 0;
-    resp?.map((file) => {
+    resp?.files.map((file) => {
       if (file.name.endsWith(".mp4") || file.name.endsWith(".mkv")) {
         size += file.size;
         setStreams((s) => {
@@ -63,88 +65,64 @@ export default function Files() {
     setSize(size);
   }, [resp]);
   useEffect(() => {
-    fetchFiles(p.hash as string);
+    (async () => {
+      const configs = await fetchConfigs();
+
+      let path;
+      if (configs.desktopMode) {
+        let history = await window.electron.getDH(p.hash as string);
+        path = history?.path;
+      }
+      fetchFiles(p.hash as string, path);
+    })();
   }, []);
 
   return (
     <>
-      <div className="cursor-pointer mt-7 ms-3 flex items-center gap-3">
-        <FontAwesomeIcon
-          onClick={() => {
-            navigate(-1);
-          }}
-          icon={faChevronLeft}
-          className="h-7"
-        />
-        <h1 className="font-bold text-3xl">Inspect Torrent</h1>
-        <SaveButton
-          onClick={async () => {
-            try {
-              if (!p.hash) return;
-
-              if (!saved) {
-                let seeders = 0;
-                let leechers = 0;
-                if (sp.get("seeds")) {
-                  seeders = Number(sp.get("seeds"));
-                }
-                if (sp.get("leechers")) {
-                  leechers = Number(sp.get("leechers"));
-                }
-                await addTorrents({
-                  name: sp.get("name") || "",
-                  provider: sp.get("provider") || "",
-                  seeders: seeders,
-                  leechers: leechers,
-                  infoHash: p.hash,
-                  magnetURI: "",
-                  url: sp.get("about") || "",
-                });
-                setSaved(true);
-              } else {
-                await removeTorrent(p.hash);
-                setSaved(false);
-              }
-            } catch (err) {
-              console.log(err);
-            }
-          }}
-          saved={saved}
-        />
+      <div className="p-5">
+        <Back />
       </div>
 
-      {streams && streams?.length > 0 && (
-        <div className="p-5">
-          <h1 className="md:text-3xl font-bold mb-3">
-            {resp && <h1>{resp[0].path.split("/")[0]}</h1>}
-          </h1>
-          <Button
-            onClick={() => {
-              const url = new URL("/api/playlist", location.origin);
-              streams.map((s) => {
-                url.searchParams.append("streams", s.streamUrl);
-                url.searchParams.append("names", s.name);
-              });
-              if (resp) {
-                url.searchParams.set("fileName", resp[0].path.split("/")[0]);
-              }
-              open(url.href);
-            }}
-          >
-            <FontAwesomeIcon icon={faPlay} className="mr-3" /> Play
-          </Button>
-        </div>
-      )}
-
       <TorrentFiles
-        resp={resp || []}
+        resp={resp}
         hash={p.hash as string}
         err={err}
         isLoading={isLoading}
+        saved={saved}
+        onSave={async () => {
+          try {
+            if (!p.hash) return;
+
+            if (!saved) {
+              let seeders = 0;
+              let leechers = 0;
+              if (sp.get("seeds")) {
+                seeders = Number(sp.get("seeds"));
+              }
+              if (sp.get("leechers")) {
+                leechers = Number(sp.get("leechers"));
+              }
+              await addTorrents({
+                name: resp?.name || "unknown name",
+                provider: sp.get("provider") || "unknown provider",
+                seeders: seeders,
+                leechers: leechers,
+                infoHash: p.hash,
+                magnetURI: "",
+                url: sp.get("about") || "",
+              });
+              setSaved(true);
+            } else {
+              await removeTorrent(p.hash);
+              setSaved(false);
+            }
+          } catch (err) {
+            console.log(err);
+          }
+        }}
       />
 
       <div className="ps-5 mt-7">
-        <p className="mb-3">{pr((size as number) || 0)}</p>
         {sp.get("peers") && sp.get("seeds") && (
           <p>
             Seeds : {sp.get("seeds")} leechers : {sp.get("leechers")}
@@ -162,12 +140,11 @@ export default function Files() {
             </a>
           </p>
         )}
-        <p className="text-sm mb-5">Info Hash : {p.hash}</p>
       </div>
       {err && (
         <h1 className="text-red-500">An error occurred while getting files</h1>
       )}
-      {resp?.length === 0 && !isLoading && (
+      {resp?.files.length === 0 && !isLoading && (
         <h1>No files found. It could be 0 seeders</h1>
       )}
       {showStreamUrl && (

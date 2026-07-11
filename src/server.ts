@@ -6,4 +6,10 @@ let PORT = 5173;
 if (process.env.NODE_ENV === "production") {
   PORT = 4173;
 }
-bootServer(PORT, { openVLC: true });
+bootServer(PORT, {
+  version: {
+    name: "Alpha 7",
+    semVer: "0.0.7",
+  },
+  desktopMode: true,
+});

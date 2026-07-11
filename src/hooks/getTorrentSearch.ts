@@ -1,22 +1,46 @@
 import { useState } from "react";
 import { fetchConfigs } from "./getMagnetURI";
+import { getMovieStreams, getTvStreams } from "../lib/torrentio";
 
 export const endSearchPoint = "/api/search";
 
 export function useTorrentSearch() {
-  const [resp, setResp] = useState<TorrentSearch[]>();
+  const [resp, setResp] = useState<TorrentSearchResp[]>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [err, setErr] = useState<any>();
-  const get = async (query: string, limit?: number) => {
+  const getTorrentio = async (p: TorrentioFetchProps) => {
+    if (p.type === "movie") {
+      let data = await getMovieStreams(p.imdb_id);
+      setResp(
+        data.streams.map((t) => {
+          return {
+            name: t.title,
+            infoHash: t.infoHash,
+          };
+        }),
+      );
+    } else {
+      let data = await getTvStreams(p.imdb_id, p.season, p.episode);
+      setResp(
+        data.streams.map((t) => {
+          return {
+            name: t.title,
+            infoHash: t.infoHash,
+          };
+        }),
+      );
+    }
+  };
+  const getTorrentAgent = async (query: string, limit?: number) => {
     const config = await fetchConfigs();
     const url = new URL(
       endSearchPoint,
       config["torrent-streamer-api"].external
         ? config["torrent-streamer-api"].origin
-        : location.origin
+        : location.origin,
     );
     url.searchParams.set("query", query);
-    url.searchParams.set("limit", `${limit}`);
+    url.searchParams.set("limit", `${limit || 20}`);
 
     await new Promise<void>((res, rej) => {
       const source = new EventSource(url.href);
@@ -44,22 +68,54 @@ export function useTorrentSearch() {
       });
     });
   };
-  const fetch = (query: string, limit?: number) => {
+  const fetch = (p: FetchProps) => {
     setIsLoading(true);
     setErr(undefined);
     setResp(undefined);
-    get(query, limit)
-      .catch((err) => {
-        setErr(err);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+    if (p.op === "torrent-agent") {
+      getTorrentAgent(p.query, p.limit)
+        .catch((err) => {
+          setErr(err);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    } else if (p.op === "torrentio") {
+      getTorrentio(p)
+        .catch((err) => {
+          setErr(err);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
   };
   return {
     resp,
     isLoading,
     err,
+    setIsLoading,
     fetch,
   };
 }
+
+type TorrentioFetchProps =
+  | {
+      op: "torrentio";
+      type: "tv";
+      imdb_id: string;
+      episode: number;
+      season: number;
+    }
+  | {
+      op: "torrentio";
+      type: "movie";
+      imdb_id: string;
+    };
+type FetchProps =
+  | {
+      op: "torrent-agent";
+      query: string;
+      limit?: number;
+    }
+  | TorrentioFetchProps;

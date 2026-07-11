@@ -54,3 +54,182 @@
 .pop-animation {
   animation: pop 0.7s ease-in-out alternate;
 }
+
+@layer components {
+  .glass-white {
+    @apply inset-shadow-sm/40 text-white shadow-2xl border border-white/10 inset-shadow-white/40 bg-white/40 backdrop-blur-xs;
+  }
+  .glass-dark {
+    @apply inset-shadow-sm/40 text-white shadow-2xl border border-white/10 inset-shadow-white/40 bg-black/40 backdrop-blur-xs;
+  }
+  .glass {
+    @apply inset-shadow-sm/40 shadow-2xl inset-shadow-white/40 backdrop-blur-xs;
+  }
+  .pop {
+    @apply hover:inset-shadow-2xs hover:inset-shadow-white/10 hover:shadow-xs hover:shadow-white/10;
+  }
+  .bg-pop {
+    @apply inset-shadow-2xs inset-shadow-white/10 shadow-xs shadow-white/10;
+  }
+}
+
+.glass-light {
+  background: rgba(56, 56, 56, 0.1);
+  -webkit-backdrop-filter: blur(20px) saturate(200%);
+  backdrop-filter: blur(5px) saturate(200%);
+
+  border-radius: 20px;
+
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.glass-light::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0.05)
+  );
+
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.spin-animation {
+  animation: spin-animation 2s infinite ease-in-out;
+}
+@keyframes spin-animation {
+  0% {
+    rotate: 0deg;
+  }
+  100% {
+    rotate: 360deg;
+  }
+}
+
+.ani-bounce {
+  animation: bounce 3s infinite;
+}
+.ani-bounce-delay {
+  animation: bounce 3s infinite 1s;
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(-100%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+}
+.alert-title {
+  position: relative;
+}
+
+.alert-title[title]::after {
+  content: attr(data-title);
+  background-color: #00ff00;
+  color: #111;
+  position: absolute;
+  padding: 1px 5px 2px 5px;
+  bottom: -1.6em;
+  left: 100%;
+  white-space: nowrap;
+  box-shadow: 1px 1px 3px #222222;
+  opacity: 0;
+  border: 1px solid #111111;
+  z-index: 99999;
+  visibility: hidden;
+  height: fit-content;
+}
+
+.alert-title-yellow {
+  position: relative;
+}
+.alert-title-yellow::after {
+  white-space: initial !important;
+  text-wrap: wrap;
+}
+.alert-title-yellow[title]:hover::after {
+  background-color: rgb(109, 109, 0) !important;
+}
+.alert-title[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  top: -100%;
+  left: 20px;
+  background-color: rgb(145, 0, 0);
+  padding: 6px;
+  opacity: 1;
+  border-radius: 10px;
+  color: white;
+  font-size: small;
+  opacity: 1;
+  transition: all 0.1s ease;
+  visibility: visible;
+}
+
+.settings-lib div {
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.settings-lib div:hover {
+  background-color: rgba(255, 255, 255, 0.132);
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none; /* Internet Explorer and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera, and older Edge */
+}
+
+/* HTML: <div class="loader"></div> */
+.loader {
+  display: inline-grid;
+  padding: 5px;
+  background: transparent;
+  filter: blur(1px) contrast(12);
+}
+.loader:before {
+  content: "";
+  height: 15px;
+  aspect-ratio: 3;
+  --c: #ffffff00 64%, #ffffff 66% 98%, #ffffff00 101%;
+  background:
+    radial-gradient(35% 146% at 50% 159%, var(--c)) 0 0,
+    radial-gradient(35% 146% at 50% -59%, var(--c)) 100% 100%;
+  background-size: calc(200% / 3) 50%;
+  background-repeat: repeat-x;
+  animation: l11 0.8s infinite linear;
+}
+@keyframes l11 {
+  to {
+    background-position:
+      -200% 0,
+      -100% 100%;
+  }
+}
+
+.opacity_anim {
+  animation: opacity_anim 4s infinite alternate-reverse;
+}
+
+@keyframes opacity_anim {
+  0% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}

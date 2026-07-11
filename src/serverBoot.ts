@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ViteDevServer } from "vite";
 
-import routes from "./api/index.js";
+import { declareRoutes } from "./api/index.js";
 import { exec } from "node:child_process";
 
 env.config();
@@ -13,19 +13,22 @@ env.config();
 const isProduction = process.env.NODE_ENV === "production";
 const base = process.env.BASE || "/";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const configs = JSON.parse(
-  await fs.readFile(path.join(__dirname, "../home_cinema_config.json"), "utf-8")
-);
 
-interface ServerConfig {
-  openVLC: boolean;
-}
+const defaultServerConf: ServerConfig = {
+  version: { name: "development", semVer: "0.0.0" },
+  openVLC: false,
+  desktopMode: false,
+  "torrent-streamer-api": {
+    external: false,
+    origin: "",
+  },
+};
 
-export async function bootServer(port: number, config?: ServerConfig) {
+export async function bootServer(port: number, config?: Partial<ServerConfig>) {
   const templateHtml = isProduction
     ? await fs.readFile(
         path.join(__dirname, "../dist/client/index.html"),
-        "utf-8"
+        "utf-8",
       )
     : "";
 
@@ -50,25 +53,35 @@ export async function bootServer(port: number, config?: ServerConfig) {
     app.use(compression());
     app.use(
       base,
-      sirv(path.join(__dirname, "../dist/client"), { extensions: [] })
+      sirv(path.join(__dirname, "../dist/client"), { extensions: [] }),
     );
   }
+  const c: ServerConfig = {
+    ...defaultServerConf,
+    ...config,
+  };
+  const router = declareRoutes(c);
+  app.use(router);
 
-  if (configs["torrent-streamer-api"].external === false) {
+  if (!c["torrent-streamer-api"].external) {
     const streamerRouter = (await import("torrent-streamer-api")).default;
     app.use(
       streamerRouter({
         torrentFilesTimeout: 1000 * 30,
-      })
+        ipStreamLimit: c.desktopMode ? Infinity : undefined,
+      }),
     );
   }
 
-  Object.values(routes).forEach((router) => {
-    app.use(router);
-  });
-  if (config && config.openVLC) {
+  if (c.openVLC) {
     app.get("/api/play-vlc", async (req, res) => {
       try {
+        if (!c.desktopMode && !c.openVLC) {
+          res.status(403).json({
+            err: "play on vlc is not allowed",
+          });
+          return;
+        }
         let streams: string[];
         if (typeof req.query.streams === "string") {
           streams = [req.query.streams];
@@ -95,7 +108,7 @@ export async function bootServer(port: number, config?: ServerConfig) {
       if (!isProduction && vite) {
         template = await fs.readFile(
           path.join(__dirname, "../index.html"),
-          "utf-8"
+          "utf-8",
         );
         template = await vite.transformIndexHtml(url, template);
         render = (

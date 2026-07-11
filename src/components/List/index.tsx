@@ -56,13 +56,13 @@ export default function List({
 }) {
   return (
     <>
-      <div className="relative overflow-visible md:ps-10">
+      <div className="relative overflow-visible">
         <div
           onClick={() => {
             let list = document.getElementById(listID);
             list?.scroll({ left: list.scrollLeft - 300 });
           }}
-          className="absolute hidden md:block w-fit left-[-40px] cursor-pointer  top-[50%] translate-y-[-50%] bg-[#444] p-5 z-30 rounded-md"
+          className="absolute glass-dark hidden md:block w-fit left-[-40px] cursor-pointer  top-[50%] translate-y-[-50%]  p-5 z-30 rounded-md"
         >
           <FontAwesomeIcon icon={faLeftLong} className="text-white" />
         </div>
@@ -71,7 +71,7 @@ export default function List({
             let list = document.getElementById(listID);
             list?.scroll({ left: list.scrollLeft + 300 });
           }}
-          className="absolute hidden md:block w-fit right-[-40px] cursor-pointer  top-[50%] translate-y-[-50%] bg-[#444] p-5 z-30 rounded-md"
+          className="absolute  glass-dark hidden md:block w-fit right-[-40px] cursor-pointer  top-[50%] translate-y-[-50%]  p-5 z-30 rounded-md"
         >
           <FontAwesomeIcon icon={faRightLong} className="text-white" />
         </div>
@@ -108,7 +108,7 @@ export function LimitedList({
   };
   return (
     <>
-      <div className="md:ps-28 md:pe-28 ps-10 pr-10 rounded-md">
+      <div className="rounded-md md:ps-28 md:pe-28 ps-10 pr-10">
         <h1 className="font-extrabold text-xl md:text-4xl mb-10 md:mb-20 mt-7 md:mt-20">
           {category}
         </h1>

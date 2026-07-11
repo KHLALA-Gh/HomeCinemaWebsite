@@ -1,15 +1,19 @@
-import Button from "@mui/joy/Button";
 import { useTorrentSearch } from "../../hooks/getTorrentSearch";
 import { useNavigate } from "react-router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowUpRightFromSquare,
   faChevronLeft,
+  faExclamationCircle,
+  faGear,
+  faMousePointer,
+  faPen,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
 import { SaveButton } from "../Movie/Movie";
+import Btn from "../Button/button";
 import {
   addTorrents,
   addTVShow,
@@ -18,22 +22,20 @@ import {
   removeTorrent,
   removeTVShow,
 } from "../../lib/idb";
-function getMagnetHash(magnetLink: string) {
-  const url = new URL(magnetLink);
-  const params = new URLSearchParams(url.search);
-  const xt = params.get("xt");
-  if (xt && xt.startsWith("urn:btih:")) {
-    return xt.replace("urn:btih:", "");
-  }
-  return null;
-}
+import { Input } from "@mui/joy";
+import { Back } from "../Utils/back";
+import axios from "axios";
 
 export function ShowDetails(props: TMDBTVShowDetails) {
-  const { resp, err, isLoading, fetch } = useTorrentSearch();
+  const { resp, err, isLoading, fetch, setIsLoading } = useTorrentSearch();
   const [selectedSeason, setSelectedSeason] = useState<number>();
+  const [showSearchOp, setShowSearchOp] = useState<boolean>(false);
+  const [searchOp, setSearchOp] = useState<"torrent-agent" | "torrentio">();
+  const [searchOption, setSearchOption] = useState<"text" | "select">("select");
+  const [query, setQuery] = useState<string>(`${props.name} S01`);
   const [selectedEp, setSelectedEp] = useState<number>();
   const [limit, setLimit] = useState<number>(10);
-  const navigate = useNavigate();
+  const [showWarning, setShowWarning] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(false);
   useEffect(() => {
     getTVShowById(props.id).then((t) => {
@@ -41,21 +43,43 @@ export function ShowDetails(props: TMDBTVShowDetails) {
         setSaved(true);
       }
     });
+    window.electron.getSearchOp().then((v) => {
+      setSearchOp(v as any);
+    });
   }, []);
-  const search = () => {
-    //@ts-ignore
-    let season = document.getElementById("season")?.value;
-    //@ts-ignore
-    let ep = document.getElementById("ep")?.value;
-    let req = `${props.name}`;
-    if (selectedSeason) {
-      req += ` S0${selectedSeason}`;
-    }
-    if (selectedEp) {
-      req += `E0${selectedEp}`;
-    }
 
-    fetch(req, limit);
+  const search = () => {
+    if (searchOp === "torrent-agent") {
+      if (searchOption === "text") {
+        fetch({ op: "torrent-agent", query, limit });
+
+        return;
+      }
+      //@ts-ignore
+      let season = document.getElementById("season")?.value;
+      //@ts-ignore
+      let ep = document.getElementById("ep")?.value;
+      let req = `${props.name}`;
+      if (selectedSeason) {
+        req += ` S0${selectedSeason}`;
+      }
+      if (selectedEp) {
+        req += `E0${selectedEp}`;
+      }
+      fetch({
+        op: "torrent-agent",
+        query: req,
+        limit,
+      });
+    } else {
+      fetch({
+        op: "torrentio",
+        type: "tv",
+        episode: selectedEp || 1,
+        season: selectedSeason || 1,
+        imdb_id: props.imdb_id,
+      });
+    }
   };
   useEffect(() => {
     let season = document.getElementById("season");
@@ -69,18 +93,10 @@ export function ShowDetails(props: TMDBTVShowDetails) {
   }, [resp]);
   return (
     <>
-      <div
-        className="md:mb-10 mb-10 cursor-pointer bg-white rounded-full h-10 w-10 flex justify-center items-center"
-        onClick={() => {
-          navigate(-1);
-        }}
-      >
-        <FontAwesomeIcon
-          className="h-5! font-bold text-black"
-          icon={faChevronLeft}
-        />
+      <div className="mb-10 z-20">
+        <Back />
       </div>
-      <div className="lg:flex gap-20 relative">
+      <div className="lg:flex gap-20 relative z-50">
         <div className="lg:z-10 left-[50%] lg:top-0 top-[20%] lg:left-0 lg:translate-x-0 translate-x-[-50%] z-[-10] lg:relative w-fit absolute min-w-[300px] min-h-[450px] rounded-md">
           <div className="rounded-md overflow-hidden w-fit">
             <img
@@ -125,7 +141,10 @@ export function ShowDetails(props: TMDBTVShowDetails) {
             />
           </div>
           <h1 className="text-xl font-semibold mt-3">
-            {props.seasons.length} Season{props.seasons.length > 1 ? "s" : ""}
+            {props.seasons.filter((s) => s.name !== "Specials").length} Season
+            {props.seasons.filter((s) => s.name !== "Specials").length > 1
+              ? "s"
+              : ""}
           </h1>
           <h1 className="text-lg mt-2">
             Genres :{" "}
@@ -138,97 +157,131 @@ export function ShowDetails(props: TMDBTVShowDetails) {
           </h1>
           <h1 className="text-lg">Rating :{props.vote_average}</h1>
           <p className="mt-7 text-base md:text-lg">{props.overview}</p>
-          <div className="flex flex-wrap">
-            <div>
-              <p className="mt-5">Season </p>
-              <Select
-                onChange={(_, v) => {
-                  if (typeof v !== "number") return;
-                  if (v == 0) {
-                    setSelectedEp(0);
-                  }
-                  setSelectedSeason(v);
-                }}
-                placeholder="Choose one…"
-                name=""
-                id="season"
-                className=" mr-2 !bg-[#151515] !text-white after:bg-black !w-[150px]"
-                sx={{
-                  padding: 0,
-                  paddingLeft: "10px",
-                }}
-              >
-                <Option
-                  className="!bg-[#000000] !text-white !border-0 hover:!bg-[#242424]"
-                  value={0}
-                >
-                  any
-                </Option>
-                {props.seasons.map((s, i) => {
-                  if (s.name === "Specials") return;
-
-                  return (
+          {searchOp === "torrent-agent" && (
+            <div
+              onClick={() =>
+                setSearchOption(searchOption === "text" ? "select" : "text")
+              }
+              className="bg-pop mt-3 cursor-pointer relative flex justify-between rounded-full w-fit bg-white/10 pt-2 pb-2 ps-3 pr-3 gap-5"
+            >
+              <div>
+                <FontAwesomeIcon icon={faMousePointer} />
+              </div>
+              <div>
+                <FontAwesomeIcon icon={faPen} />
+              </div>
+              <div
+                className={`absolute h-[100%] w-[50%] top-0 rounded-full duration-200 ease-in-out h-5 ${searchOption === "select" ? "left-0" : "left-full translate-x-[-100%]"} bg-white/30`}
+              ></div>
+            </div>
+          )}
+          <div className="flex flex-wrap items-center mt-5">
+            {(searchOption === "select" || searchOp === "torrentio") && (
+              <>
+                <div>
+                  <p>Season </p>
+                  <Select
+                    onChange={(_, v) => {
+                      if (typeof v !== "number") return;
+                      if (v == 0) {
+                        setSelectedEp(0);
+                      }
+                      setSelectedSeason(v);
+                    }}
+                    placeholder="Choose one…"
+                    name=""
+                    id="season"
+                    className=" mr-2 !bg-[#151515] !text-white after:bg-black !w-[150px]"
+                    sx={{
+                      padding: 0,
+                      paddingLeft: "10px",
+                    }}
+                  >
                     <Option
                       className="!bg-[#000000] !text-white !border-0 hover:!bg-[#242424]"
-                      value={s.season_number}
-                      key={i}
+                      value={0}
                     >
-                      {s.name}
+                      any
                     </Option>
-                  );
-                })}
-              </Select>
-            </div>
+                    {props.seasons.map((s, i) => {
+                      if (s.name === "Specials") return;
+
+                      return (
+                        <Option
+                          className="!bg-[#000000] !text-white !border-0 hover:!bg-[#242424]"
+                          value={s.season_number}
+                          key={i}
+                        >
+                          {s.name}
+                        </Option>
+                      );
+                    })}
+                  </Select>
+                </div>
+                <div>
+                  <p>Episode </p>
+                  <Select
+                    disabled={!selectedSeason}
+                    onChange={(_, v) => {
+                      if (typeof v !== "number") return;
+                      setSelectedEp(v);
+                    }}
+                    placeholder="Choose one…"
+                    name=""
+                    id="ep"
+                    className="mr-2 !bg-[#151515] !text-white after:bg-black !w-[150px]"
+                    sx={{
+                      padding: 0,
+                      paddingLeft: "10px",
+                      "&.Mui-disabled": {
+                        backgroundColor: "#000 !important",
+                        color: "#797979 !important",
+                        border: "2px solid #ccc",
+                      },
+                    }}
+                  >
+                    <Option
+                      className="!bg-[#000000] !text-white !border-0 hover:!bg-[#242424]"
+                      value={0}
+                    >
+                      any
+                    </Option>
+                    {selectedSeason &&
+                      props.seasons.map((s) => {
+                        if (s.season_number === selectedSeason) {
+                          let opts = [];
+                          for (let i = 1; i < s.episode_count + 1; i++) {
+                            opts.push(
+                              <Option
+                                value={i}
+                                key={i}
+                                className="!bg-[#000000] !text-white !border-0 hover:!bg-[#242424]"
+                              >
+                                episode {i}
+                              </Option>,
+                            );
+                          }
+                          return opts;
+                        }
+                      })}
+                  </Select>
+                </div>
+              </>
+            )}
+            {searchOption === "text" && searchOp === "torrent-agent" && (
+              <>
+                <div>
+                  <p>Search query</p>
+                  <Input
+                    value={query}
+                    onChange={(t) => setQuery(t.target.value)}
+                    className="w-min-28! h-fit mr-2 bg-white/10! bg-pop! text-white! outline-none!"
+                  />
+                </div>
+              </>
+            )}
             <div>
-              <p className="mt-5">Episode </p>
-              <Select
-                disabled={!selectedSeason}
-                onChange={(_, v) => {
-                  if (typeof v !== "number") return;
-                  setSelectedEp(v);
-                }}
-                placeholder="Choose one…"
-                name=""
-                id="ep"
-                className="mr-2 !bg-[#151515] !text-white after:bg-black !w-[150px]"
-                sx={{
-                  padding: 0,
-                  paddingLeft: "10px",
-                  "&.Mui-disabled": {
-                    backgroundColor: "#000 !important",
-                    color: "#797979 !important",
-                    border: "2px solid #ccc",
-                  },
-                }}
-              >
-                <Option
-                  className="!bg-[#000000] !text-white !border-0 hover:!bg-[#242424]"
-                  value={0}
-                >
-                  any
-                </Option>
-                {selectedSeason &&
-                  props.seasons.map((s) => {
-                    if (s.season_number === selectedSeason) {
-                      let opts = [];
-                      for (let i = 1; i < s.episode_count + 1; i++) {
-                        opts.push(
-                          <Option
-                            value={i}
-                            key={i}
-                            className="!bg-[#000000] !text-white !border-0 hover:!bg-[#242424]"
-                          >
-                            episode {i}
-                          </Option>,
-                        );
-                      }
-                      return opts;
-                    }
-                  })}
-              </Select>
-            </div>
-            <div>
-              <p className="mt-5">Search Limit</p>
+              <p>Search Limit</p>
               <Select
                 onChange={(_, v) => {
                   if (typeof v !== "number") return;
@@ -248,15 +301,129 @@ export function ShowDetails(props: TMDBTVShowDetails) {
                 {limitOptions()}
               </Select>
             </div>
+            {searchOp === "torrent-agent" && (
+              <div
+                onMouseOver={(t) => {
+                  setShowWarning(true);
+                }}
+                onMouseOut={(t) => {
+                  setShowWarning(false);
+                }}
+                className="flex justify-center items-center h-full pt-5 ps-3 cursor-pointer"
+                title={``}
+              >
+                <FontAwesomeIcon
+                  icon={faExclamationCircle}
+                  color="yellow"
+                  className=""
+                  size="lg"
+                />
+                {showWarning && (
+                  <div className="absolute z-1001 bg-[#a6a302] p-3 rounded-2xl select-none">
+                    <p>
+                      Seasons number may be wrong. if you didn't find a season
+                      you can switch to{" "}
+                      <span
+                        onClick={() => {
+                          setSearchOption("text");
+                          setShowWarning(false);
+                        }}
+                        className="ps-2 pr-2 pt-1 pb-1 bg-black/80 bg-pop rounded-md hover:bg-black"
+                      >
+                        text search <FontAwesomeIcon icon={faPen} size="sm" />
+                        <br />
+                      </span>
+                      search example : <br />
+                      Get {props.name} season 2 : <br />
+                      <span className="ps-2 select-all pr-2 pt-1 pb-1 bg-black/80 bg-pop rounded-md">
+                        {props.name} S02
+                      </span>
+                      <br />
+                      Get {props.name} season 3 episode 5 : <br />
+                      <span className="ps-2 pr-2 pt-1  select-all pb-1 bg-black/80 bg-pop rounded-md">
+                        {props.name} S03E05
+                      </span>
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-          <Button
-            loading={isLoading}
-            color="neutral"
-            onClick={search}
-            className="!text-base !pr-7 !ps-7 !pt-2 !pb-2 !mt-3"
-          >
-            Search
-          </Button>
+
+          <div className="flex gap-3 mt-3 relative">
+            <Btn
+              disabled={isLoading}
+              onClick={search}
+              className="!text-base glass! bg-white/10! !pr-7 !ps-7 !pt-2 !pb-2"
+            >
+              {isLoading ? <div className="loader"></div> : "Search"}
+            </Btn>
+            {showSearchOp && (
+              <div
+                onClick={() => {
+                  setShowSearchOp(false);
+                }}
+                className="w-full top-0 left-0 h-screen fixed z-999"
+              ></div>
+            )}
+
+            <Btn
+              className={
+                "!text-base glass z-1000 absolute! left-30  bg-white/10! p-0! duration-200 relative" +
+                (!showSearchOp
+                  ? " w-11! h-11! rounded-4xl! hover:w-37! flex items-center text-[0px]! hover:text-base!"
+                  : " w-35 h-25 rounded-2xl! text-[0px]!")
+              }
+              onClick={() => setShowSearchOp(!showSearchOp)}
+            >
+              <div
+                className={
+                  "duration-200  " +
+                  (showSearchOp
+                    ? " text-[0px] absolute opacity-0 w-0 h-0"
+                    : " flex items-center opacity-100 w-[41px] h-4")
+                }
+              >
+                <FontAwesomeIcon
+                  className="text-base! ms-[50%] translate-x-[-50%]"
+                  icon={faGear}
+                />
+              </div>
+              <h1>search tool</h1>
+
+              <div
+                className={
+                  "flex flex-col duration-200 overflow-hidden" +
+                  (showSearchOp ? " w-35 h-24 text-base!" : " w-0 h-0")
+                }
+              >
+                <div
+                  onClick={async () => {
+                    await window.electron.setSearchOp("torrentio");
+                    setSearchOp("torrentio");
+                  }}
+                  className={
+                    "border-b-1 rounded-t-2xl duration-200 p-3 border-b-white/10 pb-3 hover:bg-white/10" +
+                    (searchOp === "torrentio" ? " bg-white/5" : "")
+                  }
+                >
+                  <h1>Torrentio</h1>
+                </div>
+                <div
+                  onClick={async () => {
+                    await window.electron.setSearchOp("torrent-agent");
+                    setSearchOp("torrent-agent");
+                  }}
+                  className={
+                    "p-3 hover:bg-white/10 duration-200 rounded-b-2xl" +
+                    (searchOp === "torrent-agent" ? " bg-white/8" : "")
+                  }
+                >
+                  <h1>torrent-agent</h1>
+                </div>
+              </div>
+            </Btn>
+          </div>
         </div>
       </div>
       <div>
@@ -298,7 +465,7 @@ export function ShowDetails(props: TMDBTVShowDetails) {
   );
 }
 
-export function Torrent({ t }: { t: TorrentSearch }) {
+export function Torrent({ t }: { t: any }) {
   const [saved, setSaved] = useState(false);
   useEffect(() => {
     getTorrentByInfoHash(t.infoHash).then((torrent) => {
@@ -308,7 +475,7 @@ export function Torrent({ t }: { t: TorrentSearch }) {
   }, []);
   return (
     <>
-      <div className="lg:p-5 lg:text-base text-sm p-2 gap-5 grid md:grid-cols-11 grid-cols-10 lg:grid-cols-12 hover:bg-[#50505059] rounded-md duration-200">
+      <div className="lg:p-5 glass items-center lg:text-base text-sm p-2 gap-5 grid md:grid-cols-11 grid-cols-10 lg:grid-cols-12 hover:bg-[#50505059] rounded-md duration-200">
         <a
           href={(() => {
             const url = new URL(
@@ -329,13 +496,15 @@ export function Torrent({ t }: { t: TorrentSearch }) {
         <p className="col-span-1 text-center">{t.seeders}</p>
         <p className="col-span-1 text-center">{t.leechers}</p>
         <p className="col-span-1 text-center md:block hidden">{t.provider}</p>
-        <a
-          className="col-span-1 text-center lg:block hidden"
-          target="_blank"
-          href={t.url}
-        >
-          <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
-        </a>
+        {t.url && (
+          <a
+            className="col-span-1 text-center lg:block hidden"
+            target="_blank"
+            href={t.url}
+          >
+            <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+          </a>
+        )}
         <SaveButton
           onClick={async () => {
             try {
@@ -361,7 +530,7 @@ function FilterTorrents({
   torrents,
   filter,
 }: {
-  torrents: TorrentSearch[];
+  torrents: TorrentSearchResp[];
   filter: string;
 }) {
   return (
@@ -370,7 +539,7 @@ function FilterTorrents({
         if (t.name.includes(filter)) return true;
       }) && <p className="font-bold underline">{filter} :</p>}
       {torrents
-        ?.sort((a, b) => (b.seeders || 0) - (a.seeders || 0))
+        ?.sort((a: any, b: any) => (b.seeders || 0) - (a.seeders || 0))
         .map((t, i) => {
           if (t.name.toUpperCase().includes(filter.toUpperCase()))
             return <Torrent t={t} key={i}></Torrent>;

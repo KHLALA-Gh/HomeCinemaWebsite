@@ -2,12 +2,67 @@ import { faFilm, faSearch, faX } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Input from "../Input/Input";
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 import DrawerMobileNavigation from "./drawer";
-import img from "../../assets/imgs/logo.svg";
+import img from "../../assets/imgs/icon.png";
+import { fetchConfigs } from "../../hooks/getMagnetURI";
 
 interface NavbarProps {
   mode?: "Movies" | "TV";
+}
+
+const links = [
+  {
+    to: "/home_cinema/downloads",
+    name: "Downloads",
+  },
+  { to: "/home_cinema/torrents", name: "Torrents" },
+  { to: "/home_cinema/saved", name: "Saved" },
+];
+
+const TVShowsSearchPaths = [
+  "/home_cinema/watch_tv_shows",
+  "/home_cinema/tv_shows",
+];
+
+export function Search() {
+  const navigate = useNavigate();
+  const [term, setTerm] = useState("");
+  const loc = useLocation();
+  const startsWith = (paths: string[]): boolean => {
+    for (let p of paths) {
+      if (loc.pathname.startsWith(p)) return true;
+    }
+    return false;
+  };
+  const onPressEnter = (term: string, key: string) => {
+    if (key === "Enter") {
+      if (startsWith(TVShowsSearchPaths)) {
+        navigate(`/home_cinema/watch_tv_shows?query=${term}`);
+      } else {
+        navigate(`/home_cinema/search?term=${term}`);
+      }
+    }
+  };
+  useEffect(() => {
+    console.log(loc.pathname);
+  }, []);
+  return (
+    <>
+      <div>
+        <Input
+          value={term}
+          className="!w-[300px]  h-10! border-none! outline-none!"
+          onKeyUp={(p) => onPressEnter(term, p.key)}
+          onChange={(e) => {
+            setTerm(e.target.value);
+          }}
+          Icon={faSearch}
+          placeholder="Search"
+        />
+      </div>
+    </>
+  );
 }
 
 export default function NavBar(props: NavbarProps) {
@@ -15,6 +70,7 @@ export default function NavBar(props: NavbarProps) {
   const [changeW, setChangeW] = useState(false);
   const [searchP] = useSearchParams();
   const [term, setTerm] = useState("");
+  const [version, setVersion] = useState<Version>();
   const navigate = useNavigate();
   useEffect(() => {
     if (openS === true) {
@@ -31,6 +87,11 @@ export default function NavBar(props: NavbarProps) {
       setTerm(t);
     }
   }, [searchP]);
+  useEffect(() => {
+    fetchConfigs().then((c) => {
+      setVersion(c.version);
+    });
+  }, []);
   const onPressEnter = (id: string, key: string) => {
     if (key === "Enter") {
       // @ts-ignore
@@ -44,21 +105,20 @@ export default function NavBar(props: NavbarProps) {
   };
   return (
     <>
-      <div className="w-full mt-10">
+      <div className="flex z-999  sticky top-8 justify-center items-center">
         <div
           className={
-            "flex justify-between ps-8 pr-8 sm:ps-32 sm:pr-32 " +
-            (openS ? "!justify-center" : "")
+            " items-center relative w-[80%] flex justify-between rounded-full p-3 glass-light "
           }
         >
           {!openS && (
-            <a
-              href={
+            <Link
+              to={
                 !props.mode
                   ? "/home_cinema/"
                   : props.mode === "Movies"
-                  ? "/home_cinema/watch"
-                  : "/home_cinema/watch_tv_shows"
+                    ? "/home_cinema/watch"
+                    : "/home_cinema/watch_tv_shows"
               }
             >
               <div>
@@ -66,21 +126,16 @@ export default function NavBar(props: NavbarProps) {
                   <img src={img} className="lg:h-12 h-9" />
                   <h1 className="lg:text-xl font-black">
                     Home Cinema
-                    {props.mode === "TV" && (
-                      <p className="text-sm font-normal p-0">TV Shows</p>
-                    )}
-                    {props.mode === "Movies" && (
-                      <p className="text-sm font-normal p-0">Movies</p>
-                    )}
-                  </h1>
-                  {props.mode === "TV" && (
-                    <p className="border-2 border-green-600 pr-5 ps-5 font-semibold text-green-600 rounded-full">
-                      Beta
+                    <p
+                      title={`Version : ${version?.semVer}`}
+                      className="text-sm font-semibold p-0 text-green-600 rounded-full"
+                    >
+                      {version?.name}
                     </p>
-                  )}
+                  </h1>
                 </div>
               </div>
-            </a>
+            </Link>
           )}
           <div className="flex justify-center xl:gap-20 gap-6 items-center text-base">
             <Link
@@ -89,31 +144,38 @@ export default function NavBar(props: NavbarProps) {
                   ? "/home_cinema/watch_tv_shows"
                   : "/home_cinema/watch"
               }
-              className="font-bold lg:block hidden"
+              className={
+                "font-bold lg:block hidden " +
+                (location.pathname === "/home_cinema/watch_tv_shows" ||
+                location.pathname === "/home_cinema/watch"
+                  ? "glass-white text-black p-3 bg-white/25 rounded-full"
+                  : "")
+              }
             >
               {props.mode === "TV" && <>Movies</>}
               {(props.mode === "Movies" || !props.mode) && <>TV Shows</>}
             </Link>
-            <Link
-              to="/home_cinema/streams"
-              className="font-bold lg:block hidden"
-            >
-              Streams
-            </Link>
-            <Link
-              to="/home_cinema/torrents"
-              className="font-bold lg:block hidden"
-            >
-              Torrents
-            </Link>
-            <Link to="/home_cinema/saved" className="font-bold lg:block hidden">
-              Saved
-            </Link>
+            {links.map((l) => {
+              return (
+                <Link
+                  to={l.to}
+                  className={
+                    "font-bold lg:block hidden " +
+                    (location.pathname === l.to
+                      ? "glass-white p-3 text-black bg-white/25 rounded-full"
+                      : "")
+                  }
+                >
+                  {l.name}
+                </Link>
+              );
+            })}
+
             <div className="md:block hidden">
               <Input
                 value={term}
                 id="searchInp1"
-                className="!w-[150px]"
+                className="!w-[150px] border-none! outline-none!"
                 onKeyUp={(p) => onPressEnter("searchInp1", p.key)}
                 onChange={(e) => {
                   // @ts-ignore

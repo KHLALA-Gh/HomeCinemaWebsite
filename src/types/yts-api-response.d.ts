@@ -1,13 +1,12 @@
 interface MovieMetaData {
   id: number;
   title: string;
-  year: number;
-  rating: number;
-  medium_cover_image: string;
-  runtime: string;
+  release_date: string;
+  vote_average: number;
+  poster_path: string;
 }
 
-interface torrent {
+interface Torrent {
   url: string;
   quality: string;
   type: string;
@@ -30,5 +29,5 @@ interface MovieDetails {
   yt_trailer_code: string;
   language: "en";
   background_image: string;
-  torrents: torrent[];
+  torrents: Torrent[];
 }

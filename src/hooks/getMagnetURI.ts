@@ -5,7 +5,7 @@ export const streamEndPoint = "/api/stream";
 const magnetURIEndpoint = "/api/get_magnet_uri";
 
 export async function fetchConfigs() {
-  const configs = (await axios.get("/api/config")).data as Configs;
+  const configs = (await axios.get("/api/config")).data as ServerConfig;
   return configs;
 }
 
@@ -34,7 +34,7 @@ export function useGetMagnetURI(hash: string) {
           magnetURIEndpoint,
           c["torrent-streamer-api"].external
             ? c["torrent-streamer-api"].origin
-            : location.origin
+            : location.origin,
         );
         url.searchParams.set("hash", hash);
         get(url.href).catch((e) => {

@@ -32,17 +32,23 @@ export default function Movie({
         <div
           className="lg:w-[230px] rounded-xl overflow-hidden w-[115px] h-[172px] relative lg:h-[345px] shrink-0 cursor-pointer"
           style={{
-            backgroundImage: `url("${m.medium_cover_image}")`,
+            backgroundImage: `url("https://image.tmdb.org/t/p/original${m.poster_path}")`,
             backgroundSize: "cover",
           }}
         >
-          <div className="w-full h-full backdrop-blur-sm opacity-0 hover:opacity-100 relative pt-10 bg-[#0000009c] duration-300">
+          <div className="w-full h-full glass-dark rounded-xl  backdrop-blur-sm opacity-0 hover:opacity-100 relative pt-10 duration-300">
             <SaveButton
               saved={saved}
               className="!absolute top-2 left-2"
               onClick={async () => {
                 if (!saved) {
-                  await addMovie(m);
+                  await addMovie({
+                    ...m,
+                    medium_cover_image: m.poster_path,
+                    runtime: "",
+                    rating: m.vote_average,
+                    year: m.release_date,
+                  });
                   setSaved(true);
                 } else {
                   await removeMovie(m.id);
@@ -51,6 +57,7 @@ export default function Movie({
               }}
             />
             <div
+              className="h-full"
               onClick={() => {
                 location.href = to || "/home_cinema/watch/" + m.id;
               }}
@@ -60,16 +67,16 @@ export default function Movie({
               </h1>
               <div className="flex flex-col-reverse gap-2 md:mt-5 justify-center items-center">
                 <h1 className="font-extrabold text-center text-sm lg:text-lg">
-                  {m.rating} / 10{" "}
+                  {m.vote_average?.toFixed(1)} / 10{" "}
                 </h1>{" "}
                 <div>
                   <FontAwesomeIcon icon={faStar} className="h-3 lg:h-5" />
                 </div>
               </div>
-              <div className="flex justify-center items-center gap-1 mt-5">
+              {/* <div className="flex justify-center items-center gap-1 mt-5">
                 <FontAwesomeIcon icon={faStopwatch} className="h-3 lg:h-5" />
                 <h1 className="text-sm lg:text-lg">{m.runtime} min</h1>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -94,7 +101,7 @@ export function SaveButton({
     <div
       onClick={onClick}
       className={
-        "relative border-2 cursor-pointer duration-200 rounded-full w-8 h-8 flex justify-center items-center " +
+        "relative  glass bg-white/20 border-[1.5px] shadow-md shadow-black cursor-pointer duration-200 rounded-full w-8 h-8 flex justify-center items-center " +
         className +
         (saved ? " border-yellow-500 pop-animation" : " border-white")
       }
@@ -121,7 +128,7 @@ export function SaveCard() {
     <>
       <div
         onClick={() => nav("/home_cinema/saved")}
-        className="lg:w-[230px] bg-[#080808] overflow-visible rounded-xl w-[115px] h-[172px] relative lg:h-[345px] shrink-0 cursor-pointer"
+        className="lg:w-[230px] bg-[#080808] glass-dark overflow-visible rounded-xl w-[115px] h-[172px] relative lg:h-[345px] shrink-0 cursor-pointer"
       >
         <div
           className={

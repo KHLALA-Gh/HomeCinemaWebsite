@@ -3,7 +3,6 @@ import { getTorrents, getTVShows } from "../../lib/idb";
 import Movie from "../../components/Movie/Movie";
 import Show from "../../components/Show";
 import { useSavedMovies } from "../../hooks/useSavedMovies";
-import NavBar from "../../components/Navbar";
 import { Torrent } from "../../components/Show_Details";
 import Input from "../../components/Input/Input";
 import Fuse from "fuse.js";
@@ -27,10 +26,7 @@ const data: typeData[] = [
     code: "tr",
   },
 ];
-function grepLike(pattern: string, text: string) {
-  const safe = pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return new RegExp(safe, "i").test(text);
-}
+
 export default function Saved() {
   const [selectedData, setSelectedData] = useState<dataCode>("mv");
   const mvDetails = useSavedMovies();
@@ -38,7 +34,7 @@ export default function Saved() {
   const [torrents, setTorrents] = useState<TorrentSearch[]>([]);
   const [SearchTorrent, setTorrentSearch] = useState<string>("");
   const search = () => {
-    if (!SearchTorrent) return torrents;
+    if (!SearchTorrent.trim()) return torrents;
     const fuse = new Fuse(torrents, {
       keys: ["name"],
       threshold: 0.5,
@@ -46,7 +42,7 @@ export default function Saved() {
       includeScore: true,
     });
     return fuse
-      .search(SearchTorrent)
+      .search(SearchTorrent.trim())
       .sort((a, b) => (a.score || 0) - (b.score || 0))
       .map((t) => t.item);
   };
@@ -57,13 +53,13 @@ export default function Saved() {
       });
     } else if (selectedData === "tr") {
       getTorrents().then((t) => {
+        console.log(t);
         setTorrents(t);
       });
     }
   }, [selectedData]);
   return (
     <>
-      <NavBar />
       <div className="p-10">
         <h1 className="text-2xl font-bold">Offline Saved Data</h1>
         <div className="flex gap-5 text-sm mt-5 mb-5">
@@ -93,10 +89,9 @@ export default function Saved() {
                   m={{
                     id: m.id,
                     title: m.title,
-                    year: m.year,
-                    rating: m.rating,
-                    medium_cover_image: m.medium_cover_image,
-                    runtime: m.runtime?.toString(),
+                    release_date: m.year,
+                    vote_average: m.rating,
+                    poster_path: m.medium_cover_image,
                   }}
                 />
               );
