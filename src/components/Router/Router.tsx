@@ -22,6 +22,7 @@ import NewUpdate from "../../pages/new-update";
 import History from "../../pages/History";
 import Nav from "../Navbar/Nav";
 import { Search as SearchInp } from "../Navbar/index";
+import ConnectionStatus from "../connection";
 
 function Root() {
   const navigate = useNavigate();
@@ -57,6 +58,7 @@ function Layout() {
       >
         <SearchInp />
       </div>
+      <ConnectionStatus/>
     </>
   );
 }

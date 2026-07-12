@@ -27,7 +27,7 @@ export function useSearchTVShows() {
         setResp(data);
       })
       .catch((err) => {
-        setErr(err);
+        setErr(err.message);
       })
       .finally(() => {
         setIsLoading(false);
